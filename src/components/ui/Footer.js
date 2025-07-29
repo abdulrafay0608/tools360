@@ -1,6 +1,6 @@
 // components/Footer.tsx
+import { toolsData } from "@/data/tools-data";
 import Link from "next/link";
-import { toolsData } from "../utils/constant";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -13,9 +13,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {/* Brand Info */}
         <div>
-          <h2 className="text-lg font-semibold text-blue-600 mb-2">
-            Tools360
-          </h2>
+          <h2 className="text-lg font-semibold text-blue-600 mb-2">Tools360</h2>
           <p>
             A collection of free and powerful web tools for developers, writers,
             SEO experts, and more.
@@ -29,7 +27,7 @@ export default function Footer() {
               {section.category}
             </h3>
             <ul className="space-y-2">
-              {section.tools.slice(0, maxToolsPerCategory).map((tool) => (
+              {section?.tools?.slice(0, maxToolsPerCategory)?.map((tool) => (
                 <li key={tool.slug}>
                   <Link
                     href={`/tools/${tool.slug}`}

@@ -1,13 +1,9 @@
-import { toolsData } from "./utils/constant";
-import CategorySection from "./components/CategorySection";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import ToolCard from "@/components/ui/ToolCard";
+import { toolsData } from "@/data/tools-data";
 
 export default function Home() {
   return (
     <>
-      <Navbar />
-
       {/* Hero Section */}
       <section className="bg-blue-50 py-16 text-center ">
         <div className="container mx-auto px-6 ">
@@ -26,16 +22,25 @@ export default function Home() {
 
       {/* Tools by Category */}
       <main className="container mx-auto px-6 py-12 max-w-[1250px]">
-        {toolsData.map((categoryData) => (
-          <CategorySection
-            key={categoryData.category}
-            category={categoryData.category}
-            tools={categoryData.tools}
-          />
-        ))}
+        <div className="p-6">
+          {toolsData.map((category) => (
+            <div key={category.category} className="mb-10">
+              <h2 className="text-2xl font-bold mb-4">{category.category}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                {category.tools.map((tool) => (
+                  <ToolCard
+                    key={tool.slug}
+                    name={tool.name}
+                    slug={tool.slug}
+                    description={tool.description}
+                    icon={tool.icon}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </main>
-
-      <Footer />
     </>
   );
 }
