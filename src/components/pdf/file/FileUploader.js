@@ -1,7 +1,7 @@
 // src/app/tools/pdf/merge-pdf/components/FileUploader.js
 import React from "react";
 
-const FileUploader = ({ onUpload }) => {
+const FileUploader = ({ onUpload , accept , multiple}) => {
   const handleDrop = (e) => {
     e.preventDefault();
     onUpload(e.dataTransfer.files);
@@ -44,7 +44,7 @@ const FileUploader = ({ onUpload }) => {
           Browse Files
           <input
             type="file"
-            accept="application/pdf"
+            accept={accept}
             multiple
             onChange={handleChange}
             className="hidden"

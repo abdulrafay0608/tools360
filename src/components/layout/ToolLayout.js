@@ -72,7 +72,7 @@ const ToolLayout = ({ title, description, children }) => {
         </div>
 
         {/* Related Tools Section */}
-        <div className="mt-12 mb-16">
+        {/* <div className="mt-12 mb-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-800">More PDF Tools</h2>
             <a
@@ -138,7 +138,7 @@ const ToolLayout = ({ title, description, children }) => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

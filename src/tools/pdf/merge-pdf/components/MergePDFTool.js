@@ -2,13 +2,12 @@
 "use client";
 
 import React, { useState } from "react";
-import FileUploader from "./FileUploader";
 import FilePreviewList from "./FilePreviewList";
 import ActionBar from "./ActionBar";
-import usePDFJS from "../hooks/usePDFJS";
-import useThumbnails from "../hooks/useThumbnails";
-import { mergePDFs } from "../utils/pdfUtils";
-
+import FileUploader from "@/components/pdf/file/FileUploader";
+import usePDFJS from "@/hooks/usePDFJS";
+import useThumbnails from "@/hooks/useThumbnails";
+import { mergePDFs } from "@/components/utils/pdfUtils";
 
 const MergePDFTool = () => {
   const [files, setFiles] = useState([]);
@@ -74,7 +73,11 @@ const MergePDFTool = () => {
   return (
     <div className="max-w-4xl mx-auto p-4">
       <div className="">
-        <FileUploader onUpload={handleUpload} />
+        <FileUploader
+          onUpload={handleUpload}
+          accept="application/pdf"
+          multiple={false}
+        />
       </div>
 
       {files.length > 0 && (

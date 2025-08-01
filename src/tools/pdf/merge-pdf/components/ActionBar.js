@@ -5,29 +5,27 @@ import Button from "@/components/ui/Button";
 
 const ActionBar = ({ fileCount, onClearAll, onMerge, isMerging, canMerge }) => {
   return (
-    // <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-      <div className="flex  justify-end gap-3 p-2">
-        <Button
-          variant="secondary"
-          size="sm"
-          icon={<FaTrash />}
-          onClick={onClearAll}
-        >
-          Clear All
-        </Button>
+    <div className="flex  justify-end gap-3 p-2">
+      <Button
+        variant="secondary"
+        size="sm"
+        icon={<FaTrash />}
+        onClick={onClearAll}
+      >
+        Clear All
+      </Button>
 
-        <Button
-          variant="primary"
-          size="sm"
-          icon={<FaObjectGroup />}
-          onClick={onMerge}
-          disabled={isMerging || !canMerge}
-          isLoading={isMerging}
-        >
-          {isMerging ? "Merging..." : `Merge ${fileCount} PDFs`}
-        </Button>
-      </div>
-    
+      <Button
+        variant="primary"
+        size="sm"
+        icon={<FaObjectGroup />}
+        onClick={onMerge}
+        disabled={isMerging || !canMerge}
+        isLoading={isMerging}
+      >
+        {isMerging ? "Merging..." : `Merge ${fileCount} PDFs`}
+      </Button>
+    </div>
   );
 };
 

@@ -1,6 +1,6 @@
-// src/app/tools/pdf/merge-pdf/components/FilePreviewList.js
+// src/tools/pdf/merge-pdf/components/FilePreviewList.js
 import React from "react";
-import FilePreviewItem from "./FilePreviewItem";
+import PDFPreviewItem from "@/components/pdf/PDFPreviewItem";
 
 const FilePreviewList = ({
   files,
@@ -21,23 +21,21 @@ const FilePreviewList = ({
   };
 
   return (
-    <div className="mt-6">
-      {/* <h3 className="text-lg font-medium text-gray-800 mb-4">Your Files</h3> */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[600px] overflow-auto p-4">
-        {files.map((file, index) => (
-          <FilePreviewItem
-            key={index}
-            file={file}
-            index={index}
-            thumbnail={thumbnails[index]}
-            onRemove={() => onRemove(index)}
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDrop={(e) => handleDrop(e, index)}
-            pdfjsLoaded={pdfjsLoaded}
-            isGenerating={isGenerating}
-          />
-        ))}
-      </div>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
+      {files.map((file, index) => (
+        <PDFPreviewItem
+          key={index}
+          type="file"
+          item={file}
+          index={index}
+          thumbnail={thumbnails[index]}
+          onRemove={() => onRemove(index)}
+          onDragStart={(e) => handleDragStart(e, index)}
+          onDrop={(e) => handleDrop(e, index)}
+          pdfjsLoaded={pdfjsLoaded}
+          isGenerating={isGenerating}
+        />
+      ))}
     </div>
   );
 };
