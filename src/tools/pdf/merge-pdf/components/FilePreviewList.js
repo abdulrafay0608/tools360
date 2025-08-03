@@ -1,4 +1,3 @@
-// src/tools/pdf/merge-pdf/components/FilePreviewList.js
 import React from "react";
 import PDFPreviewItem from "@/components/pdf/PDFPreviewItem";
 
@@ -21,11 +20,13 @@ const FilePreviewList = ({
   };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
+    <div
+      className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 md:gap-4 gap-2 mt-6 p-2 border border-slate-200 rounded`}
+    >
       {files.map((file, index) => (
         <PDFPreviewItem
           key={index}
-          type="file"
+          mode="file"
           item={file}
           index={index}
           thumbnail={thumbnails[index]}

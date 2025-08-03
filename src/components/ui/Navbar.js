@@ -14,13 +14,13 @@ export default function Navbar() {
           href="/"
           className="text-2xl font-extrabold text-blue-600 hover:text-blue-700 transition-colors duration-200"
         >
-         Tools360
+          Tools360
         </Link>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex space-x-6 text-base font-medium">
           <Link
-            href="/tools"
+            href="/"
             className="text-gray-600 hover:text-blue-500 transition duration-200"
           >
             Tools
@@ -79,7 +79,7 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden px-4 pb-4 space-y-2 animate-fade-in-down">
           <Link
-            href="/tools"
+            href="/"
             className="block text-gray-700 hover:text-blue-500 transition duration-200"
             onClick={() => setIsOpen(false)}
           >

@@ -2,12 +2,12 @@
 "use client";
 
 import React, { useState } from "react";
-import FilePreviewList from "./FilePreviewList";
-import ActionBar from "./ActionBar";
-import FileUploader from "@/components/pdf/file/FileUploader";
 import usePDFJS from "@/hooks/usePDFJS";
 import useThumbnails from "@/hooks/useThumbnails";
 import { mergePDFs } from "@/components/utils/pdfUtils";
+import ActionBar from "./ActionBar";
+import FileUploader from "@/components/pdf/file/FileUploader";
+import FilePreviewList from "@/tools/pdf/merge-pdf/components/FilePreviewList";
 
 const MergePDFTool = () => {
   const [files, setFiles] = useState([]);
@@ -19,7 +19,6 @@ const MergePDFTool = () => {
     const newFiles = Array.from(uploadedFiles).filter(
       (file) => file.type === "application/pdf"
     );
-
     if (newFiles.length === 0) return;
     setFiles((prev) => [...prev, ...newFiles]);
   };
@@ -50,8 +49,6 @@ const MergePDFTool = () => {
     setIsMerging(true);
     try {
       const mergedBlob = await mergePDFs(files);
-
-      // Create download
       const url = URL.createObjectURL(mergedBlob);
       const a = document.createElement("a");
       a.href = url;
@@ -71,17 +68,17 @@ const MergePDFTool = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="">
+    <div className="max-w-5xl mx-auto p-4">
+      <div>
         <FileUploader
           onUpload={handleUpload}
           accept="application/pdf"
-          multiple={false}
+          multiple={true}
         />
       </div>
 
       {files.length > 0 && (
-        <div className="">
+        <div>
           <FilePreviewList
             files={files}
             thumbnails={thumbnails}
@@ -90,6 +87,8 @@ const MergePDFTool = () => {
             pdfjsLoaded={!!pdfjs && !isPDFJSLoading}
             isGenerating={isGenerating}
           />
+
+          {/* Action buttons / custom actions */}
           <ActionBar
             fileCount={files.length}
             onClearAll={handleClearAll}

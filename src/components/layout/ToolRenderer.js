@@ -1,15 +1,24 @@
+"use client";
+
 import dynamic from "next/dynamic";
+import ToolLoader from "./ToolLoader";
+import NotFoundTool from "./NotFoundTool";
 
 const toolMap = {
-  "merge-pdf": dynamic(() => import("@/tools/pdf/merge-pdf/page")),
-  // "split-pdf": dynamic(() => import("@/tools/pdf/split-pdf/page")),
+  "merge-pdf": dynamic(() => import("@/tools/pdf/merge-pdf/page"), {
+    ssr: false,
+    loading: () => <ToolLoader />,
+  }),
+  "split-pdf": dynamic(() => import("@/tools/pdf/split-pdf/page"), {
+    ssr: false,
+    loading: () => <ToolLoader />,
+  }),
+  // for future tools:
+  // "compress-pdf": dynamic(() => import("@/tools/pdf/compress-pdf/page"), { ssr: false, loading: () => <ToolLoader /> }),
 };
 
 export default function ToolRenderer({ slug }) {
   const ToolComponent = toolMap[slug];
-  return ToolComponent ? (
-    <ToolComponent />
-  ) : (
-    <div className="py-10 md:px-4">Tool coming soon...</div>
-  );
+  if (!ToolComponent) return <NotFoundTool />;
+  return <ToolComponent />;
 }

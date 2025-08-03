@@ -11,6 +11,7 @@ const Button = ({
   isLoading = false,
   className = "",
   disabled = false,
+  type = "button",
   ...props
 }) => {
   // Variant styles
@@ -30,6 +31,12 @@ const Button = ({
     sm: "text-sm px-3 py-2",
     md: "text-base px-4 py-2",
     lg: "text-lg px-6 py-3",
+  };
+  const spinnerSizes = {
+    xs: "h-3 w-3",
+    sm: "h-4 w-4",
+    md: "h-5 w-5",
+    lg: "h-6 w-6",
   };
 
   // Base styles
@@ -51,12 +58,15 @@ const Button = ({
 
   return (
     <button
+      type={type}
       className={buttonClasses}
       disabled={disabled || isLoading}
       {...props}
     >
       {/* Loading spinner */}
-      {isLoading && <FaSpinner className="animate-spin mr-2" />}
+      {isLoading && (
+        <FaSpinner className={`animate-spin mr-2 ${spinnerSizes[size]}`} />
+      )}
 
       {/* Left icon (only when not loading) */}
       {!isLoading && icon && iconPosition === "left" && (

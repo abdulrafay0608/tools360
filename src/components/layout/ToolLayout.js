@@ -66,7 +66,7 @@ const ToolLayout = ({ title, description, children }) => {
       </div>
 
       {/* Tool Content Area */}
-      <div className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded overflow-hidden border border-slate-200">
           {children}
         </div>

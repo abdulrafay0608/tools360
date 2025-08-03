@@ -1,22 +1,43 @@
 // src/app/tools/pdf/merge-pdf/components/FileUploader.js
-import React from "react";
+"use client";
 
-const FileUploader = ({ onUpload , accept , multiple}) => {
+import React, { useRef, useState } from "react";
+
+const FileUploader = ({ onUpload, accept, multiple }) => {
+  const inputRef = useRef(null);
+  const [dragActive, setDragActive] = useState(false);
+
   const handleDrop = (e) => {
     e.preventDefault();
-    onUpload(e.dataTransfer.files);
+    setDragActive(false);
+    validateAndUpload(e.dataTransfer.files);
   };
 
   const handleChange = (e) => {
-    onUpload(e.target.files);
-    e.target.value = ""; // Reset input
+    validateAndUpload(e.target.files);
+    e.target.value = "";
+  };
+
+  const validateAndUpload = (fileList) => {
+    const files = Array.from(fileList);
+    const valid = files.every(
+      (f) => f.type === "application/pdf" // && f.size <= 10 * 1024 * 1024
+    );
+    if (!valid) {
+      alert("Sirf PDF (≤10 MB) upload karein.");
+      return;
+    }
+    onUpload(files);
   };
 
   return (
     <div
+      onDragEnter={() => setDragActive(true)}
+      onDragLeave={() => setDragActive(false)}
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
-      className="border-2 border-dashed border-blue-300 rounded-lg p-4 text-center cursor-pointer transition-colors hover:bg-blue-50"
+      className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all 
+        ${dragActive ? "border-blue-600 bg-blue-50" : "border-blue-300"}`}
     >
       <div className="flex flex-col items-center justify-center">
         <div className="bg-blue-100 p-3 rounded-full mb-2">
@@ -43,9 +64,10 @@ const FileUploader = ({ onUpload , accept , multiple}) => {
         <label className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer">
           Browse Files
           <input
+            ref={inputRef}
             type="file"
             accept={accept}
-            multiple
+            multiple={multiple}
             onChange={handleChange}
             className="hidden"
           />

@@ -1,0 +1,83 @@
+// src/tools/pdf/split-pdf/components/FixedSplitPreview.js
+import React from "react";
+import PDFPreviewItem from "@/components/pdf/PDFPreviewItem";
+import { FaEllipsisH } from "react-icons/fa";
+
+const FixedSplitPreview = ({
+  groupNumber,
+  startPage,
+  endPage,
+  thumbnails = [],
+  pdfjsLoaded,
+  isGenerating,
+}) => {
+  const totalPages = endPage - startPage + 1;
+  const firstPageIndex = 0;
+  const lastPageIndex = thumbnails.length - 1;
+
+  const showLoading = !pdfjsLoaded || isGenerating || thumbnails.length === 0;
+
+  // Only show detailed preview for the first group
+  if (groupNumber === 1) {
+    return (
+      <div className="w-full border border-slate-300 rounded overflow-hidden mb-4">
+        <div className="text-center font-medium py-2 border-b border-slate-300 bg-slate-100">
+          Document {groupNumber}: Pages {startPage} to {endPage}
+        </div>
+
+        <div className="flex justify-center items-center gap-3 p-4">
+          {showLoading ? (
+            // Loading state
+            <>
+              <div className="h-32 w-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+              </div>
+              {totalPages > 1 && (
+                <>
+                  <div className="w-12 h-16 flex items-center justify-center text-gray-500">
+                    <FaEllipsisH />
+                  </div>
+                  <div className="h-32 w-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            // Thumbnails preview
+            <>
+              <PDFPreviewItem
+                mode="page"
+                item={{}}
+                index={firstPageIndex}
+                thumbnail={thumbnails[firstPageIndex]}
+                pdfjsLoaded={pdfjsLoaded}
+                isGenerating={isGenerating}
+                className="h-32"
+              />
+
+              {totalPages > 1 && (
+                <>
+                  <div className="w-12 h-16 flex items-center justify-center text-gray-500">
+                    <FaEllipsisH />
+                  </div>
+                  <PDFPreviewItem
+                    mode="page"
+                    item={{}}
+                    index={lastPageIndex}
+                    thumbnail={thumbnails[lastPageIndex]}
+                    pdfjsLoaded={pdfjsLoaded}
+                    isGenerating={isGenerating}
+                    className="h-32"
+                  />
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+};
+
+export default FixedSplitPreview;

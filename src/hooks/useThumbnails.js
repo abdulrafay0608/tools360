@@ -1,17 +1,29 @@
 // src/hooks/usePDFThumbnails.js
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 
 const usePDFThumbnails = (files, pdfjs, mode = "file") => {
   const [thumbnails, setThumbnails] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
+  const genRef = useRef(0); // for stale-async guard
+
+  // create a stable dependency for files
+  const fileKeys = useMemo(() => {
+    if (Array.isArray(files)) {
+      return files.map((f) => f.name + "|" + f.size);
+    } else if (files instanceof File) {
+      return [files.name + "|" + files.size];
+    }
+    return [];
+  }, [files]);
 
   useEffect(() => {
     const generateThumbnails = async () => {
+      const thisGen = ++genRef.current; // increment generation ID
       if (
         !pdfjs ||
-        (!files && mode === "file") ||
-        (mode === "page" && !files)
+        ((!files || fileKeys.length === 0) &&
+          (mode === "file" || mode === "page"))
       ) {
         setThumbnails([]);
         setTotalPages(0);
@@ -47,7 +59,7 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
               }
             })
           );
-          setThumbnails(thumbs);
+          if (thisGen === genRef.current) setThumbnails(thumbs);
         } else {
           // For split tool - generate all pages of a single file
           const data = await files.arrayBuffer();
@@ -78,17 +90,19 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
               );
             }
           }
-          setThumbnails(thumbs);
+          if (thisGen === genRef.current) {
+            setThumbnails(thumbs);
+            setTotalPages(pdf.numPages);
+          }
         }
       } catch (error) {
         console.error("Error generating thumbnails:", error);
       } finally {
-        setIsGenerating(false);
+        if (thisGen === genRef.current) setIsGenerating(false);
       }
     };
-
     generateThumbnails();
-  }, [files, pdfjs, mode]);
+  }, [fileKeys, pdfjs, mode]);
 
   return { thumbnails, isGenerating, totalPages };
 };

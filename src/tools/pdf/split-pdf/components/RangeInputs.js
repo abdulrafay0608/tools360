@@ -1,89 +1,79 @@
 // src/tools/pdf/split-pdf/components/RangeInputs.js
 import React from "react";
-import Button from "@/components/ui/Button";
 import { FaPlus, FaTrash } from "react-icons/fa";
+import Button from "@/components/ui/Button";
 
 const RangeInputs = ({
   ranges,
   totalPages,
-  rangeError,
   updateRange,
   removeRange,
   addRange,
-  applyCustomRanges,
-}) => (
-  <div className="mt-4 bg-white p-3 sm:p-4 rounded-lg border border-gray-200">
-    <div className="mb-3">
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+}) => {
+  return (
+    <div className="bg-white p-4 border border-gray-200 rounded">
+      <label className="block text-sm font-semibold text-gray-700 mb-4">
         Page Ranges
       </label>
 
       {ranges.map((range, index) => (
-        <div
-          key={index}
-          className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3"
-        >
-          <div className="flex items-center gap-2 flex-1">
-            <input
-              type="number"
-              min="1"
-              max={totalPages}
-              value={range.from}
-              onChange={(e) => updateRange(index, "from", e.target.value)}
-              placeholder="From"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            />
-            <span className="text-gray-500 text-sm hidden sm:block">to</span>
-            <input
-              type="number"
-              min="1"
-              max={totalPages}
-              value={range.to}
-              onChange={(e) => updateRange(index, "to", e.target.value)}
-              placeholder="To"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            />
+        <div key={index} className="relative flex items-start gap-3 mb-3">
+          <div className="flex items-center gap-3 w-full">
+            <div className="flex-1">
+              <label className="text-xs text-gray-500 mb-1 block">From</label>
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                value={range.from}
+                onChange={(e) => updateRange(index, "from", e.target.value)}
+                placeholder="Start"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-xs text-gray-500 mb-1 block">To</label>
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                value={range.to}
+                onChange={(e) => updateRange(index, "to", e.target.value)}
+                placeholder="End"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+            </div>
           </div>
 
-          <Button
-            variant="icon"
-            onClick={() => removeRange(index)}
-            className="text-red-600 hover:text-red-800 self-end sm:self-auto"
-            disabled={ranges.length === 1}
-          >
-            <FaTrash className="text-base" />
-          </Button>
+          {ranges.length > 1 && (
+            <button
+              type="button"
+              onClick={() => removeRange(index)}
+              className="text-red-600 hover:text-red-800 mt-6"
+            >
+              <FaTrash />
+            </button>
+          )}
         </div>
       ))}
 
-      <div className="flex flex-col sm:flex-row gap-2 mt-3">
+      <div className="flex gap-2 mt-4">
         <Button
-          variant="secondary"
+          variant="outline"
           onClick={addRange}
           icon={<FaPlus className="text-xs" />}
-          className="text-xs sm:text-sm py-2"
+          className="text-sm py-2"
         >
-          Add Another Range
-        </Button>
-        <Button
-          variant="primary"
-          onClick={applyCustomRanges}
-          className="text-xs sm:text-sm py-2"
-        >
-          Apply Ranges
+          Add Range
         </Button>
       </div>
+
+      <p className="mt-3 text-xs text-gray-500">
+        Specify custom ranges to split PDF (e.g., 1-3, 5-8). You can add
+        multiple ranges.
+      </p>
     </div>
-
-    {rangeError && (
-      <p className="mt-2 text-xs sm:text-sm text-red-600">{rangeError}</p>
-    )}
-
-    <p className="mt-3 text-xs text-gray-500">
-      Enter page ranges to extract (e.g., 1-3, 5-7). You can add multiple
-      ranges.
-    </p>
-  </div>
-);
+  );
+};
 
 export default RangeInputs;

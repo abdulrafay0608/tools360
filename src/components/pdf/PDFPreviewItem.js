@@ -1,10 +1,10 @@
 // components/pdf/PDFPreviewItem.js
-import React from "react";
+import React, { memo } from "react";
 import { IoIosClose } from "react-icons/io";
 import Button from "../ui/Button";
 
 const PDFPreviewItem = ({
-  type = "file", // 'file' or 'page'
+  mode = "file", // 'file' | 'page' | 'before' | 'after'
   item, // File object or page object
   index,
   thumbnail,
@@ -16,49 +16,53 @@ const PDFPreviewItem = ({
   pdfjsLoaded,
   isGenerating,
 }) => {
-  const isFileType = type === "file";
-  const isPageType = type === "page";
-  const pageNumber = isPageType ? index + 1 : null;
+  const isFileMode = mode === "file";
+  const isPageMode = mode === "page";
+  const isBeforeMode = mode === "before";
+  const isAfterMode = mode === "after";
+  const pageNumber = isPageMode ? index + 1 : null;
+
+  // Determine container classes based on mode and selection
+  let containerClasses = "border-gray-200 ";
+  if (isPageMode) {
+    containerClasses = isSelected
+      ? "border-blue-500 shadow cursor-pointer"
+      : "border-gray-200 hover:border-gray-300 cursor-pointer";
+  } else if (isFileMode) {
+    containerClasses = "border-gray-200 hover:border-blue-300 cursor-move";
+  }
 
   return (
     <div
-      className={`relative bg-white rounded-md border-2 p-2 transition-all ${
-        isPageType
-          ? isSelected
-            ? "border-blue-500 shadow cursor-pointer"
-            : "border-gray-200 hover:border-gray-300 cursor-pointer"
-          : "border-gray-200 hover:border-blue-300 cursor-move"
-      }`}
-      draggable={isFileType}
-      onClick={isPageType ? onSelect : undefined}
-      onDragStart={isFileType ? onDragStart : undefined}
+      className={`relative bg-white rounded-md border-2 px-2 py-4 transition-all ${containerClasses} group`}
+      draggable={isFileMode}
+      onClick={isPageMode ? onSelect : undefined}
+      onDragStart={isFileMode ? onDragStart : undefined}
       onDragOver={(e) => e.preventDefault()}
-      onDrop={isFileType ? onDrop : undefined}
+      onDrop={isFileMode ? onDrop : undefined}
+      role="button"
+      aria-label={`Preview item (${mode})`}
     >
-      {/* Remove button (for files) */}
-      {isFileType && onRemove && (
-        <div className="absolute -top-2 -right-2 z-10">
-          <Button
-            variant="icon"
-            size="xs"
-            onClick={onRemove}
-            className="bg-red-500 text-white hover:bg-red-600 rounded-full"
-            aria-label="Remove file"
-          >
-            <IoIosClose className="text-xl" />
-          </Button>
+      {/* Hover switchable index/remove icon */}
+      {isFileMode && (
+        <div
+          className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium cursor-pointer transition-all duration-200 group-hover:bg-red-500 group-hover:text-white"
+          onClick={onRemove}
+        >
+          {/* Number by default */}
+          <span className="group-hover:hidden bg-blue-500 text-white w-5 h-5 rounded-full flex items-center justify-center ">
+            {index + 1}
+          </span>
+
+          {/* Close icon on hover */}
+          <span className="hidden group-hover:block text-base leading-none">
+            <IoIosClose />
+          </span>
         </div>
       )}
 
-      {/* Position indicator (for files) */}
-      {isFileType && (
-        <div className="absolute -top-2 -left-2 bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium">
-          {index + 1}
-        </div>
-      )}
-
-      {/* Selection indicator (for pages) */}
-      {isPageType && (
+      {/* Page selection indicator */}
+      {/* {isPageMode && (
         <div className="absolute top-2 right-2">
           <div
             className={`w-5 h-5 rounded-full flex items-center justify-center ${
@@ -68,15 +72,23 @@ const PDFPreviewItem = ({
             {isSelected ? "✓" : pageNumber}
           </div>
         </div>
-      )}
+      )} */}
 
-      {/* Thumbnail container */}
-      <div className="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+      {/* Thumbnail display area */}
+      <div className="w-full h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
         {pdfjsLoaded ? (
           thumbnail ? (
             <img
               src={thumbnail}
-              alt={isFileType ? "PDF thumbnail" : `Page ${pageNumber}`}
+              alt={
+                isFileMode
+                  ? `PDF file thumbnail ${index + 1}`
+                  : isPageMode
+                  ? `Page ${pageNumber}`
+                  : isBeforeMode
+                  ? "Before processing"
+                  : "After processing"
+              }
               className="w-full h-full object-contain"
             />
           ) : (
@@ -95,27 +107,28 @@ const PDFPreviewItem = ({
         )}
       </div>
 
-      {/* Content details */}
+      {/* Details section */}
       <div className="mt-3">
-        {isFileType ? (
+        {isFileMode && (
           <>
             <h4 className="text-xs font-medium text-gray-800 truncate">
               {item.name}
             </h4>
-            <div className="mt-1 flex justify-between text-xs text-gray-500">
+            {/* <div className="mt-1 flex justify-between text-xs text-gray-500">
               <span>{(item.size / 1024).toFixed(1)} KB</span>
               <span className="text-blue-600">PDF</span>
-            </div>
+            </div> */}
           </>
-        ) : (
+        )}
+        {isPageMode && (
           <div className="text-center text-xs font-medium text-gray-700">
             Page {pageNumber}
           </div>
         )}
       </div>
 
-      {/* Reorder indicator (for files) */}
-      {isFileType && (
+      {/* Reorder hint for files */}
+      {/* {isFileMode && (
         <div className="mt-3 flex justify-center">
           <div className="flex items-center text-xs text-gray-500">
             <svg
@@ -135,9 +148,9 @@ const PDFPreviewItem = ({
             Drag to reorder
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };
 
-export default PDFPreviewItem;
+export default memo(PDFPreviewItem);
