@@ -114,10 +114,10 @@ const PDFPreviewItem = ({
             <h4 className="text-xs font-medium text-gray-800 truncate">
               {item.name}
             </h4>
-            {/* <div className="mt-1 flex justify-between text-xs text-gray-500">
+            <div className="mt-1 flex justify-between text-xs text-gray-500">
               <span>{(item.size / 1024).toFixed(1)} KB</span>
               <span className="text-blue-600">PDF</span>
-            </div> */}
+            </div>
           </>
         )}
         {isPageMode && (
