@@ -17,8 +17,10 @@ const toolMap = {
     ssr: false,
     loading: () => <ToolLoader />,
   }),
-  // for future tools:
-  // "compress-pdf": dynamic(() => import("@/tools/pdf/compress-pdf/page"), { ssr: false, loading: () => <ToolLoader /> }),
+  "pdf-to-word": dynamic(() => import("@/tools/pdf/pdf-to-word/page"), {
+    ssr: false,
+    loading: () => <ToolLoader />,
+  }),
 };
 
 export default function ToolRenderer({ slug }) {
