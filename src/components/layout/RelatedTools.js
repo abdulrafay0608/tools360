@@ -2,17 +2,20 @@
 import React from "react";
 import { FaArrowRight } from "react-icons/fa";
 import Link from "next/link";
-import { toolsData } from "@/data/toolsData"; // Adjust the path as needed
+import { toolsData } from "@/data/tools-data";
 
 const RelatedTools = ({ currentCategory, currentToolSlug }) => {
+  console.log('first', currentCategory, currentToolSlug)
   // Find the current category data
-  const categoryData = toolsData.find(cat => cat.category === currentCategory);
-  
+  const categoryData = toolsData.find(
+    (cat) => cat.category === currentCategory
+  );
+
   // Get all tools except the current one
-  const relatedTools = categoryData 
-    ? categoryData.tools.filter(tool => tool.slug !== currentToolSlug)
+  const relatedTools = categoryData
+    ? categoryData.tools.filter((tool) => tool.slug !== currentToolSlug)
     : [];
-  
+
   // Randomly select up to 4 tools
   const shuffled = [...relatedTools].sort(() => 0.5 - Math.random());
   const selectedTools = shuffled.slice(0, 4);
@@ -22,9 +25,11 @@ const RelatedTools = ({ currentCategory, currentToolSlug }) => {
   return (
     <div className="mt-12 mb-16">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-800">More {currentCategory}</h2>
-        <Link 
-          href={`/tools/${currentCategory.toLowerCase().replace(/\s+/g, '-')}`} 
+        <h2 className="text-xl font-bold text-gray-800">
+          More {currentCategory}
+        </h2>
+        <Link
+          href={`/tools/${currentCategory.toLowerCase().replace(/\s+/g, "-")}`}
           className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
         >
           View all tools <FaArrowRight className="ml-1" />
@@ -72,9 +77,9 @@ const ToolCard = ({ tool }) => {
           </div>
           <div className="ml-4">
             <h3 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
-              {tool.name}
+              {tool?.name}
             </h3>
-            <p className="mt-1 text-sm text-gray-600">{tool.description}</p>
+            <p className="mt-1 text-sm text-gray-600 line-clamp-2">{tool.description}</p>
             <div className="mt-3 text-sm text-blue-600 font-medium group-hover:text-blue-800 transition-colors">
               Use Tool →
             </div>

@@ -94,71 +94,70 @@ const CompressPDFTool = () => {
           multiple={false}
         />
       ) : (
-       <div className="text-center px-2">
-  {/* Preview only if not yet compressed */}
-  {!compressedBlob && (
-    <FilePreviewList
-      files={files}
-      thumbnails={thumbnails}
-      onRemove={handleRemove}
-      pdfjsLoaded={!!pdfjs && !isPDFJSLoading}
-      isGenerating={isGenerating}
-    />
-  )}
+        <div className="text-center px-2">
+          {/* Preview only if not yet compressed */}
+          {!compressedBlob && (
+            <FilePreviewList
+              files={files}
+              thumbnails={thumbnails}
+              onRemove={handleRemove}
+              pdfjsLoaded={!!pdfjs && !isPDFJSLoading}
+              isGenerating={isGenerating}
+            />
+          )}
 
-  {/* Compress button */}
-  {!processing && !compressedBlob && (
-    <Button
-      onClick={handleCompress}
-      variant="primary"
-      size="md"
-      icon={<FaCompress />}
-      iconPosition="left"
-      className="mt-4 w-full sm:w-auto"
-    >
-      Compress PDF
-    </Button>
-  )}
+          {/* Compress button */}
+          {!processing && !compressedBlob && (
+            <Button
+              onClick={handleCompress}
+              variant="primary"
+              size="md"
+              icon={<FaCompress />}
+              iconPosition="left"
+              className="mt-4 w-full sm:w-auto"
+            >
+              Compress PDF
+            </Button>
+          )}
 
-  {/* Processing state */}
-  {processing && (
-    <div className="mt-4 text-gray-600 animate-pulse text-sm sm:text-base">
-      Compressing your PDF...
-    </div>
-  )}
+          {/* Processing state */}
+          {processing && (
+            <div className="mt-4 text-gray-600 animate-pulse text-sm sm:text-base">
+              Compressing your PDF...
+            </div>
+          )}
 
-  {/* Download result */}
-  {compressedBlob && !processing && (
-    <>
-      <div className="mt-4 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4">
-        <Button
-          onClick={handleDownload}
-          variant="primary"
-          size="md"
-          icon={<FaDownload />}
-          iconPosition="left"
-          className="w-full sm:w-auto"
-        >
-          Download Compressed PDF
-        </Button>
-        <span className="text-gray-600 text-xs sm:text-sm">
-          Size: {(compressedBlob.size / 1024).toFixed(1)} KB
-        </span>
-      </div>
-      <Button
-        onClick={handleReload}
-        variant="secondary"
-        size="md"
-        icon={<TbReload />}
-        iconPosition="left"
-        className="mt-3 w-full sm:w-auto"
-      >
-        Upload Another PDF
-      </Button>
-    </>
-  )}
-</div>
-
+          {/* Download result */}
+          {compressedBlob && !processing && (
+            <>
+              <div className="mt-4 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4">
+                <Button
+                  onClick={handleDownload}
+                  variant="primary"
+                  size="md"
+                  icon={<FaDownload />}
+                  iconPosition="left"
+                  className="w-full sm:w-auto"
+                >
+                  Download Compressed PDF
+                </Button>
+                <span className="text-gray-600 text-xs sm:text-sm">
+                  Size: {(compressedBlob.size / 1024).toFixed(1)} KB
+                </span>
+              </div>
+              <Button
+                onClick={handleReload}
+                variant="secondary"
+                size="md"
+                icon={<TbReload />}
+                iconPosition="left"
+                className="mt-3 w-full sm:w-auto"
+              >
+                Upload Another PDF
+              </Button>
+            </>
+          )}
+        </div>
       )}
     </div>
   );

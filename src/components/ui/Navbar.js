@@ -7,7 +7,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="bg-white/90 backdrop-blur shadow-md sticky top-0 z-50 transition-all duration-300">
+    <header className="bg-white/50 backdrop-blur shadow sticky top-0 z-50 transition-all duration-300">
       <div className="container mx-auto flex justify-between items-center px-4 py-3">
         {/* Logo */}
         <Link

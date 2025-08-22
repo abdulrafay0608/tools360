@@ -23,9 +23,7 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        data-new-gr-c-s-check-loaded="14.1246.0"
-        data-gr-ext-installed=""
-        cz-shortcut-listen="true"
+        suppressHydrationWarning
       >
         <Navbar />
         {children}

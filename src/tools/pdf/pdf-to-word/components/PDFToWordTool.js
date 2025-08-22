@@ -1,153 +1,105 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import FileUploader from "@/components/pdf/file/FileUploader";
-import FilePreviewList from "@/components/pdf/file/FilePreviewList";
+import FilePreviewList from "@/tools/pdf/compress-pdf/components/FilePreviewList";
 import Button from "@/components/ui/Button";
-import { FaDownload, FaFileWord, FaCloudUploadAlt } from "react-icons/fa";
 
-export default function PdfToWordTool() {
+export default function PDFToWordTool() {
   const [files, setFiles] = useState([]);
-  const [processing, setProcessing] = useState(false);
-  const [resultBlob, setResultBlob] = useState(null);
-  const [error, setError] = useState("");
-  const [progressText, setProgressText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState(null);
+  const [error, setError] = useState(null);
 
-  const handleUpload = useCallback((newFiles) => {
-    setFiles(newFiles);
-    setResultBlob(null);
-    setError("");
-    setProgressText("");
-  }, []);
+  // ✅ file selection
+  const handleFileSelect = (uploadedFiles) => {
+    setFiles(uploadedFiles);
+    setDownloadUrl(null);
+    setError(null);
+  };
 
-  const handleRemove = useCallback((idx) => {
-    setFiles((prev) => prev.filter((_, i) => i !== idx));
-  }, []);
+  // ✅ Convert PDF → Word
+  const handleConvert = async () => {
+    if (!files.length) {
+      setError("⚠️ Please upload a PDF file first.");
+      return;
+    }
 
-  const convert = async () => {
-    if (!files?.length) return;
-    setProcessing(true);
-    setError("");
-    setProgressText("Uploading...");
+    setLoading(true);
+    setError(null);
+    setDownloadUrl(null);
 
     try {
-      const file = files[0];
+      const formData = new FormData();
+      formData.append("file", files[0].file);
 
-      // Send raw file bytes to server. We'll set headers with filename.
-      const uploadResp = await fetch("/api/convert-pdf-to-docx", {
+      const res = await fetch("/api/convert", {
         method: "POST",
-        headers: {
-          "x-filename": file.name,
-          "content-type": file.type || "application/pdf",
-        },
-        body: await file.arrayBuffer(), // send raw ArrayBuffer
+        body: formData,
       });
 
-      if (!uploadResp.ok) {
-        const json = await uploadResp.json().catch(() => null);
-        throw new Error(
-          json?.error || `Conversion failed: ${uploadResp.status}`
-        );
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Conversion failed.");
       }
 
-      setProgressText("Downloading converted file...");
-      const blob = await uploadResp.blob();
-      setResultBlob(blob);
-      setProgressText("Ready");
+      const data = await res.json();
+      if (data.downloadUrl) {
+        setDownloadUrl(data.downloadUrl);
+      } else {
+        throw new Error("Conversion did not return a file.");
+      }
     } catch (err) {
-      console.error(err);
-      setError(err.message || "Conversion failed");
+      setError(err.message);
     } finally {
-      setProcessing(false);
+      setLoading(false);
     }
   };
 
-  const downloadResult = () => {
-    if (!resultBlob) return;
-    const url = URL.createObjectURL(resultBlob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download =
-      files?.[0]?.name?.replace(/\.pdf$/i, ".docx") || "converted.docx";
-    a.click();
-    URL.revokeObjectURL(url);
-
-    // reset so user can upload again
-    setFiles([]);
-    setResultBlob(null);
-    setProgressText("");
-  };
-
   return (
-    <div className="max-w-5xl mx-auto p-4">
-      {files.length === 0 ? (
-        <FileUploader
-          onUpload={handleUpload}
-          accept="application/pdf"
-          multiple={false}
-        />
-      ) : (
-        <>
-          <FilePreviewList
-            files={files}
-            thumbnails={[]} // optional: reuse your thumbnails hook if desired
-            onRemove={handleRemove}
-            pdfjsLoaded={false}
-            isGenerating={false}
-          />
+    <div className="flex flex-col items-center gap-6 w-full max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-2xl border border-gray-200">
+      <h2 className="text-2xl font-semibold">📄 PDF to Word Converter</h2>
+      <p className="text-gray-600 text-sm text-center">
+        Upload a PDF file and convert it into an editable Word document (DOCX).
+      </p>
 
-          {!processing && !resultBlob && (
-            <Button
-              onClick={convert}
-              variant="primary"
-              size="md"
-              icon={<FaCloudUploadAlt />}
-              iconPosition="left"
-              className="mt-4 w-full sm:w-auto"
-            >
-              Convert to Word
-            </Button>
-          )}
+      {/* ✅ File Upload */}
+      <FileUploader
+        onUpload={handleFileSelect}
+        accept="application/pdf"
+        multiple={false}
+      />
 
-          {processing && (
-            <div className="mt-4 text-gray-600 text-sm animate-pulse">
-              {progressText}
-            </div>
-          )}
+      {/* ✅ File Preview */}
+      {files.length > 0 && (
+        <FilePreviewList files={files} setFiles={setFiles} />
+      )}
 
-          {error && <div className="mt-3 text-red-600 text-sm">{error}</div>}
+      {/* ✅ Convert Button */}
+      <Button
+        onClick={handleConvert}
+        disabled={loading || files.length === 0}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+      >
+        {loading ? "⏳ Converting..." : "Convert to Word"}
+      </Button>
 
-          {resultBlob && !processing && (
-            <div className="mt-4 flex flex-col sm:flex-row items-center gap-3">
-              <Button
-                onClick={downloadResult}
-                variant="primary"
-                size="md"
-                icon={<FaDownload />}
-                iconPosition="left"
-                className="w-full sm:w-auto"
-              >
-                Download .docx
-              </Button>
+      {/* ✅ Error Message */}
+      {error && (
+        <p className="text-red-500 text-sm text-center w-full">{error}</p>
+      )}
 
-              <div className="text-gray-600 text-sm">
-                {((resultBlob.size || 0) / 1024).toFixed(1)} KB
-              </div>
-
-              <Button
-                onClick={() => {
-                  setFiles([]);
-                  setResultBlob(null);
-                }}
-                variant="secondary"
-                size="md"
-                className="w-full sm:w-auto"
-              >
-                Convert another
-              </Button>
-            </div>
-          )}
-        </>
+      {/* ✅ Download Link */}
+      {downloadUrl && (
+        <a
+          href={downloadUrl}
+          download={
+            files[0]?.file?.name?.replace(/\.pdf$/i, "") + "_converted.docx"
+          }
+          className="w-full text-center mt-4 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg"
+        >
+          ⬇ Download Word File
+        </a>
       )}
     </div>
   );
