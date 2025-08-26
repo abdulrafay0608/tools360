@@ -90,8 +90,8 @@ export default function Home() {
             Need Something Else?
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto mb-8">
-            We're constantly adding new tools to our collection. Let us know
-            what you'd like to see next!
+            We&apos;re constantly adding new tools to our collection. Let us know
+            what you&apos;d like to see next!
           </p>
           <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-full transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl">
             Suggest a Tool

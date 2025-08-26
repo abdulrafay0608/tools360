@@ -33,8 +33,9 @@ const ToolLayout = ({ title, description, slug, category, children }) => {
             description={description}
             slug={slug}
             category={category}
-            children={children}
-          />
+          >
+            {children}
+          </MainContentArea>
 
           {/* Right Sidebar - Desktop Only */}
           {/* <RightSidebar /> */}
