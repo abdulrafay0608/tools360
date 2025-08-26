@@ -4,7 +4,7 @@ import { FaLightbulb, FaArrowRight, FaShieldAlt } from "react-icons/fa";
 
 const TrustIndicators = () => {
   return (
-    <div className="flex flex-wrap justify-center gap-x-4">
+    <div className="flex flex-wrap justify-center gap-2 lg:gap-4">
       <div className="flex items-center bg-green-100 text-green-800 px-3 py-1.5 rounded-full">
         <FaShieldAlt className="w-4 h-4 mr-2" />
         <span className="text-xs font-medium">Secure Processing</span>

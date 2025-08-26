@@ -23,23 +23,21 @@ const ToolLayout = ({ title, description, slug, category, children }) => {
         {/* Header Section */}
         <HeaderSection title={title} description={description} />
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-            {/* Left Sidebar - Desktop Only */}
-            <LeftSidebar />
+        <div className="max-w-5xl mx-auto px-2 sm:px-4 lg:px-8 py-8">
+          {/* Left Sidebar - Desktop Only */}
+          {/* <LeftSidebar /> */}
 
-            {/* Main Content Area */}
-            <MainContentArea
-              title={title}
-              description={description}
-              slug={slug}
-              category={category}
-              children={children}
-            />
+          {/* Main Content Area */}
+          <MainContentArea
+            title={title}
+            description={description}
+            slug={slug}
+            category={category}
+            children={children}
+          />
 
-            {/* Right Sidebar - Desktop Only */}
-            <RightSidebar />
-          </div>
+          {/* Right Sidebar - Desktop Only */}
+          {/* <RightSidebar /> */}
           {/* Related Tools */}
           <div className="mb-8">
             <RelatedTools currentCategory={category} currentToolSlug={slug} />
