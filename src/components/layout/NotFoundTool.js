@@ -25,8 +25,8 @@ export default function NotFoundTool() {
           Tool Not Found
         </h2>
         <p className="text-gray-600 mb-8">
-          Sorry, we couldn't find the PDF tool you're looking for. It might have
-          been moved or doesn't exist.
+          Sorry, we couldn&apos;t find the PDF tool you&apos;re looking for. It might have
+          been moved or doesn&apos;t exist.
         </p>
 
         {/* Action Buttons */}
