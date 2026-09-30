@@ -1,7 +1,7 @@
 // components/pdf/PDFPreviewItem.js
 import React, { memo } from "react";
 import { IoIosClose } from "react-icons/io";
-import Button from "../ui/Button";
+import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 
 const PDFPreviewItem = ({
   mode = "file", // 'file' | 'page' | 'before' | 'after'
@@ -13,6 +13,10 @@ const PDFPreviewItem = ({
   onRemove,
   onDragStart,
   onDrop,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp = true,
+  canMoveDown = true,
   pdfjsLoaded,
   isGenerating,
 }) => {
@@ -20,45 +24,81 @@ const PDFPreviewItem = ({
   const isPageMode = mode === "page";
   const isBeforeMode = mode === "before";
   const isAfterMode = mode === "after";
+  const canReorder = isFileMode && Boolean(onDragStart);
   const pageNumber = isPageMode ? index + 1 : null;
 
   // Determine container classes based on mode and selection
-  let containerClasses = "border-gray-200 ";
+  let containerClasses = "border-[#dce5e0] ";
   if (isPageMode) {
     containerClasses = isSelected
-      ? "border-blue-500 shadow cursor-pointer"
-      : "border-gray-200 hover:border-gray-300 cursor-pointer";
+      ? "border-[#235c4f] ring-1 ring-[#235c4f] cursor-pointer"
+      : "border-[#dce5e0] hover:border-[#91aa9c] cursor-pointer";
   } else if (isFileMode) {
-    containerClasses = "border-gray-200 hover:border-blue-300 cursor-move";
+    containerClasses = `border-[#dce5e0] hover:border-[#91aa9c] ${canReorder ? "cursor-move" : ""}`;
   }
 
   return (
     <div
-      className={`relative bg-white rounded-md border-2 px-2 py-4 transition-all ${containerClasses} group`}
-      draggable={isFileMode}
+      className={`group relative border bg-white px-3 py-3 transition-colors ${containerClasses}`}
+      draggable={canReorder}
       onClick={isPageMode ? onSelect : undefined}
-      onDragStart={isFileMode ? onDragStart : undefined}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={isFileMode ? onDrop : undefined}
-      role="button"
-      aria-label={`Preview item (${mode})`}
+      onKeyDown={
+        isPageMode && onSelect
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onSelect();
+              }
+            }
+          : undefined
+      }
+      tabIndex={isPageMode && onSelect ? 0 : undefined}
+      onDragStart={canReorder ? onDragStart : undefined}
+      onDragOver={canReorder ? (event) => event.preventDefault() : undefined}
+      onDrop={canReorder ? onDrop : undefined}
+      role={isPageMode && onSelect ? "button" : "group"}
+      aria-label={isFileMode ? item.name : `Page ${pageNumber}`}
     >
-      {/* Hover switchable index/remove icon */}
       {isFileMode && (
-        <div
-          className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium cursor-pointer transition-all duration-200 group-hover:bg-red-500 group-hover:text-white"
-          onClick={onRemove}
-        >
-          {/* Number by default */}
-          <span className="group-hover:hidden bg-blue-500 text-white w-5 h-5 rounded-full flex items-center justify-center ">
+        <>
+          <span className="absolute left-2 top-2 flex size-6 items-center justify-center bg-[#eaf3ed] text-xs font-semibold text-[#235c4f]">
             {index + 1}
           </span>
-
-          {/* Close icon on hover */}
-          <span className="hidden group-hover:block text-base leading-none">
-            <IoIosClose />
-          </span>
-        </div>
+          <div className="absolute right-2 top-2 flex items-center gap-1">
+            {onMoveUp && (
+              <button
+                type="button"
+                aria-label={`Move ${item.name} up`}
+                title="Move up"
+                disabled={!canMoveUp}
+                onClick={onMoveUp}
+                className="flex size-7 items-center justify-center text-[#527268] transition-colors hover:bg-[#edf3ef] disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                <FaArrowUp aria-hidden="true" />
+              </button>
+            )}
+            {onMoveDown && (
+              <button
+                type="button"
+                aria-label={`Move ${item.name} down`}
+                title="Move down"
+                disabled={!canMoveDown}
+                onClick={onMoveDown}
+                className="flex size-7 items-center justify-center text-[#527268] transition-colors hover:bg-[#edf3ef] disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                <FaArrowDown aria-hidden="true" />
+              </button>
+            )}
+            <button
+              type="button"
+              aria-label={`Remove ${item.name}`}
+              onClick={onRemove}
+              className="flex size-7 items-center justify-center text-[#708079] transition-colors hover:bg-[#f9eeec] hover:text-[#a13c2f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#a13c2f]"
+            >
+              <IoIosClose className="size-5" aria-hidden="true" />
+            </button>
+          </div>
+        </>
       )}
 
       {/* Page selection indicator */}
@@ -75,7 +115,7 @@ const PDFPreviewItem = ({
       )} */}
 
       {/* Thumbnail display area */}
-      <div className="w-full h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+      <div className="flex h-32 w-full items-center justify-center overflow-hidden bg-[#f4f7f5]">
         {pdfjsLoaded ? (
           thumbnail ? (
             <img
@@ -93,16 +133,16 @@ const PDFPreviewItem = ({
             />
           ) : (
             <div className="text-center p-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-              <span className="text-gray-500 text-xs">
+              <div className="mx-auto mb-2 size-7 animate-spin rounded-full border-2 border-[#dce5e0] border-b-[#235c4f]"></div>
+              <span className="text-xs text-[#708079]">
                 {isGenerating ? "Processing..." : "Generating preview..."}
               </span>
             </div>
           )
         ) : (
           <div className="text-center p-4">
-            <div className="animate-pulse bg-gray-200 rounded-lg w-16 h-16 mx-auto mb-2"></div>
-            <span className="text-gray-500 text-xs">Loading PDF engine...</span>
+            <div className="mx-auto mb-2 size-14 animate-pulse bg-[#e4ece7]"></div>
+            <span className="text-xs text-[#708079]">Loading PDF engine...</span>
           </div>
         )}
       </div>
@@ -111,17 +151,17 @@ const PDFPreviewItem = ({
       <div className="mt-3">
         {isFileMode && (
           <>
-            <h4 className="text-xs font-medium text-gray-800 truncate">
+            <h4 className="truncate pr-6 text-xs font-medium text-[#263e36]">
               {item.name}
             </h4>
-            <div className="mt-1 flex justify-between text-xs text-gray-500">
+            <div className="mt-1 flex justify-between text-xs text-[#708079]">
               <span>{(item.size / 1024).toFixed(1)} KB</span>
-              <span className="text-blue-600">PDF</span>
+              <span className="font-medium text-[#527268]">PDF</span>
             </div>
           </>
         )}
         {isPageMode && (
-          <div className="text-center text-xs font-medium text-gray-700">
+          <div className="text-center text-xs font-medium text-[#405950]">
             Page {pageNumber}
           </div>
         )}

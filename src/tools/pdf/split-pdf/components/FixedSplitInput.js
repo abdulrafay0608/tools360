@@ -13,10 +13,10 @@ const FixedSplitInput = ({
       : `The PDF will be split into ${documentCount} documents with ${fixedSplit} pages each`;
 
   return (
-    <div className="bg-white p-4 border border-gray-200 rounded">
+    <div className="border border-[#dce5e0] bg-white p-4">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">
+          <label className="mb-2 text-sm font-semibold text-[#263e36]">
             Pages per Document
           </label>
 
@@ -27,16 +27,16 @@ const FixedSplitInput = ({
               max={totalPages}
               value={fixedSplit}
               onChange={(e) => onFixedSplitChange(e.target.value)}
-              className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-24 rounded-sm border border-[#b8c9c0] bg-white px-3 py-2 text-sm text-[#172c27] outline-none focus-visible:ring-2 focus-visible:ring-[#527268]"
             />
-            <span className="text-sm text-gray-600">pages per document</span>
+            <span className="text-sm text-[#5d706a]">pages per document</span>
           </div>
         </div>
 
         <div className="my-2">
-          <p className="text-sm text-gray-700">{message}</p>
+          <p className="text-sm text-[#405950]">{message}</p>
           {documentCount > 1 && (
-            <p className="text-xs text-gray-600 mt-1">
+            <p className="mt-1 text-xs text-[#708079]">
               The last document may have fewer pages
             </p>
           )}

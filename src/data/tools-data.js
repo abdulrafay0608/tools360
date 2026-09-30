@@ -6,6 +6,7 @@ export const toolsData = [
         name: "Merge PDF",
         slug: "merge-pdf",
         icon: "merge",
+        available: true,
         description:
           "Combine PDFs in the order you want with the easiest PDF merger available.",
       },
@@ -13,6 +14,7 @@ export const toolsData = [
         name: "Split PDF",
         slug: "split-pdf",
         icon: "split",
+        available: true,
         description:
           "Separate one page or a whole set for easy conversion into independent PDF files.",
       },
@@ -20,6 +22,7 @@ export const toolsData = [
         name: "Compress PDF",
         slug: "compress-pdf",
         icon: "compress",
+        available: true,
         description:
           "Reduce file size while optimizing for maximal PDF quality.",
       },
@@ -155,7 +158,8 @@ export const toolsData = [
         name: "Compare PDF",
         slug: "compare-pdf",
         icon: "compare",
-        description: "See visual difference between two PDFs.",
+        available: true,
+        description: "Review corresponding PDF pages side by side.",
       },
       {
         name: "Redact PDF",

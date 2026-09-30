@@ -1,18 +1,23 @@
 import { toolsData } from "@/data/tools-data";
 import ToolLayout from "@/components/layout/ToolLayout";
 import ToolRenderer from "@/components/layout/ToolRenderer";
-import NotFoundTool from "@/components/layout/NotFoundTool";
+import { notFound } from "next/navigation";
+
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   const slugs = toolsData.flatMap((cat) =>
-    cat.tools.map((tool) => ({ slug: tool.slug }))
+    cat.tools
+      .filter((tool) => tool.available)
+      .map((tool) => ({ slug: tool.slug }))
   );
   return slugs;
 }
 
 export async function generateMetadata({ params }) {
+  const { slug } = await params;
   const allTools = toolsData.flatMap((cat) => cat.tools);
-  const tool = allTools.find((t) => t.slug === params.slug);
+  const tool = allTools.find((t) => t.slug === slug && t.available);
 
   return {
     title: tool ? `${tool.name} | Tools360.com` : "Tool Not Found",
@@ -20,10 +25,11 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default function ToolPage({ params }) {
+export default async function ToolPage({ params }) {
+  const { slug } = await params;
   const allTools = toolsData.flatMap((cat) => cat.tools);
-  const tool = allTools.find((t) => t.slug === params.slug);
-  if (!tool) return <NotFoundTool />;
+  const tool = allTools.find((t) => t.slug === slug && t.available);
+  if (!tool) notFound();
 
   return (
     <ToolLayout title={tool.name} description={tool.description} category={""}>

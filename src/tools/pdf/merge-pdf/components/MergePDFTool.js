@@ -14,13 +14,17 @@ const MergePDFTool = () => {
   const { pdfjs, isLoading: isPDFJSLoading } = usePDFJS();
   const { thumbnails, isGenerating } = useThumbnails(files, pdfjs);
   const [isMerging, setIsMerging] = useState(false);
+  const [message, setMessage] = useState("");
 
   const handleUpload = (uploadedFiles) => {
     const newFiles = Array.from(uploadedFiles).filter(
-      (file) => file.type === "application/pdf"
+      (file) =>
+        file.type === "application/pdf" ||
+        file.name.toLowerCase().endsWith(".pdf")
     );
     if (newFiles.length === 0) return;
     setFiles((prev) => [...prev, ...newFiles]);
+    setMessage("");
   };
 
   const handleRemove = (index) => {
@@ -38,15 +42,17 @@ const MergePDFTool = () => {
 
   const handleClearAll = () => {
     setFiles([]);
+    setMessage("");
   };
 
   const handleMerge = async () => {
     if (files.length < 2) {
-      alert("Please upload at least 2 PDF files to merge");
+      setMessage("Select at least two PDF files to merge.");
       return;
     }
 
     setIsMerging(true);
+    setMessage("");
     try {
       const mergedBlob = await mergePDFs(files);
       const url = URL.createObjectURL(mergedBlob);
@@ -56,29 +62,32 @@ const MergePDFTool = () => {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       setFiles([]);
-      alert("PDFs merged successfully! Download started.");
+      setMessage("Your merged PDF is ready. The download has started.");
     } catch (error) {
       console.error("Error merging PDFs:", error);
-      alert("Error merging PDFs. Please try again.");
+      setMessage(error.message || "The PDFs could not be merged. Try again.");
     } finally {
       setIsMerging(false);
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
-      <div>
-        <FileUploader
-          onUpload={handleUpload}
-          accept="application/pdf"
-          multiple={true}
-        />
-      </div>
+    <div className="p-4 sm:p-6">
+      <FileUploader
+        onUpload={handleUpload}
+        accept="application/pdf,.pdf"
+        multiple
+      />
 
       {files.length > 0 && (
         <div>
+          {message && (
+            <p className="mb-4 text-sm text-[#a13c2f]" role="alert">
+              {message}
+            </p>
+          )}
           <FilePreviewList
             files={files}
             thumbnails={thumbnails}
@@ -97,6 +106,11 @@ const MergePDFTool = () => {
             canMerge={files.length >= 2}
           />
         </div>
+      )}
+      {files.length === 0 && message && (
+        <p className="mt-4 text-sm text-[#527268]" role="status">
+          {message}
+        </p>
       )}
     </div>
   );

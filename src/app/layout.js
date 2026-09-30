@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Tools360 | Free Online PDF & Dev Tools",
-  description: "Merge PDF, Format JSON, Convert files, and more free tools.",
+  title: "Tools360 | Simple PDF Tools",
+  description:
+    "Merge, split, and process PDF files with focused tools that run in your browser.",
 };
 
 export default function RootLayout({ children }) {

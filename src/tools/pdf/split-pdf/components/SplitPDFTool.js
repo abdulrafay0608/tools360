@@ -13,6 +13,7 @@ import usePDFThumbnails from "@/hooks/useThumbnails";
 import PagePreviewList from "./PagePreviewList";
 import Button from "@/components/ui/Button";
 import FixedSplitPreview from "./FixedSplitPreview";
+import { formatFileSize } from "@/components/utils/pdfUtils";
 
 const SplitPDFTool = () => {
   const [mode, setMode] = useState("range"); // 'range' or 'fixed'
@@ -20,6 +21,7 @@ const SplitPDFTool = () => {
   const [ranges, setRanges] = useState([]);
   const [fixedSplit, setFixedSplit] = useState(1);
   const [error, setError] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
   const [isSplitting, setIsSplitting] = useState(false);
 
   const { pdfjs, isLoading: isPDFJSLoading } = usePDFJS();
@@ -55,12 +57,15 @@ const SplitPDFTool = () => {
   // Handle file upload
   const handleUpload = (uploadedFiles) => {
     const pdfFile = Array.from(uploadedFiles).find(
-      (file) => file.type === "application/pdf"
+      (file) =>
+        file.type === "application/pdf" ||
+        file.name.toLowerCase().endsWith(".pdf")
     );
     if (!pdfFile) return;
 
     setFile(pdfFile);
     setError("");
+    setStatusMessage("");
     setRanges([]);
   };
 
@@ -68,6 +73,7 @@ const SplitPDFTool = () => {
   const handleClear = () => {
     setFile(null);
     setError("");
+    setStatusMessage("");
     setRanges([]);
     setFixedSplit(1);
   };
@@ -115,25 +121,43 @@ const SplitPDFTool = () => {
   };
 
   // Validate ranges
-  const validateRanges = () => {
-    for (const [idx, range] of ranges.entries()) {
-      const from = parseInt(range.from);
-      const to = parseInt(range.to);
+  const validateRanges = (pageCount) => {
+    if (ranges.length === 0) {
+      setError("Add at least one page range.");
+      return false;
+    }
 
-      if (!from || !to) {
-        setError(`Range ${idx + 1} has empty fields`);
+    for (const [idx, range] of ranges.entries()) {
+      const from = Number(range.from);
+      const to = Number(range.to);
+
+      if (!Number.isInteger(from) || !Number.isInteger(to)) {
+        setError(`Enter whole page numbers for range ${idx + 1}.`);
         return false;
       }
 
-      if (from < 1 || to < 1 || from > totalPages || to > totalPages) {
-        setError(`Range ${idx + 1} is out of bounds (1-${totalPages})`);
+      if (from < 1 || to < 1 || from > pageCount || to > pageCount) {
+        setError(`Range ${idx + 1} must be between page 1 and ${pageCount}.`);
         return false;
       }
 
       if (from > to) {
-        setError(
-          `In range ${idx + 1}, start page cannot be greater than end page`
-        );
+        setError(`Range ${idx + 1} must start before it ends.`);
+        return false;
+      }
+
+      const overlaps = ranges.some((otherRange, otherIndex) => {
+        if (otherIndex === idx) return false;
+        const otherFrom = Number(otherRange.from);
+        const otherTo = Number(otherRange.to);
+        return Number.isInteger(otherFrom) &&
+          Number.isInteger(otherTo) &&
+          from <= otherTo &&
+          to >= otherFrom;
+      });
+
+      if (overlaps) {
+        setError("Page ranges cannot overlap. Each page can be in one output.");
         return false;
       }
     }
@@ -148,27 +172,30 @@ const SplitPDFTool = () => {
     }
 
     setIsSplitting(true);
+    setError("");
+    setStatusMessage("");
     try {
       const fileBytes = await file.arrayBuffer();
       const originalPdf = await PDFDocument.load(fileBytes);
+      const pageCount = originalPdf.getPageCount();
 
       if (mode === "range") {
-        if (!validateRanges()) return;
+        if (!validateRanges(pageCount)) return;
         await processRangeSplit(originalPdf);
       } else {
         if (fixedSplit < 1) {
           setError("Pages per split must be at least 1");
           return;
         }
-        if (fixedSplit > totalPages) {
-          setError(`Cannot split into more than ${totalPages} pages per split`);
+        if (fixedSplit > pageCount) {
+          setError(`Pages per split cannot exceed ${pageCount}.`);
           return;
         }
-        await processFixedSplit(originalPdf);
+        await processFixedSplit(originalPdf, pageCount);
       }
     } catch (error) {
       console.error("Error splitting PDF:", error);
-      setError("Error splitting PDF. Please try again.");
+      setError(error.message || "The PDF could not be split. Please try again.");
     } finally {
       setIsSplitting(false);
     }
@@ -204,17 +231,17 @@ const SplitPDFTool = () => {
     const blob = await downloadZip(files).blob();
     const fileName = `split-document-${Date.now()}.zip`;
     download(blob, fileName, "application/zip");
-    alert(`${files.length} PDFs created! Download started.`);
+    setStatusMessage(`${files.length} PDF files are ready. ZIP download started.`);
   };
 
   // Process fixed split mode
-  const processFixedSplit = async (originalPdf) => {
+  const processFixedSplit = async (originalPdf, pageCount) => {
     const files = [];
-    const numGroups = Math.ceil(totalPages / fixedSplit);
+    const numGroups = Math.ceil(pageCount / fixedSplit);
 
     for (let group = 0; group < numGroups; group++) {
       const startPage = group * fixedSplit;
-      const endPage = Math.min((group + 1) * fixedSplit, totalPages);
+      const endPage = Math.min((group + 1) * fixedSplit, pageCount);
       const groupPages = Array.from(
         { length: endPage - startPage },
         (_, i) => startPage + i + 1
@@ -238,7 +265,7 @@ const SplitPDFTool = () => {
     const blob = await downloadZip(files).blob();
     const fileName = `split-document-${Date.now()}.zip`;
     download(blob, fileName, "application/zip");
-    alert(`${files.length} PDFs created! Download started.`);
+    setStatusMessage(`${files.length} PDF files are ready. ZIP download started.`);
   };
 
   // Handle mode change
@@ -251,23 +278,34 @@ const SplitPDFTool = () => {
   const fixedSplitGroups = getFixedSplitGroups();
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
+    <div className="p-4 sm:p-6">
       {!file ? (
-        <div>
-          <FileUploader
-            onUpload={handleUpload}
-            accept="application/pdf"
-            multiple={false}
-          />
-        </div>
+        <FileUploader
+          onUpload={handleUpload}
+          accept="application/pdf,.pdf"
+          multiple={false}
+        />
       ) : (
         <>
-          {/* <div className="mb-6 flex justify-between items-center">
-            <h1 className="text-xl font-bold text-gray-800">Split PDF</h1>
-            
-          </div> */}
+          <div className="mb-5 flex flex-col gap-3 border-b border-[#e5ece8] pb-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wide text-[#708079]">
+                Selected PDF
+              </p>
+              <p className="mt-1 truncate text-sm font-semibold text-[#263e36]">
+                {file.name}
+              </p>
+              <p className="mt-1 text-xs text-[#708079]">
+                {formatFileSize(file.size)}
+                {totalPages > 0 ? ` · ${totalPages} pages` : ""}
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleClear}>
+              Choose another PDF
+            </Button>
+          </div>
 
-          <div className="flex flex-col lg:flex-row gap-4 w-full">
+          <div className="grid w-full gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
             <div className="w-full lg:w-2/3">
               {mode === "range" ? (
                 ranges.map((range, index) => {
@@ -323,22 +361,30 @@ const SplitPDFTool = () => {
             </div>
 
             <div className="w-full lg:w-1/3">
-              <div className="flex border border-gray-300 rounded overflow-hidden mb-2">
+              <div
+                className="mb-3 grid grid-cols-2 border border-[#dce5e0] bg-[#f4f7f5] p-1"
+                role="group"
+                aria-label="Split mode"
+              >
                 <button
-                  className={`flex-1 py-3 text-center ${
+                  type="button"
+                  aria-pressed={mode === "range"}
+                  className={`min-h-10 px-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#235c4f] ${
                     mode === "range"
-                      ? "bg-blue-600 text-white"
-                      : "bg-white hover:bg-gray-50"
+                      ? "bg-[#173d34] text-white"
+                      : "text-[#52675e] hover:bg-white"
                   }`}
                   onClick={() => handleModeChange("range")}
                 >
                   Custom Range
                 </button>
                 <button
-                  className={`flex-1 py-3 text-center ${
+                  type="button"
+                  aria-pressed={mode === "fixed"}
+                  className={`min-h-10 px-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#235c4f] ${
                     mode === "fixed"
-                      ? "bg-blue-600 text-white"
-                      : "bg-white hover:bg-gray-50"
+                      ? "bg-[#173d34] text-white"
+                      : "text-[#52675e] hover:bg-white"
                   }`}
                   onClick={() => handleModeChange("fixed")}
                 >
@@ -363,19 +409,21 @@ const SplitPDFTool = () => {
                 />
               )}
 
-              {error && <p className="mt-4 text-red-500 text-sm">{error}</p>}
+              {error && (
+                <p className="mt-4 text-sm text-[#a13c2f]" role="alert">
+                  {error}
+                </p>
+              )}
+              {statusMessage && (
+                <p className="mt-4 text-sm text-[#235c4f]" role="status">
+                  {statusMessage}
+                </p>
+              )}
 
               <div className="flex gap-2 mt-6">
                 <Button
-                  className="w-full py-3"
-                  variant="outline"
-                  onClick={handleClear}
-                >
-                  Clear File
-                </Button>
-                <Button
                   onClick={handleSplit}
-                  disabled={isSplitting}
+                  disabled={isSplitting || !totalPages}
                   className="w-full py-3"
                 >
                   {isSplitting ? "Splitting..." : "Split PDF"}

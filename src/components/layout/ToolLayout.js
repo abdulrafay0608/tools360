@@ -1,32 +1,32 @@
 // components/layout/ToolLayout.js
 import React from "react";
-import { FaLightbulb, FaArrowRight, FaShieldAlt } from "react-icons/fa";
+import { FaFilePdf, FaLaptop } from "react-icons/fa";
 
 const ToolLayout = ({ title, description, children }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+    <main className="min-h-[70vh] bg-[#f4f7f5] text-[#172c27]">
       {/* Tool Header */}
-      <div className="bg-white border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-6">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center bg-blue-50 text-blue-600 rounded-full p-2 mb-2">
-              <FaLightbulb className="h-6 w-6" />
+      <div className="border-b border-[#dce5e0] bg-white">
+        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+          <div className="max-w-4xl">
+            <div className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#527268]">
+              <FaFilePdf aria-hidden="true" /> PDF workspace
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
               {title}
             </h1>
             {description && (
-              <p className="mt-3 max-w-2xl mx-auto text-base text-gray-600">
+              <p className="mt-3 max-w-2xl text-base leading-7 text-[#5d706a]">
                 {description}
               </p>
             )}
 
             {/* Features Banner */}
-            <div className="mt-6 flex flex-wrap justify-center gap-4">
-              <div className="flex items-center bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs">
-                <FaShieldAlt className="mr-1" /> Secure Processing
+            <div className="mt-5 flex flex-wrap justify-start gap-x-5 gap-y-2">
+              <div className="flex items-center gap-2 text-sm text-[#527268]">
+                <FaLaptop className="mr-1" aria-hidden="true" /> Processed in your browser
               </div>
-              <div className="flex items-center bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs">
+              <div className="flex items-center gap-2 text-sm text-[#527268]">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-4 w-4 mr-1"
@@ -41,9 +41,9 @@ const ToolLayout = ({ title, description, children }) => {
                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                   />
                 </svg>
-                No File Storage
+                Files are not uploaded
               </div>
-              <div className="flex items-center bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-xs">
+              <div className="flex items-center gap-2 text-sm text-[#527268]">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-4 w-4 mr-1"
@@ -58,7 +58,7 @@ const ToolLayout = ({ title, description, children }) => {
                     d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                   />
                 </svg>
-                100% Free
+                No account required
               </div>
             </div>
           </div>
@@ -66,12 +66,8 @@ const ToolLayout = ({ title, description, children }) => {
       </div>
 
       {/* Tool Content Area */}
-      <div className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded border border-slate-200">
-          <div className="bg-slate-200 m-3 sm:m-6 p-2 sm:p-2.5">
-            <div className="bg-white m-2 sm:m-3">{children}</div>
-          </div>
-        </div>
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-8 lg:px-12">
+        <div className="border border-[#dce5e0] bg-white">{children}</div>
 
         {/* Related Tools Section */}
         {/* <div className="mt-12 mb-16">
@@ -142,7 +138,7 @@ const ToolLayout = ({ title, description, children }) => {
           </div>
         </div> */}
       </div>
-    </div>
+    </main>
   );
 };
 

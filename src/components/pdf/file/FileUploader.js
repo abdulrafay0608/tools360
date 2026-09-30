@@ -1,16 +1,35 @@
 // src/app/tools/pdf/merge-pdf/components/FileUploader.js
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useId, useRef, useState } from "react";
 
-const FileUploader = ({ onUpload, accept, multiple }) => {
-  const inputRef = useRef(null);
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+
+const FileUploader = ({ onUpload, accept = "application/pdf,.pdf", multiple }) => {
+  const inputId = useId();
   const [dragActive, setDragActive] = useState(false);
+  const [error, setError] = useState("");
+  const dragDepth = useRef(0);
+
+  const handleDragEnter = (event) => {
+    event.preventDefault();
+    if (!event.dataTransfer.types.includes("Files")) return;
+    dragDepth.current += 1;
+    setDragActive(true);
+  };
 
   const handleDrop = (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    dragDepth.current = 0;
     setDragActive(false);
     validateAndUpload(e.dataTransfer.files);
+  };
+
+  const handleDragLeave = (event) => {
+    event.preventDefault();
+    dragDepth.current = Math.max(0, dragDepth.current - 1);
+    if (dragDepth.current === 0) setDragActive(false);
   };
 
   const handleChange = (e) => {
@@ -20,30 +39,57 @@ const FileUploader = ({ onUpload, accept, multiple }) => {
 
   const validateAndUpload = (fileList) => {
     const files = Array.from(fileList);
-    const valid = files.every(
-      (f) => f.type === "application/pdf" // && f.size <= 10 * 1024 * 1024
-    );
-    if (!valid) {
-      alert("Sirf PDF (≤10 MB) upload karein.");
+    if (!files.length) return;
+
+    if (!multiple && files.length > 1) {
+      setError("Choose one PDF file at a time.");
       return;
     }
+
+    const invalidFile = files.find(
+      (file) =>
+        (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) ||
+        file.size > MAX_FILE_SIZE_BYTES
+    );
+    if (invalidFile) {
+      const isPdf =
+        invalidFile.type === "application/pdf" ||
+        invalidFile.name.toLowerCase().endsWith(".pdf");
+      setError(
+        isPdf
+          ? `${invalidFile.name} exceeds the 10 MB file limit.`
+          : `${invalidFile.name} is not a PDF file.`
+      );
+      return;
+    }
+
+    setError("");
     onUpload(files);
   };
 
   return (
     <div
-      onDragEnter={() => setDragActive(true)}
-      onDragLeave={() => setDragActive(false)}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onDragOver={(e) => e.preventDefault()}
-      className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all 
-        ${dragActive ? "border-blue-600 bg-blue-50" : "border-blue-300"}`}
+      onDragOver={(event) => {
+        event.preventDefault();
+        if (event.dataTransfer.types.includes("Files")) {
+          event.dataTransfer.dropEffect = "copy";
+        }
+      }}
+      className={`border border-dashed p-6 text-center transition-colors sm:p-10 ${
+        dragActive
+          ? "border-[#235c4f] bg-[#eaf3ed]"
+          : "border-[#b8c9c0] bg-white hover:border-[#7e9b8c]"
+      }`}
+      aria-label="PDF file drop area"
     >
       <div className="flex flex-col items-center justify-center">
-        <div className="bg-blue-100 p-3 rounded-full mb-2">
+        <div className="mb-3 flex size-12 items-center justify-center bg-[#eaf3ed] text-[#235c4f]">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-8 w-8 text-blue-600"
+            className="h-6 w-6"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -56,25 +102,42 @@ const FileUploader = ({ onUpload, accept, multiple }) => {
             />
           </svg>
         </div>
-        <p className="mb-2 text-gray-700">
-          <span className="font-medium text-blue-600">Drag and drop</span> PDF
-          files here
+        <p className="mb-1 text-[#263e36]" aria-live="polite">
+          <span className="font-semibold">
+            {dragActive ? "Drop PDF files to add them" : "Drop PDF files here"}
+          </span>
         </p>
-        <p className="text-sm text-gray-500 mb-4">or</p>
-        <label className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer">
-          Browse Files
+        <p className="mb-4 text-sm text-[#708079]">or choose from your device</p>
+        <div>
           <input
-            ref={inputRef}
+            id={inputId}
             type="file"
             accept={accept}
             multiple={multiple}
             onChange={handleChange}
-            className="hidden"
+            aria-describedby={`${inputId}-help${error ? ` ${inputId}-error` : ""}`}
+            aria-invalid={Boolean(error)}
+            className="peer sr-only"
           />
-        </label>
-        <p className="mt-3 text-xs text-gray-500">
-          Maximum file size: 10MB • Supported format: PDF
+          <label
+            htmlFor={inputId}
+            className="inline-flex min-h-11 cursor-pointer items-center justify-center bg-[#173d34] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#245b4c] peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-[#235c4f]"
+          >
+            Browse files
+          </label>
+        </div>
+        <p id={`${inputId}-help`} className="mt-4 text-xs text-[#708079]">
+          {multiple ? "PDF files up to 10 MB each" : "One PDF up to 10 MB"}
         </p>
+        {error && (
+          <p
+            id={`${inputId}-error`}
+            className="mt-3 text-sm text-[#a13c2f]"
+            role="alert"
+          >
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );

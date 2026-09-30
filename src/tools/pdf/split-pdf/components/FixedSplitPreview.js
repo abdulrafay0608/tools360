@@ -18,10 +18,21 @@ const FixedSplitPreview = ({
   const showLoading = !pdfjsLoaded || isGenerating || thumbnails.length === 0;
 
   // Only show detailed preview for the first group
+  if (groupNumber !== 1) {
+    return (
+      <div className="mb-4 flex items-center justify-between border border-[#dce5e0] bg-white px-4 py-3 text-sm">
+        <span className="font-medium text-[#405950]">
+          Document {groupNumber}: Pages {startPage} to {endPage}
+        </span>
+        <span className="text-[#708079]">{totalPages} pages</span>
+      </div>
+    );
+  }
+
   if (groupNumber === 1) {
     return (
-      <div className="w-full border border-slate-300 rounded overflow-hidden mb-4">
-        <div className="text-center font-medium py-2 border-b border-slate-300 bg-slate-100">
+      <div className="mb-4 w-full overflow-hidden border border-[#dce5e0] bg-white">
+        <div className="border-b border-[#dce5e0] bg-[#f4f7f5] py-2 text-center text-sm font-medium text-[#405950]">
           Document {groupNumber}: Pages {startPage} to {endPage}
         </div>
 
@@ -29,16 +40,16 @@ const FixedSplitPreview = ({
           {showLoading ? (
             // Loading state
             <>
-              <div className="h-32 w-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+              <div className="flex h-32 w-24 items-center justify-center bg-[#f4f7f5]">
+                <div className="size-6 animate-spin rounded-full border-2 border-[#dce5e0] border-b-[#235c4f]"></div>
               </div>
               {totalPages > 1 && (
                 <>
-                  <div className="w-12 h-16 flex items-center justify-center text-gray-500">
+                  <div className="flex h-16 w-12 items-center justify-center text-[#708079]">
                     <FaEllipsisH />
                   </div>
-                  <div className="h-32 w-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                  <div className="flex h-32 w-24 items-center justify-center bg-[#f4f7f5]">
+                    <div className="size-6 animate-spin rounded-full border-2 border-[#dce5e0] border-b-[#235c4f]"></div>
                   </div>
                 </>
               )}
@@ -58,7 +69,7 @@ const FixedSplitPreview = ({
 
               {totalPages > 1 && (
                 <>
-                  <div className="w-12 h-16 flex items-center justify-center text-gray-500">
+                  <div className="flex h-16 w-12 items-center justify-center text-[#708079]">
                     <FaEllipsisH />
                   </div>
                   <PDFPreviewItem

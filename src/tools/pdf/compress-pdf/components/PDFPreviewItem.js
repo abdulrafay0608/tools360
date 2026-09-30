@@ -19,32 +19,37 @@ const PDFPreviewItem = ({
   const pageNumber = mode === "page" ? index + 1 : null;
 
   const containerClasses = isFileMode
-    ? "border-gray-200 hover:border-blue-300 cursor-move"
+    ? "border-[#dce5e0] hover:border-[#91aa9c] cursor-move"
     : isSelected
-    ? "border-blue-500 shadow cursor-pointer"
-    : "border-gray-200 hover:border-gray-300 cursor-pointer";
+    ? "border-[#235c4f] ring-1 ring-[#235c4f] cursor-pointer"
+    : "border-[#dce5e0] hover:border-[#91aa9c] cursor-pointer";
 
   return (
     <div
-      className={`relative bg-white rounded-md border-2 px-2 py-4 transition-all ${containerClasses} group`}
-      style={{ width: "160px" }} // ✅ fixed card width
+      className={`group relative w-40 shrink-0 border bg-white px-3 py-3 transition-colors ${containerClasses}`}
       draggable={isFileMode}
       onClick={!isFileMode ? onSelect : undefined}
       onDragStart={isFileMode ? onDragStart : undefined}
       onDragOver={isFileMode ? (e) => e.preventDefault() : undefined}
       onDrop={isFileMode ? onDrop : undefined}
-      role="button"
+      role={isFileMode ? "group" : "button"}
       aria-label={`Preview ${mode}`}
     >
       {/* Remove / index badge */}
       {isFileMode && (
         <div
-          className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium cursor-pointer transition-all duration-200 group-hover:bg-red-500 group-hover:text-white"
+          role="button"
+          tabIndex={0}
+          aria-label={`Remove ${item.name}`}
+          className="absolute right-2 top-2 flex size-7 cursor-pointer items-center justify-center bg-white text-[#708079] transition-colors hover:bg-[#f9eeec] hover:text-[#a13c2f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#a13c2f]"
           onClick={onRemove}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              onRemove();
+            }
+          }}
         >
-          {/* <span className="group-hover:hidden bg-blue-500 text-white w-5 h-5 rounded-full flex items-center justify-center">
-            {index + 1}
-          </span> */}
           <span className="hidden group-hover:block text-base leading-none">
             <IoIosClose />
           </span>
@@ -52,7 +57,7 @@ const PDFPreviewItem = ({
       )}
 
       {/* Thumbnail */}
-      <div className="h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+      <div className="flex h-32 items-center justify-center overflow-hidden bg-[#f4f7f5]">
         {pdfjsLoaded ? (
           thumbnail ? (
             <img
@@ -66,16 +71,16 @@ const PDFPreviewItem = ({
             />
           ) : (
             <div className="text-center p-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-              <span className="text-gray-500 text-xs">
+              <div className="mx-auto mb-2 size-7 animate-spin rounded-full border-2 border-[#dce5e0] border-b-[#235c4f]"></div>
+              <span className="text-xs text-[#708079]">
                 {isGenerating ? "Processing..." : "Generating preview..."}
               </span>
             </div>
           )
         ) : (
           <div className="text-center p-4">
-            <div className="animate-pulse bg-gray-200 rounded-lg w-16 h-16 mx-auto mb-2"></div>
-            <span className="text-gray-500 text-xs">Loading PDF engine...</span>
+            <div className="mx-auto mb-2 size-14 animate-pulse bg-[#e4ece7]"></div>
+            <span className="text-xs text-[#708079]">Loading PDF engine...</span>
           </div>
         )}
       </div>
@@ -84,16 +89,16 @@ const PDFPreviewItem = ({
       <div className="mt-3">
         {isFileMode ? (
           <>
-            <h4 className="text-xs font-medium text-gray-800 truncate">
+            <h4 className="truncate pr-6 text-xs font-medium text-[#263e36]">
               {item.name}
             </h4>
-            <div className="mt-1 flex justify-between text-xs text-gray-500">
+            <div className="mt-1 flex justify-between text-xs text-[#708079]">
               <span>{(item.size / 1024).toFixed(1)} KB</span>
-              <span className="text-blue-600">PDF</span>
+              <span className="font-medium text-[#527268]">PDF</span>
             </div>
           </>
         ) : (
-          <div className="text-center text-xs font-medium text-gray-700">
+          <div className="text-center text-xs font-medium text-[#405950]">
             Page {pageNumber}
           </div>
         )}

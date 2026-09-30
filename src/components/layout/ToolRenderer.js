@@ -17,6 +17,10 @@ const toolMap = {
     ssr: false,
     loading: () => <ToolLoader />,
   }),
+  "compare-pdf": dynamic(() => import("@/tools/pdf/compare-pdf/page"), {
+    ssr: false,
+    loading: () => <ToolLoader />,
+  }),
   // for future tools:
   // "compress-pdf": dynamic(() => import("@/tools/pdf/compress-pdf/page"), { ssr: false, loading: () => <ToolLoader /> }),
 };

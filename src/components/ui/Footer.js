@@ -1,109 +1,85 @@
 // components/Footer.tsx
 import { toolsData } from "@/data/tools-data";
 import Link from "next/link";
+import { FaFilePdf } from "react-icons/fa";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
-  // Show up to 4 tools per category in the footer
-  const maxToolsPerCategory = 6;
+  const availableCategories = toolsData
+    .map((category) => ({
+      ...category,
+      tools: category.tools.filter((tool) => tool.available),
+    }))
+    .filter((category) => category.tools.length > 0);
 
   return (
-    <footer className="bg-gray-50 border-t mt-16 text-gray-600 text-sm">
-      <div className="container mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {/* Brand Info */}
-        <div>
-          <h2 className="text-lg font-semibold text-blue-600 mb-2">Tools360</h2>
-          <p>
-            A collection of free and powerful web tools for developers, writers,
-            SEO experts, and more.
+    <footer className="border-t border-[#dce5e0] bg-white text-sm text-[#5d706a]">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-9 px-5 py-9 sm:grid-cols-2 sm:px-8 lg:grid-cols-[1.4fr_1fr_1fr] lg:px-12">
+        <div className="max-w-xs">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-base font-semibold text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#235c4f]"
+          >
+            <FaFilePdf aria-hidden="true" className="text-[#527268]" />
+            Tools360
+          </Link>
+          <p className="mt-3 leading-6">
+            Straightforward tools for common PDF tasks. Files are processed in
+            your browser.
           </p>
         </div>
 
-        {/* Dynamic Category Sections */}
-        {toolsData.slice(0).map((section) => (
+        {availableCategories.map((section) => (
           <div key={section.category}>
-            <h3 className="font-semibold mb-3 text-gray-800">
-              {section.category}
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#405950]">
+              PDF tools
             </h3>
-            <ul className="space-y-2">
-              {section?.tools?.slice(0, maxToolsPerCategory)?.map((tool) => (
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-1">
+              {section.tools.map((tool) => (
                 <li key={tool.slug}>
                   <Link
                     href={`/tools/${tool.slug}`}
-                    className="hover:text-blue-500 transition-colors duration-200"
+                    className="transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
                   >
                     {tool.name}
                   </Link>
                 </li>
               ))}
-              {/* {section.tools.length > maxToolsPerCategory && (
-                <li>
-                  <Link
-                    href={`/tools?category=${encodeURIComponent(
-                      section.category
-                    )}`}
-                    className="text-blue-600 hover:underline transition-colors duration-200"
-                  >
-                    See all {section.category}
-                  </Link>
-                </li>
-              )} */}
             </ul>
           </div>
         ))}
 
-        {/* Quick Links */}
         <div>
-          <h3 className="font-semibold mb-3 text-gray-800">Quick Links</h3>
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#405950]">
+            Information
+          </h3>
           <ul className="space-y-2">
             <li>
               <Link
                 href="/"
-                className="hover:text-blue-500 transition-colors duration-200"
+                className="transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
               >
-                All Tools
+                All PDF tools
               </Link>
             </li>
             <li>
               <Link
                 href="/about"
-                className="hover:text-blue-500 transition-colors duration-200"
+                className="transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
               >
-                About Us
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/contact"
-                className="hover:text-blue-500 transition-colors duration-200"
-              >
-                Contact
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/privacy"
-                className="hover:text-blue-500 transition-colors duration-200"
-              >
-                Privacy Policy
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/terms"
-                className="hover:text-blue-500 transition-colors duration-200"
-              >
-                Terms & Conditions
+                About Tools360
               </Link>
             </li>
           </ul>
         </div>
       </div>
 
-      {/* Bottom Line */}
-      <div className="border-t pt-6 pb-4 text-center text-gray-400 text-xs">
-        © {currentYear} DevTools Hub. All rights reserved.
+      <div className="border-t border-[#e8eeea]">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-4 text-xs text-[#71827c] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+          <span>© {currentYear} Tools360</span>
+          <span>PDFs stay on your device while you work.</span>
+        </div>
       </div>
     </footer>
   );

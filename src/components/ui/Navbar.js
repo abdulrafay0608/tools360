@@ -2,48 +2,59 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { FaFilePdf } from "react-icons/fa";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const links = [
+    { href: "/", label: "Tools" },
+    { href: "/about", label: "About" },
+  ];
 
   return (
-    <header className="bg-white/90 backdrop-blur shadow-md sticky top-0 z-50 transition-all duration-300">
-      <div className="container mx-auto flex justify-between items-center px-4 py-3">
-        {/* Logo */}
+    <header className="border-b border-[#dce5e0] bg-white">
+      <div className="mx-auto flex h-16 max-w-7xl items-center px-5 sm:px-8 lg:px-12">
         <Link
           href="/"
-          className="text-2xl font-extrabold text-blue-600 hover:text-blue-700 transition-colors duration-200"
+          aria-label="Tools360 home"
+          className="inline-flex shrink-0 items-center gap-2.5 text-lg font-semibold text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#235c4f]"
         >
-          Tools360
+          <span className="flex size-8 items-center justify-center bg-[#eaf3ed] text-[#235c4f]">
+            <FaFilePdf aria-hidden="true" className="h-4 w-4" />
+          </span>
+          <span>Tools360</span>
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex space-x-6 text-base font-medium">
-          <Link
-            href="/"
-            className="text-gray-600 hover:text-blue-500 transition duration-200"
-          >
-            Tools
-          </Link>
-          <Link
-            href="/about"
-            className="text-gray-600 hover:text-blue-500 transition duration-200"
-          >
-            About
-          </Link>
+        <nav aria-label="Main navigation" className="ml-auto hidden h-full items-center gap-7 text-sm font-medium md:flex">
+          {links.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              aria-current={pathname === href ? "page" : undefined}
+              className={`flex h-full items-center border-b-2 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-[#235c4f] ${
+                pathname === href
+                  ? "border-[#235c4f] text-[#173d34]"
+                  : "border-transparent text-[#62746d] hover:text-[#173d34]"
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
         </nav>
 
-        {/* Mobile Toggle Button with SVG */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-blue-600 focus:outline-none transition-transform duration-200"
-          aria-label="Toggle Menu"
+          className="ml-auto flex size-10 items-center justify-center text-[#235c4f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f] md:hidden"
+          aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={isOpen}
+          aria-controls="mobile-navigation"
         >
           {isOpen ? (
-            // Close Icon (X)
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-6 h-6"
+              className="h-5 w-5"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -56,10 +67,9 @@ export default function Navbar() {
               />
             </svg>
           ) : (
-            // Hamburger Icon
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-6 h-6"
+              className="h-5 w-5"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -75,24 +85,24 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden px-4 pb-4 space-y-2 animate-fade-in-down">
-          <Link
-            href="/"
-            className="block text-gray-700 hover:text-blue-500 transition duration-200"
-            onClick={() => setIsOpen(false)}
-          >
-            Tools
-          </Link>
-          <Link
-            href="/about"
-            className="block text-gray-700 hover:text-blue-500 transition duration-200"
-            onClick={() => setIsOpen(false)}
-          >
-            About
-          </Link>
-        </div>
+        <nav
+          id="mobile-navigation"
+          aria-label="Mobile navigation"
+          className="border-t border-[#e6ece9] bg-white px-5 py-2 sm:px-8 md:hidden"
+        >
+          {links.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              aria-current={pathname === href ? "page" : undefined}
+              className="block border-b border-[#edf1ef] py-3 text-sm font-medium text-[#405950] last:border-0"
+              onClick={() => setIsOpen(false)}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
       )}
     </header>
   );

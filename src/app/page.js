@@ -2,32 +2,45 @@ import ToolCard from "@/components/ui/ToolCard";
 import { toolsData } from "@/data/tools-data";
 
 export default function Home() {
+  const availableCategories = toolsData
+    .map((category) => ({
+      ...category,
+      tools: category.tools.filter((tool) => tool.available),
+    }))
+    .filter((category) => category.tools.length > 0);
+
   return (
-    <>
-      {/* Hero Section */}
-      <section className="bg-blue-50 py-16 text-center ">
-        <div className="container mx-auto px-6 ">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-blue-600 mb-8 mx-auto max-w-[900px]">
-            Your Free All‑in‑One Toolkit for PDFs, SEO, Coding & More
-          </h1>
-          <p className="max-w-5xl mx-auto text-lg text-gray-700">
-            DevTools Hub brings you the smartest collection of free online
-            utilities—PDF converters, SEO generators, code formatters, and
-            everyday productivity tools—all in one place. No downloads, no
-            surprise fees: just lightning‑fast, browser‑based tools designed to
-            boost your workflow and save you time.
-          </p>
+    <main className="min-h-[75vh] bg-[#f4f7f5] text-[#172c27]">
+      <section className="border-b border-[#dce5e0] bg-white">
+        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10 lg:px-12">
+          <div className="max-w-4xl">
+            <h1 className="max-w-3xl text-3xl font-semibold leading-tight text-[#173d34] sm:text-4xl">
+              PDF tools for everyday tasks.
+            </h1>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-[#5d706a] sm:text-base">
+              Merge files, split pages, compare revisions, or reduce file size.
+              Your PDFs are processed in this browser, not uploaded.
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* Tools by Category */}
-      <main className="container mx-auto px-6 py-12 max-w-[1250px]">
-        <div className="p-6">
-          {toolsData.map((category) => (
-            <div key={category.category} className="mb-10">
-              <h2 className="text-2xl font-bold mb-4">{category.category}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                {category.tools.map((tool) => (
+      <section
+        id="pdf-tools"
+        className="mx-auto max-w-7xl px-5 py-7 sm:px-8 md:py-9 lg:px-12"
+      >
+        <div className="mb-7 flex flex-wrap items-end justify-between gap-3 border-b border-[#d7e0dc] pb-5">
+          <div>
+            <p className="text-sm font-medium text-[#527268]">Choose a task</p>
+            <h2 className="mt-1 text-2xl font-semibold">PDF tools</h2>
+          </div>
+          <p className="max-w-sm text-sm leading-6 text-[#5d706a]">
+            Choose a task to get started.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {availableCategories.map((category) =>
+            category.tools.map((tool) => (
                   <ToolCard
                     key={tool.slug}
                     name={tool.name}
@@ -35,12 +48,10 @@ export default function Home() {
                     description={tool.description}
                     icon={tool.icon}
                   />
-                ))}
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
-      </main>
-    </>
+      </section>
+    </main>
   );
 }

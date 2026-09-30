@@ -16,8 +16,8 @@ const PagePreviewList = ({
   const lastPageIndex = totalPages - 1;
 
   return (
-    <div className="w-full border border-slate-300 rounded overflow-hidden">
-      <div className="text-center font-medium py-2 border-b border-slate-300 bg-slate-100">
+    <div className="w-full overflow-hidden border border-[#dce5e0] bg-white">
+      <div className="border-b border-[#dce5e0] bg-[#f4f7f5] py-2 text-center text-sm font-medium text-[#405950]">
         Range {rangeNumber} ({totalPagesInRange} pages)
       </div>
 
@@ -25,16 +25,16 @@ const PagePreviewList = ({
         {showLoading ? (
           // Loading state
           <>
-            <div className="h-32 w-24 bg-gray-100 rounded-lg flex items-center justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+            <div className="flex h-32 w-24 items-center justify-center bg-[#f4f7f5]">
+              <div className="size-6 animate-spin rounded-full border-2 border-[#dce5e0] border-b-[#235c4f]"></div>
             </div>
             {totalPagesInRange > 1 && (
               <>
-                <div className="w-12 h-16 flex items-center justify-center text-gray-500">
+                <div className="flex h-16 w-12 items-center justify-center text-[#708079]">
                   <FaEllipsisH />
                 </div>
-                <div className="h-32 w-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                <div className="flex h-32 w-24 items-center justify-center bg-[#f4f7f5]">
+                  <div className="size-6 animate-spin rounded-full border-2 border-[#dce5e0] border-b-[#235c4f]"></div>
                 </div>
               </>
             )}
@@ -54,7 +54,7 @@ const PagePreviewList = ({
 
             {totalPages > 1 && (
               <>
-                <div className="w-12 h-16 flex items-center justify-center text-gray-500">
+                <div className="flex h-16 w-12 items-center justify-center text-[#708079]">
                   <FaEllipsisH />
                 </div>
                 <PDFPreviewItem

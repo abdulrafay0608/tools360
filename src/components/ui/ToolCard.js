@@ -1,28 +1,25 @@
 import Link from "next/link";
+import ToolIcon from "@/components/icons/ToolIcon";
 
 export default function ToolCard({ name, slug, description, icon }) {
   return (
     <Link
       href={`/tools/${slug}`}
-      className="group block bg-white rounded border border-gray-100 shadow-md hover:shadow-lg transition-all duration-500 ease-in-out p-5 transform hover:-translate-y-1 hover:scale-105"
+      className="group flex min-h-48 flex-col border border-[#dce5e0] bg-white p-5 transition-colors hover:border-[#527268] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
     >
-      {/* SVG icon from public/icons */}
-      <div className="flex justify-center mb-3">
-        {/* <img
-          src={`/icons/${icon}.svg`}
-          className="size-16"
-          alt={`${name} icon`}
-        /> */}
+      <div className="flex items-start justify-between">
+        <span className="flex size-11 items-center justify-center bg-[#eaf3ed] text-[#235c4f]">
+          <ToolIcon icon={icon} className="h-5 w-5" />
+        </span>
+        <span className="text-sm text-[#71827c] transition-transform group-hover:translate-x-1" aria-hidden="true">
+          →
+        </span>
       </div>
-      <div className="flex items-center justify-center h-14 w-14 bg-blue-100 text-blue-600 rounded-full text-xl font-bold transition-all duration-300 group-hover:rotate-6">
-        {/* Replace with icon later */}
-        {name.charAt(0)}
-      </div>
-      <h3 className="mt-4 text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-200">
+      <h3 className="mt-6 text-lg font-semibold text-[#172c27]">
         {name}
       </h3>
 
-      <p className="mt-1 text-sm text-gray-600 leading-snug group-hover:text-gray-700 transition-colors duration-200">
+      <p className="mt-2 text-sm leading-6 text-[#5d706a]">
         {description}
       </p>
     </Link>

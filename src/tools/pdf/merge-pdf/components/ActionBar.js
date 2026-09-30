@@ -1,11 +1,11 @@
 // src/app/tools/pdf/merge-pdf/components/ActionBar.js
 import React from "react";
-import { FaTrash, FaObjectGroup, FaArrowRight } from "react-icons/fa";
+import { FaTrash, FaObjectGroup } from "react-icons/fa";
 import Button from "@/components/ui/Button";
 
 const ActionBar = ({ fileCount, onClearAll, onMerge, isMerging, canMerge }) => {
   return (
-    <div className="flex  justify-end gap-3 p-2">
+    <div className="flex flex-wrap justify-end gap-2 border-t border-[#e5ece8] pt-4">
       <Button
         variant="secondary"
         size="sm"

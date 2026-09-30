@@ -9,6 +9,7 @@ import { TbReload } from "react-icons/tb";
 import FileUploader from "@/components/pdf/file/FileUploader";
 import FilePreviewList from "./FilePreviewList";
 import Button from "@/components/ui/Button";
+import { formatFileSize } from "@/components/utils/pdfUtils";
 import usePDFJS from "@/hooks/usePDFJS";
 import usePDFThumbnails from "@/hooks/useThumbnails";
 
@@ -19,9 +20,7 @@ import usePDFThumbnails from "@/hooks/useThumbnails";
  */
 async function compressPdf(file) {
   const arrayBuffer = await file.arrayBuffer();
-  const pdfDoc = await PDFDocument.load(arrayBuffer, {
-    ignoreEncryption: true,
-  });
+  const pdfDoc = await PDFDocument.load(arrayBuffer);
 
   // Clear metadata
   pdfDoc.setTitle("");
@@ -47,6 +46,7 @@ const CompressPDFTool = () => {
   const [files, setFiles] = useState([]);
   const [processing, setProcessing] = useState(false);
   const [compressedBlob, setCompressedBlob] = useState(null);
+  const [error, setError] = useState("");
 
   const { pdfjs, isLoading: isPDFJSLoading } = usePDFJS();
   const { thumbnails, isGenerating } = usePDFThumbnails(files, pdfjs);
@@ -54,6 +54,7 @@ const CompressPDFTool = () => {
   const handleUpload = useCallback((newFiles) => {
     setFiles(newFiles);
     setCompressedBlob(null); // Reset previous compression result
+    setError("");
   }, []);
 
   const handleRemove = useCallback(
@@ -64,11 +65,15 @@ const CompressPDFTool = () => {
   const handleCompress = useCallback(async () => {
     if (!files.length) return;
     setProcessing(true);
+    setError("");
     try {
       const compressed = await compressPdf(files[0]);
       setCompressedBlob(compressed);
     } catch (err) {
       console.error("Compression failed:", err);
+      setError(
+        err.message || "This PDF could not be processed. Try another file."
+      );
     } finally {
       setProcessing(false);
     }
@@ -77,6 +82,7 @@ const CompressPDFTool = () => {
   const handleReload = useCallback(() => {
     setFiles([]);
     setCompressedBlob(null);
+    setError("");
   }, []);
 
   const handleDownload = useCallback(() => {
@@ -86,7 +92,7 @@ const CompressPDFTool = () => {
   }, [compressedBlob, handleReload]);
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
+    <div className="p-4 sm:p-6">
       {files.length === 0 ? (
         <FileUploader
           onUpload={handleUpload}
@@ -94,7 +100,12 @@ const CompressPDFTool = () => {
           multiple={false}
         />
       ) : (
-       <div className="text-center px-2">
+      <div className="space-y-4 px-1">
+  {error && (
+    <p className="mb-4 text-sm text-[#a13c2f]" role="alert">
+      {error}
+    </p>
+  )}
   {/* Preview only if not yet compressed */}
   {!compressedBlob && (
     <FilePreviewList
@@ -122,7 +133,7 @@ const CompressPDFTool = () => {
 
   {/* Processing state */}
   {processing && (
-    <div className="mt-4 text-gray-600 animate-pulse text-sm sm:text-base">
+    <div className="text-sm text-[#527268]" role="status">
       Compressing your PDF...
     </div>
   )}
@@ -130,7 +141,22 @@ const CompressPDFTool = () => {
   {/* Download result */}
   {compressedBlob && !processing && (
     <>
-      <div className="mt-4 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4">
+      <div className="mx-auto mt-5 grid max-w-xl grid-cols-2 border border-[#dce5e0] text-left">
+        <div className="p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-[#708079]">Original</p>
+          <p className="mt-1 font-semibold text-[#263e36]">{formatFileSize(files[0].size)}</p>
+        </div>
+        <div className="border-l border-[#dce5e0] p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-[#708079]">Processed</p>
+          <p className="mt-1 font-semibold text-[#263e36]">{formatFileSize(compressedBlob.size)}</p>
+        </div>
+      </div>
+      <p className="mt-3 text-sm text-[#527268]" role="status">
+        {compressedBlob.size < files[0].size
+          ? `File size reduced by ${(((files[0].size - compressedBlob.size) / files[0].size) * 100).toFixed(1)}%.`
+          : "This file did not get smaller. It may already be optimized or contain content that cannot be reduced by this tool."}
+      </p>
+      <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
         <Button
           onClick={handleDownload}
           variant="primary"
@@ -141,9 +167,6 @@ const CompressPDFTool = () => {
         >
           Download Compressed PDF
         </Button>
-        <span className="text-gray-600 text-xs sm:text-sm">
-          Size: {(compressedBlob.size / 1024).toFixed(1)} KB
-        </span>
       </div>
       <Button
         onClick={handleReload}
@@ -151,7 +174,7 @@ const CompressPDFTool = () => {
         size="md"
         icon={<TbReload />}
         iconPosition="left"
-        className="mt-3 w-full sm:w-auto"
+        className="w-full sm:w-auto"
       >
         Upload Another PDF
       </Button>

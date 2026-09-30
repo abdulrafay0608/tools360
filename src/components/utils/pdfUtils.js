@@ -2,6 +2,10 @@ import { PDFDocument } from "pdf-lib";
 
 // ✅ Merge PDFs with error handling
 export const mergePDFs = async (files, onProgress) => {
+  if (!files.length) {
+    throw new Error("Select at least one PDF file to merge.");
+  }
+
   const mergedPdf = await PDFDocument.create();
 
   for (const [i, file] of files.entries()) {
@@ -12,13 +16,13 @@ export const mergePDFs = async (files, onProgress) => {
 
       pages.forEach((page) => mergedPdf.addPage(page));
     } catch (err) {
-      console.warn(`⛔ Failed to load or merge: ${file.name}`, err);
-      continue; // skip this file and go to the next
+      throw new Error(
+        `Could not read ${file.name}. The file may be damaged or password-protected.`
+      );
     }
 
-    // ✅ Optional: Call progress callback if passed
     if (onProgress) {
-      onProgress(Math.round(((i + 1) / files.length) * 100)); // e.g. 30%, 50%
+      onProgress(Math.round(((i + 1) / files.length) * 100));
     }
   }
 

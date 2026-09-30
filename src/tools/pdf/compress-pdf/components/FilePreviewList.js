@@ -12,8 +12,8 @@ const FilePreviewList = ({
   if (!files?.length) return null; // avoid rendering empty wrapper
 
   return (
-    <div className="flex justify-center items-center">
-      <div className="flex justify-center items-center p-2 border border-slate-200 rounded">
+    <div className="flex items-center justify-center">
+      <div className="flex max-w-full items-center justify-center overflow-x-auto border border-[#dce5e0] bg-white p-3">
         {files.map((file, index) => (
           <PDFPreviewItem
             key={`${file.name}-${index}`} // more stable unique key
