@@ -80,6 +80,7 @@ export const toolsData = [
         name: "JPG to PDF",
         slug: "jpg-to-pdf",
         icon: "image",
+        available: true,
         description: "Convert JPG images to PDF in seconds.",
       },
       {

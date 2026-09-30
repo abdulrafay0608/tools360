@@ -1,60 +1,74 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import {
-  FaArrowLeft,
-  FaArrowRight,
-  FaColumns,
-  FaLayerGroup,
-  FaTimes,
-} from "react-icons/fa";
-import FileUploader from "@/components/pdf/file/FileUploader";
-import Button from "@/components/ui/Button";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import usePDFJS from "@/hooks/usePDFJS";
-import { createDifferenceImageData } from "../compareUtils.js";
+import {
+  createDifferenceImageData,
+  classifyDifference,
+} from "../compareUtils.js";
 
-const MAX_RENDER_DIMENSION = 1400;
+import CompareUploadLanding from "./CompareUploadLanding";
+import CompareHeaderBar from "./CompareHeaderBar";
+import CompareControlsToolbar from "./CompareControlsToolbar";
+import PageThumbnailStrip from "./PageThumbnailStrip";
+import SideBySideView from "./SideBySideView";
+import OverlayView from "./OverlayView";
+import DiffMapView from "./DiffMapView";
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   Constants
+───────────────────────────────────────────────────────────────────────────── */
+const MAX_RENDER_DIMENSION = 1600;
+const THUMBNAIL_SCALE = 0.18;
+const ZOOM_LEVELS = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
+const DEFAULT_ZOOM_INDEX = 2; // 1.0
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Canvas helpers
+───────────────────────────────────────────────────────────────────────────── */
 async function renderPageToCanvas(page, scale, renderTasks) {
   const viewport = page.getViewport({ scale });
   const canvas = document.createElement("canvas");
   canvas.width = Math.ceil(viewport.width);
   canvas.height = Math.ceil(viewport.height);
 
-  const context = canvas.getContext("2d");
-  if (!context) throw new Error("Canvas rendering is unavailable.");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas rendering is unavailable.");
 
-  const renderTask = page.render({ canvasContext: context, viewport });
-  renderTasks.push(renderTask);
-  await renderTask.promise;
+  const task = page.render({ canvasContext: ctx, viewport });
+  renderTasks.push(task);
+  await task.promise;
   return canvas;
 }
 
-function createAlignedCanvas(sourceCanvas, width, height) {
+function createAlignedCanvas(src, width, height) {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
-
-  const context = canvas.getContext("2d");
-  if (!context) throw new Error("Canvas rendering is unavailable.");
-  context.fillStyle = "#ffffff";
-  context.fillRect(0, 0, width, height);
-
-  if (sourceCanvas) {
-    context.drawImage(
-      sourceCanvas,
-      Math.round((width - sourceCanvas.width) / 2),
-      Math.round((height - sourceCanvas.height) / 2)
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas rendering is unavailable.");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+  if (src) {
+    ctx.drawImage(
+      src,
+      Math.round((width - src.width) / 2),
+      Math.round((height - src.height) / 2)
     );
   }
-
   return canvas;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   Main ComparePDFTool component
+───────────────────────────────────────────────────────────────────────────── */
 export default function ComparePDFTool() {
-  const [files, setFiles] = useState([]);
+  /* ── State ── */
+  const [originalFile, setOriginalFile] = useState(null);
+  const [revisedFile, setRevisedFile] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [pageNumber, setPageNumber] = useState(1);
+  const [pageInput, setPageInput] = useState("1");
   const [viewMode, setViewMode] = useState("side-by-side");
   const [overlayOpacity, setOverlayOpacity] = useState(50);
   const [error, setError] = useState("");
@@ -62,405 +76,481 @@ export default function ComparePDFTool() {
   const [isRendering, setIsRendering] = useState(false);
   const [comparisonAvailable, setComparisonAvailable] = useState(false);
   const [comparisonStats, setComparisonStats] = useState(null);
+  const [zoomIndex, setZoomIndex] = useState(DEFAULT_ZOOM_INDEX);
+  const [pageDiffs, setPageDiffs] = useState([]);
+  const [thumbnails, setThumbnails] = useState([]);
+
+  /* ── Canvas & Scroll refs ── */
   const leftCanvasRef = useRef(null);
   const rightCanvasRef = useRef(null);
   const resultCanvasRef = useRef(null);
-  const { pdfjs, isLoading: isPDFJSLoading } = usePDFJS();
+  const leftScrollRef = useRef(null);
+  const rightScrollRef = useRef(null);
+  const syncingLeft = useRef(false);
+  const syncingRight = useRef(false);
+  const currentAlignedRef = useRef({ left: null, right: null });
 
-    const handleUpload = (uploadedFiles) => {
-      if (uploadedFiles.length !== 2) {
-        setError("Choose exactly two PDF files to compare.");
-        return;
+  const { pdfjs } = usePDFJS();
+
+  const maxPages =
+    documents.length === 2
+      ? Math.max(documents[0].numPages, documents[1].numPages)
+      : 0;
+  const doc0Pages = documents[0]?.numPages ?? 0;
+  const doc1Pages = documents[1]?.numPages ?? 0;
+  const zoom = ZOOM_LEVELS[zoomIndex];
+
+  /* ── Sync scroll side-by-side ── */
+  const handleLeftScroll = useCallback(() => {
+    if (syncingLeft.current) return;
+    syncingRight.current = true;
+    if (rightScrollRef.current && leftScrollRef.current) {
+      rightScrollRef.current.scrollTop = leftScrollRef.current.scrollTop;
+    }
+    syncingRight.current = false;
+  }, []);
+
+  const handleRightScroll = useCallback(() => {
+    if (syncingRight.current) return;
+    syncingLeft.current = true;
+    if (leftScrollRef.current && rightScrollRef.current) {
+      leftScrollRef.current.scrollTop = rightScrollRef.current.scrollTop;
+    }
+    syncingLeft.current = false;
+  }, []);
+
+  /* ── Upload handlers ── */
+  const handleBatchUpload = useCallback((files) => {
+    const pdfFiles = Array.from(files).filter(
+      (f) => f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf")
+    );
+    if (pdfFiles.length < 2) {
+      setError("Please select at least two PDF files to compare.");
+      return;
+    }
+    setOriginalFile(pdfFiles[0]);
+    setRevisedFile(pdfFiles[1]);
+    setError("");
+  }, []);
+
+  const handleSwapFiles = useCallback(() => {
+    setOriginalFile(revisedFile);
+    setRevisedFile(originalFile);
+    setDocuments([]);
+    setPageDiffs([]);
+    setThumbnails([]);
+  }, [originalFile, revisedFile]);
+
+  const handleClearAll = useCallback(() => {
+    setOriginalFile(null);
+    setRevisedFile(null);
+    setDocuments([]);
+    setPageNumber(1);
+    setPageInput("1");
+    setViewMode("side-by-side");
+    setError("");
+    setPageDiffs([]);
+    setThumbnails([]);
+    setComparisonStats(null);
+  }, []);
+
+  /* ── Load PDF Documents ── */
+  useEffect(() => {
+    if (!pdfjs || !originalFile || !revisedFile) return undefined;
+
+    let isActive = true;
+    const loadingTasks = [];
+    setIsLoadingDocuments(true);
+    setError("");
+
+    (async () => {
+      try {
+        const loaded = await Promise.all(
+          [originalFile, revisedFile].map(async (file) => {
+            const data = await file.arrayBuffer();
+            const task = pdfjs.getDocument({ data });
+            loadingTasks.push(task);
+            return task.promise;
+          })
+        );
+        if (isActive) {
+          setDocuments(loaded);
+          setPageNumber(1);
+          setPageInput("1");
+        }
+      } catch (err) {
+        if (isActive) {
+          setError(
+            err.name === "PasswordException"
+              ? "Password-protected PDFs are not supported. Remove password and try again."
+              : "One or both files could not be opened. Verify both files are valid PDFs."
+          );
+        }
+      } finally {
+        if (isActive) setIsLoadingDocuments(false);
       }
+    })();
 
-      setFiles(Array.from(uploadedFiles));
-      setDocuments([]);
-      setPageNumber(1);
-      setViewMode("side-by-side");
-      setError("");
+    return () => {
+      isActive = false;
+      loadingTasks.forEach((t) => t.destroy());
     };
+  }, [originalFile, revisedFile, pdfjs]);
 
-    const clearFiles = () => {
-      setFiles([]);
-      setDocuments([]);
-      setPageNumber(1);
-      setViewMode("side-by-side");
-      setError("");
-    };
+  /* ── Progressive Thumbnail & Diff Analysis ── */
+  useEffect(() => {
+    if (documents.length !== 2 || !pdfjs) return undefined;
 
-    useEffect(() => {
-      if (!pdfjs || files.length !== 2) return undefined;
+    let isActive = true;
+    const renderTasks = [];
+    const pages = Math.max(documents[0].numPages, documents[1].numPages);
+    const thumbs = new Array(pages).fill(null);
+    const diffs = new Array(pages).fill(null);
 
-      let isActive = true;
-      const loadingTasks = [];
-      setIsLoadingDocuments(true);
-      setError("");
+    setThumbnails([]);
+    setPageDiffs([]);
 
-      const loadDocuments = async () => {
+    (async () => {
+      for (let i = 0; i < pages; i++) {
+        if (!isActive) break;
+        const pageNum = i + 1;
         try {
-          const loadedDocuments = await Promise.all(
-            files.map(async (file) => {
-              const data = await file.arrayBuffer();
-              const loadingTask = pdfjs.getDocument({ data });
-              loadingTasks.push(loadingTask);
-              return loadingTask.promise;
-            })
-          );
+          const [p0, p1] = await Promise.all([
+            pageNum <= documents[0].numPages
+              ? documents[0].getPage(pageNum)
+              : Promise.resolve(null),
+            pageNum <= documents[1].numPages
+              ? documents[1].getPage(pageNum)
+              : Promise.resolve(null),
+          ]);
 
-          if (isActive) setDocuments(loadedDocuments);
-        } catch (loadError) {
-          if (isActive) {
-            setError(
-              loadError.name === "PasswordException"
-                ? "Password-protected PDFs are not supported. Remove the password and try again."
-                : "One of these files could not be opened. Check that both PDFs are valid and try again."
-            );
-          }
-        } finally {
-          if (isActive) setIsLoadingDocuments(false);
-        }
-      };
-
-      loadDocuments();
-
-      return () => {
-        isActive = false;
-        loadingTasks.forEach((task) => task.destroy());
-      };
-    }, [files, pdfjs]);
-
-    useEffect(() => {
-      if (documents.length !== 2) return undefined;
-
-      let isActive = true;
-      const renderTasks = [];
-      const canvases = [leftCanvasRef.current, rightCanvasRef.current];
-      setIsRendering(true);
-      setError("");
-
-      const renderComparison = async () => {
-        try {
-          const pages = await Promise.all(
-            documents.map((document) =>
-              pageNumber <= document.numPages
-                ? document.getPage(pageNumber)
-                : Promise.resolve(null)
-            )
-          );
-          const pageSizes = pages
-            .filter(Boolean)
-            .map((page) => page.getViewport({ scale: 1 }));
-
-          if (pageSizes.length === 0) {
-            throw new Error("Neither document has this page.");
-          }
-
-          const originalWidth = Math.max(...pageSizes.map((size) => size.width));
-          const originalHeight = Math.max(...pageSizes.map((size) => size.height));
-          const scale = Math.min(
-            1.25,
-            MAX_RENDER_DIMENSION / Math.max(originalWidth, originalHeight)
-          );
-          const width = Math.max(1, Math.ceil(originalWidth * scale));
-          const height = Math.max(1, Math.ceil(originalHeight * scale));
-
-          const sourceCanvases = await Promise.all(
-            pages.map((page) =>
-              page ? renderPageToCanvas(page, scale, renderTasks) : null
-            )
-          );
-          if (!isActive) return;
-
-          const alignedCanvases = sourceCanvases.map((canvas) =>
-            createAlignedCanvas(canvas, width, height)
-          );
-
-          alignedCanvases.forEach((sourceCanvas, index) => {
-            const targetCanvas = canvases[index];
-            if (!targetCanvas) return;
-
-            targetCanvas.width = width;
-            targetCanvas.height = height;
-            const context = targetCanvas.getContext("2d");
-            if (!context) throw new Error("Canvas rendering is unavailable.");
-            context.drawImage(sourceCanvas, 0, 0);
-          });
-
-          const canCompare = pages.every(Boolean);
-          setComparisonAvailable(canCompare);
-          if (!canCompare) {
-            setComparisonStats(null);
-            return;
-          }
-
-          const resultCanvas = resultCanvasRef.current;
-          const resultContext = resultCanvas?.getContext("2d");
-          if (!resultCanvas || !resultContext) {
-            throw new Error("Canvas rendering is unavailable.");
-          }
-
-          resultCanvas.width = width;
-          resultCanvas.height = height;
-          resultContext.clearRect(0, 0, width, height);
-
-          if (viewMode === "overlay") {
-            resultContext.drawImage(alignedCanvases[0], 0, 0);
-            resultContext.globalAlpha = overlayOpacity / 100;
-            resultContext.drawImage(alignedCanvases[1], 0, 0);
-            resultContext.globalAlpha = 1;
-            setComparisonStats(null);
-          } else if (viewMode === "difference") {
-            const originalContext = alignedCanvases[0].getContext("2d");
-            const revisedContext = alignedCanvases[1].getContext("2d");
-            if (!originalContext || !revisedContext) {
-              throw new Error("Canvas comparison is unavailable.");
+          const thumbPage = p0 || p1;
+          if (thumbPage) {
+            const thumbVp = thumbPage.getViewport({ scale: THUMBNAIL_SCALE });
+            const tc = document.createElement("canvas");
+            tc.width = Math.ceil(thumbVp.width);
+            tc.height = Math.ceil(thumbVp.height);
+            const tctx = tc.getContext("2d");
+            if (tctx) {
+              const task = thumbPage.render({ canvasContext: tctx, viewport: thumbVp });
+              renderTasks.push(task);
+              await task.promise;
+              thumbs[i] = tc.toDataURL("image/jpeg", 0.7);
             }
+          }
 
-            const difference = createDifferenceImageData(
-              originalContext.getImageData(0, 0, width, height).data,
-              revisedContext.getImageData(0, 0, width, height).data
+          if (p0 && p1) {
+            const scale = Math.min(
+              0.75,
+              MAX_RENDER_DIMENSION / Math.max(
+                p0.getViewport({ scale: 1 }).width,
+                p1.getViewport({ scale: 1 }).width
+              )
             );
-            const imageData = resultContext.createImageData(width, height);
-            imageData.data.set(difference.pixels);
-            resultContext.putImageData(imageData, 0, 0);
-            setComparisonStats(difference);
+            const [c0, c1] = await Promise.all([
+              renderPageToCanvas(p0, scale, renderTasks),
+              renderPageToCanvas(p1, scale, renderTasks),
+            ]);
+            const maxW = Math.max(c0.width, c1.width);
+            const maxH = Math.max(c0.height, c1.height);
+            const a0 = createAlignedCanvas(c0, maxW, maxH);
+            const a1 = createAlignedCanvas(c1, maxW, maxH);
+            const ctx0 = a0.getContext("2d");
+            const ctx1 = a1.getContext("2d");
+            if (ctx0 && ctx1) {
+              const diff = createDifferenceImageData(
+                ctx0.getImageData(0, 0, maxW, maxH).data,
+                ctx1.getImageData(0, 0, maxW, maxH).data
+              );
+              diffs[i] = {
+                changedPercent: diff.changedPercent,
+                changedPixels: diff.changedPixels,
+                totalPixels: diff.totalPixels,
+                severity: classifyDifference(diff.changedPercent),
+              };
+            }
           } else {
-            setComparisonStats(null);
+            diffs[i] = { changedPercent: 100, changedPixels: -1, totalPixels: -1, severity: "major" };
           }
-        } catch (renderError) {
+
           if (isActive) {
-            setError(renderError.message || "These pages could not be compared.");
+            setThumbnails([...thumbs]);
+            setPageDiffs([...diffs]);
           }
-        } finally {
-          if (isActive) setIsRendering(false);
+        } catch {
+          diffs[i] = null;
         }
-      };
+      }
+    })();
 
-      renderComparison();
+    return () => {
+      isActive = false;
+      renderTasks.forEach((t) => {
+        try { t.cancel(); } catch { /* ignore */ }
+      });
+    };
+  }, [documents, pdfjs]);
 
-      return () => {
-        isActive = false;
-        renderTasks.forEach((task) => task.cancel());
-      };
-    }, [documents, pageNumber, viewMode, overlayOpacity]);
+  /* ── Render Active Page to Canvases ── */
+  useEffect(() => {
+    if (documents.length !== 2) return undefined;
 
-    const maxPages =
-      documents.length === 2
-        ? Math.max(documents[0].numPages, documents[1].numPages)
-        : 0;
+    let isActive = true;
+    const renderTasks = [];
+    const canvases = [leftCanvasRef.current, rightCanvasRef.current];
+    setIsRendering(true);
+    setError("");
 
-    const viewModes = [
-      { id: "side-by-side", label: "Side by side", icon: FaColumns },
-      { id: "overlay", label: "Overlay", icon: FaLayerGroup },
-      { id: "difference", label: "Difference", icon: FaTimes },
-    ];
+    (async () => {
+      try {
+        const [p0, p1] = await Promise.all([
+          pageNumber <= documents[0].numPages
+            ? documents[0].getPage(pageNumber)
+            : Promise.resolve(null),
+          pageNumber <= documents[1].numPages
+            ? documents[1].getPage(pageNumber)
+            : Promise.resolve(null),
+        ]);
 
+        const pages = [p0, p1];
+        const validPages = pages.filter(Boolean);
+        if (validPages.length === 0) throw new Error("Neither document has this page.");
+
+        const pageSizes = validPages.map((p) => p.getViewport({ scale: 1 }));
+        const origW = Math.max(...pageSizes.map((v) => v.width));
+        const origH = Math.max(...pageSizes.map((v) => v.height));
+
+        const baseScale = Math.min(1.5, MAX_RENDER_DIMENSION / Math.max(origW, origH));
+        const scale = baseScale * zoom;
+        const width = Math.max(1, Math.ceil(origW * scale));
+        const height = Math.max(1, Math.ceil(origH * scale));
+
+        const sourceCanvases = await Promise.all(
+          pages.map((page) => (page ? renderPageToCanvas(page, scale, renderTasks) : null))
+        );
+        if (!isActive) return;
+
+        const aligned = sourceCanvases.map((c) => createAlignedCanvas(c, width, height));
+        currentAlignedRef.current = { left: aligned[0], right: aligned[1] };
+
+        aligned.forEach((src, idx) => {
+          const target = canvases[idx];
+          if (!target) return;
+          target.width = width;
+          target.height = height;
+          const ctx = target.getContext("2d");
+          if (!ctx) throw new Error("Canvas rendering is unavailable.");
+          ctx.drawImage(src, 0, 0);
+        });
+
+        const bothPresent = Boolean(p0 && p1);
+        setComparisonAvailable(bothPresent);
+
+        if (!bothPresent) {
+          setComparisonStats(null);
+          return;
+        }
+
+        const resultCanvas = resultCanvasRef.current;
+        const resultCtx = resultCanvas?.getContext("2d");
+        if (!resultCanvas || !resultCtx) return;
+
+        resultCanvas.width = width;
+        resultCanvas.height = height;
+        resultCtx.clearRect(0, 0, width, height);
+
+        if (viewMode === "overlay") {
+          resultCtx.drawImage(aligned[0], 0, 0);
+          resultCtx.globalAlpha = overlayOpacity / 100;
+          resultCtx.drawImage(aligned[1], 0, 0);
+          resultCtx.globalAlpha = 1;
+          setComparisonStats(null);
+        } else if (viewMode === "difference") {
+          const ctx0 = aligned[0].getContext("2d");
+          const ctx1 = aligned[1].getContext("2d");
+          if (ctx0 && ctx1) {
+            const diff = createDifferenceImageData(
+              ctx0.getImageData(0, 0, width, height).data,
+              ctx1.getImageData(0, 0, width, height).data
+            );
+            const imageData = resultCtx.createImageData(width, height);
+            imageData.data.set(diff.pixels);
+            resultCtx.putImageData(imageData, 0, 0);
+            setComparisonStats(diff);
+          }
+        }
+      } catch (err) {
+        if (isActive) setError(err.message || "These pages could not be compared.");
+      } finally {
+        if (isActive) setIsRendering(false);
+      }
+    })();
+
+    return () => {
+      isActive = false;
+      renderTasks.forEach((t) => {
+        try { t.cancel(); } catch { /* ignore */ }
+      });
+    };
+  }, [documents, pageNumber, viewMode, overlayOpacity, zoom]);
+
+  /* ── Keyboard navigation ── */
+  useEffect(() => {
+    if (documents.length !== 2) return undefined;
+
+    const onKey = (e) => {
+      if (e.target.tagName === "INPUT") return;
+      if (e.key === "ArrowLeft") setPageNumber((p) => Math.max(1, p - 1));
+      else if (e.key === "ArrowRight") setPageNumber((p) => Math.min(maxPages, p + 1));
+      else if (e.key === "1") setViewMode("side-by-side");
+      else if (e.key === "2") setViewMode("overlay");
+      else if (e.key === "3") setViewMode("difference");
+      else if (e.key === "+" || e.key === "=") setZoomIndex((z) => Math.min(ZOOM_LEVELS.length - 1, z + 1));
+      else if (e.key === "-") setZoomIndex((z) => Math.max(0, z - 1));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [documents, maxPages]);
+
+  useEffect(() => {
+    setPageInput(String(pageNumber));
+  }, [pageNumber]);
+
+  const commitPageInput = () => {
+    const n = parseInt(pageInput, 10);
+    if (!isNaN(n) && n >= 1 && n <= maxPages) {
+      setPageNumber(n);
+    } else {
+      setPageInput(String(pageNumber));
+    }
+  };
+
+  const handleDownloadDiff = () => {
+    const canvas = viewMode === "side-by-side" ? null : resultCanvasRef.current;
+    if (!canvas) return;
+    const url = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `pdf-diff-page-${pageNumber}.png`;
+    a.click();
+  };
+
+  /* ── Initial Upload View ── */
+  if (documents.length !== 2) {
     return (
-      <section className="p-4 sm:p-6">
-        {files.length !== 2 ? (
-          <div className="mx-auto max-w-3xl">
-            <div className="mb-5">
-              <h2 className="text-lg font-semibold text-[#263e36]">Choose two PDFs</h2>
-              <p className="mt-1 text-sm leading-6 text-[#62746d]">
-                Select the original first and the revised file second. Compare
-                their pages side by side, as an overlay, or with changed areas
-                highlighted.
-              </p>
-            </div>
-            <FileUploader
-              onUpload={handleUpload}
-              accept="application/pdf,.pdf"
-              multiple
-            />
-            {error && (
-              <p className="mt-4 text-sm text-[#a13c2f]" role="alert">
-                {error}
-              </p>
-            )}
+      <div className="p-4 sm:p-6">
+        <CompareUploadLanding
+          originalFile={originalFile}
+          revisedFile={revisedFile}
+          onSelectOriginal={(file) => setOriginalFile(file)}
+          onSelectRevised={(file) => setRevisedFile(file)}
+          onBatchUpload={handleBatchUpload}
+          onSwapFiles={handleSwapFiles}
+          onClearOriginal={() => setOriginalFile(null)}
+          onClearRevised={() => setRevisedFile(null)}
+          onCompare={() => setError("")}
+          error={error}
+        />
+        {isLoadingDocuments && (
+          <div className="mt-4 text-center text-sm font-medium text-[#235c4f]">
+            Loading PDF documents...
           </div>
-        ) : (
-          <>
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#e5ece8] pb-4">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-[#263e36]">
-                  Compare documents
-                </p>
-                <p className="mt-1 truncate text-xs text-[#708079]">
-                  {files[0].name} <span aria-hidden="true">vs</span> {files[1].name}
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                icon={<FaTimes aria-hidden="true" />}
-                onClick={clearFiles}
-              >
-                Choose different files
-              </Button>
-            </div>
-
-            {isPDFJSLoading || isLoadingDocuments ? (
-              <p className="py-12 text-center text-sm text-[#62746d]" role="status">
-                Opening both PDFs...
-              </p>
-            ) : documents.length === 2 ? (
-              <>
-                <div className="flex flex-wrap items-center justify-between gap-3 py-4">
-                  <p className="text-sm font-medium text-[#405950]">
-                    Page {pageNumber} of {maxPages}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      icon={<FaArrowLeft aria-hidden="true" />}
-                      onClick={() => setPageNumber((page) => Math.max(1, page - 1))}
-                      disabled={pageNumber <= 1 || isRendering}
-                      aria-label="Previous page"
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      icon={<FaArrowRight aria-hidden="true" />}
-                      iconPosition="right"
-                      onClick={() => setPageNumber((page) => Math.min(maxPages, page + 1))}
-                      disabled={pageNumber >= maxPages || isRendering}
-                      aria-label="Next page"
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                  <div
-                    className="grid grid-cols-3 border border-[#dce5e0] bg-[#f4f7f5] p-1"
-                    role="group"
-                    aria-label="Comparison view"
-                  >
-                    {viewModes.map(({ id, label, icon: Icon }) => (
-                      <button
-                        key={id}
-                        type="button"
-                        aria-pressed={viewMode === id}
-                        disabled={id !== "side-by-side" && !comparisonAvailable}
-                        onClick={() => setViewMode(id)}
-                        className={`inline-flex min-h-10 items-center justify-center gap-2 px-3 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#235c4f] disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm ${
-                          viewMode === id
-                            ? "bg-[#173d34] text-white"
-                            : "text-[#52675e] hover:bg-white"
-                        }`}
-                      >
-                        <Icon aria-hidden="true" />
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-
-                  {viewMode === "overlay" && comparisonAvailable && (
-                    <label className="flex min-w-48 items-center gap-3 text-xs text-[#5d706a] sm:text-sm">
-                      <span>Revised opacity</span>
-                      <input
-                        type="range"
-                        min="10"
-                        max="90"
-                        step="5"
-                        value={overlayOpacity}
-                        onChange={(event) => setOverlayOpacity(Number(event.target.value))}
-                        aria-label="Revised page overlay opacity"
-                        className="w-28 accent-[#235c4f]"
-                      />
-                      <span className="w-9 text-right tabular-nums">
-                        {overlayOpacity}%
-                      </span>
-                    </label>
-                  )}
-                </div>
-
-                {error && (
-                  <p className="mb-4 text-sm text-[#a13c2f]" role="alert">
-                    {error}
-                  </p>
-                )}
-
-                {viewMode === "side-by-side" || !comparisonAvailable ? (
-                  <>
-                    {!comparisonAvailable && viewMode !== "side-by-side" && (
-                      <p className="mb-3 text-sm text-[#708079]" role="status">
-                        This page exists in only one document. Choose side by side
-                        to review it.
-                      </p>
-                    )}
-                    <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                      {files.map((file, index) => {
-                        const hasPage = pageNumber <= documents[index].numPages;
-                        return (
-                          <section key={`${file.name}-${index}`} className="min-w-0">
-                            <h3 className="mb-2 truncate text-sm font-semibold text-[#405950]">
-                              {index === 0 ? "Original" : "Revised"}: {file.name}
-                            </h3>
-                            <div className="flex min-h-80 items-start justify-center overflow-auto border border-[#dce5e0] bg-[#eef2ef] p-3">
-                              <canvas
-                                ref={index === 0 ? leftCanvasRef : rightCanvasRef}
-                                aria-label={`${index === 0 ? "Original" : "Revised"} document, page ${pageNumber}`}
-                                className={`${hasPage ? "" : "hidden"} h-auto max-w-full bg-white shadow-sm`}
-                              />
-                              {!hasPage && (
-                                <p className="py-24 text-center text-sm text-[#708079]">
-                                  This document has no page {pageNumber}.
-                                </p>
-                              )}
-                            </div>
-                          </section>
-                        );
-                      })}
-                    </div>
-                  </>
-                ) : (
-                  <section className="min-w-0">
-                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="text-sm font-semibold text-[#405950]">
-                        {viewMode === "overlay" ? "Page overlay" : "Changed areas"}
-                      </h3>
-                      {viewMode === "difference" && comparisonStats && (
-                        <p className="text-xs tabular-nums text-[#708079]" role="status">
-                          {comparisonStats.changedPixels === 0
-                            ? "No visible changes on this page"
-                            : `${comparisonStats.changedPercent.toFixed(2)}% of page pixels differ`}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex min-h-80 items-start justify-center overflow-auto border border-[#dce5e0] bg-[#eef2ef] p-3">
-                      <canvas
-                        ref={resultCanvasRef}
-                        aria-label={`${viewMode === "overlay" ? "Overlaid" : "Difference map for"} page ${pageNumber}`}
-                        className="h-auto max-w-full bg-white shadow-sm"
-                      />
-                    </div>
-                    {viewMode === "difference" && (
-                      <p className="mt-2 text-xs leading-5 text-[#708079]">
-                        Highlighted pixels show visual changes. Text or font
-                        rendering differences may also be marked.
-                      </p>
-                    )}
-                  </section>
-                )}
-
-                {isRendering && (
-                  <p className="mt-3 text-center text-sm text-[#708079]" role="status">
-                    Rendering page comparison...
-                  </p>
-                )}
-              </>
-            ) : (
-              <div className="py-12 text-center text-sm text-[#62746d]" role="status">
-                {error || "Preparing document previews..."}
-              </div>
-            )}
-          </>
         )}
-      </section>
+      </div>
     );
   }
+
+  /* ── Active Viewer View ── */
+  return (
+    <div className="p-4 sm:p-6 space-y-4">
+      {/* Header Bar */}
+      <CompareHeaderBar
+        originalFile={originalFile}
+        revisedFile={revisedFile}
+        doc0Pages={doc0Pages}
+        doc1Pages={doc1Pages}
+        maxPages={maxPages}
+        pageDiffs={pageDiffs}
+        onSwapFiles={handleSwapFiles}
+        onChangeFiles={handleClearAll}
+      />
+
+      {/* Main Comparison Interface */}
+      <div className="flex flex-col rounded-sm border border-[#dce5e0] bg-white shadow-sm overflow-hidden">
+        {/* Controls Toolbar */}
+        <CompareControlsToolbar
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          pageNumber={pageNumber}
+          maxPages={maxPages}
+          pageInput={pageInput}
+          onPageInputChange={(e) => setPageInput(e.target.value)}
+          onPageInputCommit={commitPageInput}
+          onPrevPage={() => setPageNumber((p) => Math.max(1, p - 1))}
+          onNextPage={() => setPageNumber((p) => Math.min(maxPages, p + 1))}
+          zoomIndex={zoomIndex}
+          onZoomIn={() => setZoomIndex((z) => Math.min(ZOOM_LEVELS.length - 1, z + 1))}
+          onZoomOut={() => setZoomIndex((z) => Math.max(0, z - 1))}
+          onDownloadDiff={handleDownloadDiff}
+        />
+
+        {error && (
+          <div className="bg-[#fdf4f3] px-4 py-2 text-xs text-[#a13c2f] border-b border-[#f3cfc8]" role="alert">
+            {error}
+          </div>
+        )}
+
+        {/* View Workspace: Sidebar + Mode View */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Page Thumbnails Sidebar */}
+          <PageThumbnailStrip
+            thumbnails={thumbnails}
+            pageDiffs={pageDiffs}
+            maxPages={maxPages}
+            doc0Pages={doc0Pages}
+            doc1Pages={doc1Pages}
+            currentPage={pageNumber}
+            onPageSelect={setPageNumber}
+          />
+
+          {/* Active View Mode Component */}
+          {viewMode === "side-by-side" && (
+            <SideBySideView
+              pageNumber={pageNumber}
+              doc0Pages={doc0Pages}
+              doc1Pages={doc1Pages}
+              originalFileName={originalFile?.name}
+              revisedFileName={revisedFile?.name}
+              leftCanvasRef={leftCanvasRef}
+              rightCanvasRef={rightCanvasRef}
+              leftScrollRef={leftScrollRef}
+              rightScrollRef={rightScrollRef}
+              onLeftScroll={handleLeftScroll}
+              onRightScroll={handleRightScroll}
+              isRendering={isRendering}
+            />
+          )}
+
+          {viewMode === "overlay" && (
+            <OverlayView
+              resultCanvasRef={resultCanvasRef}
+              overlayOpacity={overlayOpacity}
+              onOpacityChange={setOverlayOpacity}
+              isRendering={isRendering}
+              comparisonAvailable={comparisonAvailable}
+            />
+          )}
+
+          {viewMode === "difference" && (
+            <DiffMapView
+              resultCanvasRef={resultCanvasRef}
+              comparisonStats={comparisonStats}
+              isRendering={isRendering}
+              comparisonAvailable={comparisonAvailable}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,15 +1,42 @@
-// src/app/tools/pdf/merge-pdf/components/FileUploader.js
+// src/components/pdf/file/FileUploader.js
 "use client";
 
 import React, { useId, useRef, useState } from "react";
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
-const FileUploader = ({ onUpload, accept = "application/pdf,.pdf", multiple }) => {
+const isFileAccepted = (file, acceptStr) => {
+  if (!acceptStr || acceptStr === "*") return true;
+  const acceptedTypes = acceptStr.split(",").map((s) => s.trim().toLowerCase());
+  const fileType = (file.type || "").toLowerCase();
+  const fileName = (file.name || "").toLowerCase();
+
+  return acceptedTypes.some((type) => {
+    if (type.startsWith(".")) {
+      return fileName.endsWith(type);
+    }
+    if (type.endsWith("/*")) {
+      const category = type.slice(0, -2);
+      return fileType.startsWith(category);
+    }
+    return fileType === type;
+  });
+};
+
+const FileUploader = ({
+  onUpload,
+  accept = "application/pdf,.pdf",
+  multiple = true,
+  fileTypeLabel,
+  titleText,
+}) => {
   const inputId = useId();
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState("");
   const dragDepth = useRef(0);
+
+  const isImageMode = accept.includes("image") || accept.includes("jpg") || accept.includes("png");
+  const typeLabel = fileTypeLabel || (isImageMode ? "JPG image" : "PDF file");
 
   const handleDragEnter = (event) => {
     event.preventDefault();
@@ -42,30 +69,31 @@ const FileUploader = ({ onUpload, accept = "application/pdf,.pdf", multiple }) =
     if (!files.length) return;
 
     if (!multiple && files.length > 1) {
-      setError("Choose one PDF file at a time.");
+      setError(`Choose one ${typeLabel} at a time.`);
       return;
     }
 
-    const invalidFile = files.find(
-      (file) =>
-        (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) ||
-        file.size > MAX_FILE_SIZE_BYTES
-    );
-    if (invalidFile) {
-      const isPdf =
-        invalidFile.type === "application/pdf" ||
-        invalidFile.name.toLowerCase().endsWith(".pdf");
-      setError(
-        isPdf
-          ? `${invalidFile.name} exceeds the 10 MB file limit.`
-          : `${invalidFile.name} is not a PDF file.`
-      );
+    const invalidSizeFile = files.find((file) => file.size > MAX_FILE_SIZE_BYTES);
+    if (invalidSizeFile) {
+      setError(`${invalidSizeFile.name} exceeds the 10 MB file limit.`);
+      return;
+    }
+
+    const invalidTypeFile = files.find((file) => !isFileAccepted(file, accept));
+    if (invalidTypeFile) {
+      setError(`${invalidTypeFile.name} is not a valid ${typeLabel}.`);
       return;
     }
 
     setError("");
     onUpload(files);
   };
+
+  const displayTitle = titleText
+    ? titleText
+    : dragActive
+    ? `Drop ${typeLabel}s to add them`
+    : `Drop ${typeLabel}s here`;
 
   return (
     <div
@@ -83,7 +111,7 @@ const FileUploader = ({ onUpload, accept = "application/pdf,.pdf", multiple }) =
           ? "border-[#235c4f] bg-[#eaf3ed]"
           : "border-[#b8c9c0] bg-white hover:border-[#7e9b8c]"
       }`}
-      aria-label="PDF file drop area"
+      aria-label={`${typeLabel} drop area`}
     >
       <div className="flex flex-col items-center justify-center">
         <div className="mb-3 flex size-12 items-center justify-center bg-[#eaf3ed] text-[#235c4f]">
@@ -103,9 +131,7 @@ const FileUploader = ({ onUpload, accept = "application/pdf,.pdf", multiple }) =
           </svg>
         </div>
         <p className="mb-1 text-[#263e36]" aria-live="polite">
-          <span className="font-semibold">
-            {dragActive ? "Drop PDF files to add them" : "Drop PDF files here"}
-          </span>
+          <span className="font-semibold">{displayTitle}</span>
         </p>
         <p className="mb-4 text-sm text-[#708079]">or choose from your device</p>
         <div>
@@ -127,7 +153,7 @@ const FileUploader = ({ onUpload, accept = "application/pdf,.pdf", multiple }) =
           </label>
         </div>
         <p id={`${inputId}-help`} className="mt-4 text-xs text-[#708079]">
-          {multiple ? "PDF files up to 10 MB each" : "One PDF up to 10 MB"}
+          {multiple ? `${typeLabel}s up to 10 MB each` : `One ${typeLabel} up to 10 MB`}
         </p>
         {error && (
           <p
