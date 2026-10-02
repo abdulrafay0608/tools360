@@ -1,9 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
-  eslint: {
-	// Ignore ESLint on Build Time
-    ignoreDuringBuilds: true,
+  turbopack: {
+    resolveAlias: {
+      canvas: { browser: "" },
+    },
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      canvas: false,
+    };
+    return config;
   },
 };
 

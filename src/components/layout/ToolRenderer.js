@@ -25,6 +25,10 @@ const toolMap = {
     ssr: false,
     loading: () => <ToolLoader />,
   }),
+  "pdf-to-jpg": dynamic(() => import("@/tools/pdf/pdf-to-jpg/page"), {
+    ssr: false,
+    loading: () => <ToolLoader />,
+  }),
   // for future tools:
   // "compress-pdf": dynamic(() => import("@/tools/pdf/compress-pdf/page"), { ssr: false, loading: () => <ToolLoader /> }),
 };

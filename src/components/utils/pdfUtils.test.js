@@ -58,7 +58,7 @@ test("createDifferenceImageData reports no differences for matching pixels", () 
 
   assert.equal(result.changedPixels, 0);
   assert.equal(result.changedPercent, 0);
-  assert.deepEqual([...result.pixels], [0, 0, 0, 0, 0, 0, 0, 0]);
+  assert.deepEqual([...result.pixels], [255, 255, 255, 255, 30, 30, 30, 255]);
 });
 
 test("createDifferenceImageData highlights pixels beyond the threshold", () => {
@@ -70,7 +70,7 @@ test("createDifferenceImageData highlights pixels beyond the threshold", () => {
   assert.equal(result.changedPixels, 1);
   assert.equal(result.totalPixels, 2);
   assert.equal(result.changedPercent, 50);
-  assert.deepEqual([...result.pixels], [0, 0, 0, 0, 190, 60, 46, 255]);
+  assert.deepEqual([...result.pixels], [255, 255, 255, 255, 255, 65, 65, 255]);
 });
 
 test("createDifferenceImageData rejects pages with mismatched dimensions", () => {

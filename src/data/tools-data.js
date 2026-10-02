@@ -74,7 +74,8 @@ export const toolsData = [
         name: "PDF to JPG",
         slug: "pdf-to-jpg",
         icon: "image",
-        description: "Convert PDF pages into JPG images or extract images.",
+        available: true,
+        description: "Convert PDF pages into high-quality JPG images or download all as a ZIP archive.",
       },
       {
         name: "JPG to PDF",

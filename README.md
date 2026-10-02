@@ -10,11 +10,35 @@ Tools360 is a fast, browser-based web application for common PDF tasks and devel
 - **Split PDF** (`/tools/split-pdf`): Splits a PDF by custom page ranges or fixed-size page groups and downloads a ZIP file.
 - **Compress PDF** (`/tools/compress-pdf`): Rewrites PDF structures and metadata in the browser and reports actual size savings.
 - **Compare PDF** (`/tools/compare-pdf`): Advanced dual-document comparison tool featuring side-by-side view, transparency overlay (10-90% opacity), visual difference map, and progressive background scanning.
-- **JPG to PDF** (`/tools/jpg-to-pdf`): Converts single or multiple JPG, PNG, WEBP, or BMP images into a single PDF document. Includes page orientation controls (Auto/Portrait/Landscape), page size presets (Fit Image/A4/Letter), margins (None/Small/Big), image reordering, and individual image rotation.
+- **JPG to PDF** (`/tools/jpg-to-pdf`): Converts single or multiple JPG, PNG, WEBP, or BMP images into individual PDFs (ZIP) or a single combined PDF document. Includes page orientation controls, page size presets, margins, and individual rotation.
+- **PDF to JPG** (`/tools/pdf-to-jpg`): Converts PDF pages into high-resolution JPG images with adjustable image quality (Low/Medium/High) and DPI scaling (1x ~96 DPI, 1.5x ~150 DPI, 2x ~300 DPI). Supports instant single-page JPG downloads or batch selected-pages ZIP export.
 
 ---
 
 ## Component Architecture
+
+### PDF to JPG (`src/tools/pdf/pdf-to-jpg/`)
+```
+src/tools/pdf/pdf-to-jpg/
+├── page.js                             # Tool route entry point
+├── pdfToJpgUtils.js                    # PDF.js rasterization & ZIP packaging engine
+└── components/
+    ├── PdfToJpgTool.js                # State orchestrator component
+    ├── PdfToJpgHeader.js              # Selected PDF summary bar & size warnings
+    ├── PdfToJpgPageGrid.js            # Page thumbnails grid with selection & quick download
+    └── PdfToJpgOptionsBar.js          # Settings panel for quality, DPI resolution, and ZIP export
+```
+
+### JPG to PDF (`src/tools/pdf/jpg-to-pdf/`)
+```
+src/tools/pdf/jpg-to-pdf/
+├── page.js                             # Tool route entry point
+├── jpgToPdfUtils.js                    # pdf-lib image embedding & page positioning engine
+└── components/
+    ├── JpgToPdfTool.js                # State orchestrator component
+    ├── ImagePreviewGrid.js            # Interactive grid of images with reorder, rotate & delete
+    └── JpgToPdfOptionsBar.js          # Settings panel for orientation, page size, margins & filename
+```
 
 ### Compare PDF (`src/tools/pdf/compare-pdf/`)
 ```
@@ -31,17 +55,6 @@ src/tools/pdf/compare-pdf/
     ├── OverlayView.js                 # Transparency overlay page viewer with opacity slider
     ├── DiffMapView.js                 # Pixel difference map viewer & legend
     └── KeyboardShortcutsModal.js      # Accessible keyboard shortcut guide popover
-```
-
-### JPG to PDF (`src/tools/pdf/jpg-to-pdf/`)
-```
-src/tools/pdf/jpg-to-pdf/
-├── page.js                             # Tool route entry point
-├── jpgToPdfUtils.js                    # pdf-lib image embedding & page positioning engine
-└── components/
-    ├── JpgToPdfTool.js                # State orchestrator component
-    ├── ImagePreviewGrid.js            # Interactive grid of images with reorder, rotate & delete
-    └── JpgToPdfOptionsBar.js          # Settings panel for orientation, page size, margins & filename
 ```
 
 ---
@@ -67,6 +80,9 @@ npm run lint
 
 # Run unit tests
 npm test
+
+# Run production build
+npm run build
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
