@@ -1,8 +1,12 @@
-// components/layout/NotFoundTool.js
-import React from 'react';
-import { FaExclamationTriangle } from 'react-icons/fa';
+"use client";
+
+import React from "react";
+import { FaExclamationTriangle } from "react-icons/fa";
+import { useAdPauseWhile } from "@/hooks/useAdPause";
 
 export default function NotFoundTool() {
+  useAdPauseWhile("empty-tool", true);
+
   return (
     <div className="py-20 text-center">
       <FaExclamationTriangle className="text-5xl text-amber-500 mb-4 mx-auto" />

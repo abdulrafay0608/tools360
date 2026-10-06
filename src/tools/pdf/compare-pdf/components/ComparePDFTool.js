@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useAdPauseWhile } from "@/hooks/useAdPause";
 import usePDFJS from "@/hooks/usePDFJS";
 import {
   createDifferenceImageData,
@@ -79,6 +80,12 @@ export default function ComparePDFTool() {
   const [zoomIndex, setZoomIndex] = useState(DEFAULT_ZOOM_INDEX);
   const [pageDiffs, setPageDiffs] = useState([]);
   const [thumbnails, setThumbnails] = useState([]);
+  useAdPauseWhile(
+    "compare-processing",
+    isLoadingDocuments || isRendering
+  );
+  useAdPauseWhile("compare-error", Boolean(error));
+  useAdPauseWhile("compare-empty", !originalFile || !revisedFile);
 
   /* ── Canvas & Scroll refs ── */
   const leftCanvasRef = useRef(null);
@@ -462,7 +469,7 @@ export default function ComparePDFTool() {
 
   /* ── Active Viewer View ── */
   return (
-    <div className="p-4 sm:p-6 space-y-4">
+    <div className="p-4 sm:p-6">
       {/* Header Bar */}
       <CompareHeaderBar
         originalFile={originalFile}

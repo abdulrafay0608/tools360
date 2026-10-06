@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useRef } from "react";
+import { useAdPauseWhile } from "@/hooks/useAdPause";
 import { saveAs } from "file-saver";
-import { FaImage, FaSlidersH, FaShieldAlt } from "react-icons/fa";
 import FileUploader from "@/components/pdf/file/FileUploader";
 import usePDFJS from "@/hooks/usePDFJS";
 import PdfToJpgHeader from "./PdfToJpgHeader";
@@ -25,8 +25,16 @@ export default function PdfToJpgTool() {
   const [quality, setQuality] = useState("medium");
   const [scalePreset, setScalePreset] = useState("1.5x");
   const [isConverting, setIsConverting] = useState(false);
+  const [isRenderingThumbnails, setIsRenderingThumbnails] = useState(false);
   const [progress, setProgress] = useState(null);
   const [error, setError] = useState("");
+  const isLoadingPdf = Boolean(file && !pdfDoc && !error);
+  useAdPauseWhile(
+    "pdf-to-jpg-processing",
+    isConverting || isLoadingPdf || isRenderingThumbnails
+  );
+  useAdPauseWhile("pdf-to-jpg-error", Boolean(error));
+  useAdPauseWhile("pdf-to-jpg-empty", !file);
 
   const { pdfjs } = usePDFJS();
   const activeDocRef = useRef(null);
@@ -47,6 +55,7 @@ export default function PdfToJpgTool() {
     setTotalPages(0);
     setThumbnails([]);
     setSelectedPages([]);
+    setIsRenderingThumbnails(false);
     setError("");
   }, []);
 
@@ -60,6 +69,7 @@ export default function PdfToJpgTool() {
     setError("");
     setProgress(null);
     setIsConverting(false);
+    setIsRenderingThumbnails(false);
   }, []);
 
   /* ── Load PDF Document via PDF.js ── */
@@ -68,6 +78,7 @@ export default function PdfToJpgTool() {
 
     let isActive = true;
     setError("");
+    setIsRenderingThumbnails(false);
 
     (async () => {
       try {
@@ -116,19 +127,24 @@ export default function PdfToJpgTool() {
     const thumbs = new Array(totalPages).fill("");
 
     (async () => {
-      for (let i = 0; i < totalPages; i++) {
-        if (!isActive) break;
-        const pageNum = i + 1;
-        try {
-          const page = await pdfDoc.getPage(pageNum);
-          const dataUrl = await generatePageThumbnail(page, 220);
-          if (isActive) {
-            thumbs[i] = dataUrl;
-            setThumbnails([...thumbs]);
+      setIsRenderingThumbnails(true);
+      try {
+        for (let i = 0; i < totalPages; i++) {
+          if (!isActive) break;
+          const pageNum = i + 1;
+          try {
+            const page = await pdfDoc.getPage(pageNum);
+            const dataUrl = await generatePageThumbnail(page, 220);
+            if (isActive) {
+              thumbs[i] = dataUrl;
+              setThumbnails([...thumbs]);
+            }
+          } catch (err) {
+            console.warn(`Failed to render thumbnail for page ${pageNum}:`, err);
           }
-        } catch (err) {
-          console.warn(`Failed to render thumbnail for page ${pageNum}:`, err);
         }
+      } finally {
+        if (isActive) setIsRenderingThumbnails(false);
       }
     })();
 
@@ -158,6 +174,8 @@ export default function PdfToJpgTool() {
   const handleDownloadSinglePage = useCallback(
     async (pageNum) => {
       if (!pdfDoc) return;
+      setIsConverting(true);
+      setError("");
       try {
         const page = await pdfDoc.getPage(pageNum);
         const scale = SCALE_PRESETS[scalePreset] || 1.5;
@@ -170,6 +188,8 @@ export default function PdfToJpgTool() {
       } catch (err) {
         console.error("Single page export failed:", err);
         setError("Failed to export page as JPG. Please try again.");
+      } finally {
+        setIsConverting(false);
       }
     },
     [pdfDoc, scalePreset, quality, file, totalPages]
@@ -217,7 +237,7 @@ export default function PdfToJpgTool() {
   }, [pdfDoc, selectedPages, scalePreset, quality, file, totalPages]);
 
   return (
-    <div className="p-4 sm:p-6 space-y-6">
+    <div className="p-4 sm:p-6">
       {error && (
         <div className="rounded-sm border border-[#f3cfc8] bg-[#fdf4f3] px-4 py-3 text-sm text-[#a13c2f]" role="alert">
           {error}
@@ -226,7 +246,7 @@ export default function PdfToJpgTool() {
 
       {/* State 1: No file selected */}
       {!file && (
-        <div className="space-y-8">
+        <div>
           <FileUploader
             onUpload={handleUpload}
             accept="application/pdf,.pdf"
@@ -234,44 +254,12 @@ export default function PdfToJpgTool() {
             fileTypeLabel="PDF file"
             titleText="Drop PDF file here"
           />
-
-          {/* Feature Highlight Cards */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {[
-              {
-                title: "High Quality JPGs",
-                desc: "Render PDF pages at up to 300 DPI for crisp, crystal-clear image exports.",
-                icon: FaImage,
-              },
-              {
-                title: "Custom Selection & Scale",
-                desc: "Choose individual pages or entire documents with customizable DPI scale.",
-                icon: FaSlidersH,
-              },
-              {
-                title: "100% Private & Fast",
-                desc: "All rendering runs inside your browser. No files are uploaded to any server.",
-                icon: FaShieldAlt,
-              },
-            ].map(({ title, desc, icon: Icon }) => (
-              <div
-                key={title}
-                className="flex flex-col gap-2 rounded-sm border border-[#dce5e0] bg-[#f8faf9] p-4 transition-colors hover:bg-white"
-              >
-                <div className="flex h-9 w-9 items-center justify-center bg-[#e6f0eb] text-[#235c4f]">
-                  <Icon className="h-4 w-4" />
-                </div>
-                <p className="text-sm font-semibold text-[#263e36]">{title}</p>
-                <p className="text-xs leading-5 text-[#627a6e]">{desc}</p>
-              </div>
-            ))}
-          </div>
         </div>
       )}
 
       {/* State 2: PDF file loaded */}
       {file && (
-        <div className="space-y-6">
+        <div>
           <PdfToJpgHeader
             file={file}
             totalPages={totalPages}

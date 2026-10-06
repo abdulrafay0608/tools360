@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
+import { useAdPauseWhile } from "@/hooks/useAdPause";
 import { PDFDocument } from "pdf-lib";
 import { saveAs } from "file-saver";
 import { FaDownload, FaCompress } from "react-icons/fa";
@@ -50,6 +51,9 @@ const CompressPDFTool = () => {
 
   const { pdfjs, isLoading: isPDFJSLoading } = usePDFJS();
   const { thumbnails, isGenerating } = usePDFThumbnails(files, pdfjs);
+  useAdPauseWhile("compress-processing", processing || isGenerating);
+  useAdPauseWhile("compress-error", Boolean(error));
+  useAdPauseWhile("compress-empty", files.length === 0);
 
   const handleUpload = useCallback((newFiles) => {
     setFiles(newFiles);

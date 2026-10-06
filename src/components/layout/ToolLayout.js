@@ -1,28 +1,39 @@
 // components/layout/ToolLayout.js
 import React from "react";
 import { FaFilePdf, FaLaptop } from "react-icons/fa";
+import AdSlot from "@/components/ads/AdSlot";
+import ToolAdFrame from "@/components/ads/ToolAdFrame";
 
-const ToolLayout = ({ title, description, children }) => {
+/**
+ * ToolLayout — Responsive layout for tool pages.
+ *
+ * Desktop (lg+): 2-column layout (tool content + sticky ad sidebar).
+ * Mobile: 1-column layout, no sidebar.
+ *
+ * Ad placements (all from config):
+ * - Desktop sidebar: sticky "tool-sidebar" (right column)
+ * - Below tool: "tool-below" (horizontal, both breakpoints)
+ * - Content section: "content-mid" (inside SEO content area)
+ */
+const ToolLayout = ({ title, description, children, seoContent }) => {
   return (
     <main className="min-h-[70vh] bg-[#f4f7f5] text-[#172c27]">
-      {/* Tool Header */}
       <div className="border-b border-[#dce5e0] bg-white">
-        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-7xl px-5 py-5 sm:px-8 sm:py-8 lg:px-12">
           <div className="max-w-4xl">
-            <div className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#527268]">
+            <div className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#527268] sm:mb-4">
               <FaFilePdf aria-hidden="true" /> PDF workspace
             </div>
-            <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
+            <h1 className="text-2xl font-semibold leading-tight sm:text-4xl">
               {title}
             </h1>
             {description && (
-              <p className="mt-3 max-w-2xl text-base leading-7 text-[#5d706a]">
+              <p className="mt-2 min-h-12 max-w-2xl text-sm leading-6 text-[#5d706a] sm:mt-3 sm:min-h-14 sm:text-base sm:leading-7">
                 {description}
               </p>
             )}
 
-            {/* Features Banner */}
-            <div className="mt-5 flex flex-wrap justify-start gap-x-5 gap-y-2">
+            <div className="mt-3 flex flex-wrap justify-start gap-x-5 gap-y-2 sm:mt-5">
               <div className="flex items-center gap-2 text-sm text-[#527268]">
                 <FaLaptop className="mr-1" aria-hidden="true" /> Processed in your browser
               </div>
@@ -65,78 +76,36 @@ const ToolLayout = ({ title, description, children }) => {
         </div>
       </div>
 
-      {/* Tool Content Area */}
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-8 lg:px-12">
-        <div className="border border-[#dce5e0] bg-white">{children}</div>
+      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-8 sm:py-8 lg:px-12">
+        <ToolAdFrame>
+          <div className="flex flex-col lg:flex-row lg:gap-8">
+            <div className="min-w-0 flex-1">
+              <div className="border border-[#dce5e0] bg-white">{children}</div>
 
-        {/* Related Tools Section */}
-        {/* <div className="mt-12 mb-16">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-800">More PDF Tools</h2>
-            <a
-              href="#"
-              className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
-            >
-              View all tools <FaArrowRight className="ml-1" />
-            </a>
-          </div>
+              <div className="mt-6 lg:mt-8">
+                <AdSlot placement="tool-below" />
+              </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                title: "Split PDF",
-                description: "Separate one PDF into multiple files",
-              },
-              {
-                title: "Compress PDF",
-                description: "Reduce file size while optimizing quality",
-              },
-              {
-                title: "PDF to Word",
-                description: "Convert PDFs to editable Word documents",
-              },
-              {
-                title: "PDF to JPG",
-                description: "Convert each PDF page to a JPG image",
-              },
-            ].map((tool, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-sm p-5 border border-gray-100 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start">
-                  <div className="bg-blue-100 p-2 rounded-lg flex-shrink-0">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-blue-600"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="font-semibold text-gray-800">
-                      {tool.title}
-                    </h3>
-                    <p className="mt-1 text-sm text-gray-600">
-                      {tool.description}
-                    </p>
-                    <button className="mt-3 text-sm text-blue-600 font-medium hover:text-blue-800">
-                      Use Tool
-                    </button>
+              {seoContent ? (
+                <div className="mt-8">
+                  {seoContent}
+                  <div className="mt-8">
+                    <AdSlot placement="content-mid" />
                   </div>
                 </div>
+              ) : null}
+            </div>
+
+            <aside className="hidden w-[300px] shrink-0 lg:block">
+              <div
+                className="sticky top-8"
+                style={{ maxHeight: "calc(100vh - 4rem)" }}
+              >
+                <AdSlot placement="tool-sidebar" />
               </div>
-            ))}
+            </aside>
           </div>
-        </div> */}
+        </ToolAdFrame>
       </div>
     </main>
   );

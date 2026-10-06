@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { toolsData } from "@/data/tools-data";
 import ToolLayout from "@/components/layout/ToolLayout";
 import ToolRenderer from "@/components/layout/ToolRenderer";
-import AdSlot from "@/components/ads/AdSlot";
 
 export const dynamicParams = false;
 
@@ -29,10 +28,10 @@ export async function generateMetadata({ params }) {
     };
   }
 
-  const title = `${tool.name} — Convert PDF to High-Quality JPG Images Online | Tools360`;
+  const title = `${tool.name} Online | Tools360`;
   const description =
     tool.description ||
-    `Convert PDF pages to JPG images for free. Extract individual pages or all pages as a ZIP archive with custom DPI resolution and quality. No file uploads required.`;
+    `Use ${tool.name} in your browser. Files are processed locally and are not uploaded.`;
   const url = `${BASE_URL}/tools/${tool.slug}`;
 
   return {
@@ -138,6 +137,99 @@ function getToolContent(tool) {
   };
 }
 
+/**
+ * SEO Content section — server-rendered, passed to ToolLayout as `seoContent`.
+ */
+function ToolSEOContent({ tool, content }) {
+  return (
+    <section className="border border-[#dce5e0] bg-[#f8faf9] p-6 sm:p-8 space-y-8">
+      {/* How to use */}
+      <div>
+        <h2 className="text-lg font-semibold text-[#1a3328] sm:text-xl">
+          How to use {tool.name} online
+        </h2>
+        <ol className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm text-[#52675e]">
+          <li className="rounded-sm border border-[#dce5e0] bg-white p-4">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#e6f0eb] font-bold text-xs text-[#173d34] mb-2">
+              1
+            </span>
+            <p className="font-semibold text-[#263e36]">Select or drop your PDF</p>
+            <p className="mt-1 text-xs text-[#708079]">
+              Choose your PDF file or drag and drop it into the upload dropzone.
+            </p>
+          </li>
+          <li className="rounded-sm border border-[#dce5e0] bg-white p-4">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#e6f0eb] font-bold text-xs text-[#173d34] mb-2">
+              2
+            </span>
+            <p className="font-semibold text-[#263e36]">Customize options & pages</p>
+            <p className="mt-1 text-xs text-[#708079]">
+              Select the pages you need, choose image quality, and set your desired DPI resolution.
+            </p>
+          </li>
+          <li className="rounded-sm border border-[#dce5e0] bg-white p-4">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#e6f0eb] font-bold text-xs text-[#173d34] mb-2">
+              3
+            </span>
+            <p className="font-semibold text-[#263e36]">Download your file</p>
+            <p className="mt-1 text-xs text-[#708079]">
+              Process the file in your browser, then download the result to your device.
+            </p>
+          </li>
+        </ol>
+      </div>
+
+      {/* Pro Tips & Privacy Section */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="rounded-sm border border-[#dce5e0] bg-white p-5 space-y-3">
+          <h3 className="text-sm font-semibold text-[#1a3328] uppercase tracking-wider">
+            💡 Pro Tips for Best Results
+          </h3>
+          <ul className="space-y-2 text-xs leading-relaxed text-[#52675e]">
+            {content.tips.map((tip, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <span className="text-[#235c4f] font-bold">•</span>
+                <span>{tip}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="rounded-sm border border-[#dce5e0] bg-white p-5 space-y-3">
+          <h3 className="text-sm font-semibold text-[#1a3328] uppercase tracking-wider">
+            🔒 Privacy & Local Processing
+          </h3>
+          <p className="text-xs leading-relaxed text-[#52675e]">
+            {content.privacyText}
+          </p>
+        </div>
+      </div>
+
+      {/* FAQs */}
+      <div>
+        <h2 className="text-lg font-semibold text-[#1a3328] sm:text-xl">
+          Frequently Asked Questions (FAQs)
+        </h2>
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {content.faqs.map((faq, index) => (
+            <div
+              key={index}
+              className="rounded-sm border border-[#dce5e0] bg-white p-4"
+            >
+              <h3 className="text-sm font-semibold text-[#263e36]">
+                {faq.question}
+              </h3>
+              <p className="mt-2 text-xs leading-relaxed text-[#52675e]">
+                {faq.answer}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default async function ToolPage({ params }) {
   const { slug } = await params;
   const allTools = toolsData.flatMap((cat) => cat.tools);
@@ -188,101 +280,13 @@ export default async function ToolPage({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <ToolLayout title={tool.name} description={tool.description}>
+      <ToolLayout
+        title={tool.name}
+        description={tool.description}
+        seoContent={<ToolSEOContent tool={tool} content={content} />}
+      >
         {/* Interactive Client Component Tool */}
         <ToolRenderer slug={tool.slug} />
-
-        {/* Ad Placeholder below tool */}
-        <div className="p-4 sm:p-6 border-t border-[#eef2ef]">
-          <AdSlot slotId={`tool-bottom-${tool.slug}`} format="horizontal" />
-        </div>
-
-        {/* Server-Rendered SEO Content & FAQ Section */}
-        <section className="border-t border-[#dce5e0] bg-[#f8faf9] p-6 sm:p-8 space-y-8">
-          {/* How to use */}
-          <div>
-            <h2 className="text-lg font-semibold text-[#1a3328] sm:text-xl">
-              How to use {tool.name} online
-            </h2>
-            <ol className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm text-[#52675e]">
-              <li className="rounded-sm border border-[#dce5e0] bg-white p-4">
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#e6f0eb] font-bold text-xs text-[#173d34] mb-2">
-                  1
-                </span>
-                <p className="font-semibold text-[#263e36]">Select or drop your PDF</p>
-                <p className="mt-1 text-xs text-[#708079]">
-                  Choose your PDF file or drag and drop it into the upload dropzone.
-                </p>
-              </li>
-              <li className="rounded-sm border border-[#dce5e0] bg-white p-4">
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#e6f0eb] font-bold text-xs text-[#173d34] mb-2">
-                  2
-                </span>
-                <p className="font-semibold text-[#263e36]">Customize options & pages</p>
-                <p className="mt-1 text-xs text-[#708079]">
-                  Select the pages you need, choose image quality, and set your desired DPI resolution.
-                </p>
-              </li>
-              <li className="rounded-sm border border-[#dce5e0] bg-white p-4">
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#e6f0eb] font-bold text-xs text-[#173d34] mb-2">
-                  3
-                </span>
-                <p className="font-semibold text-[#263e36]">Download JPG or ZIP</p>
-                <p className="mt-1 text-xs text-[#708079]">
-                  Download single page JPGs instantly or all selected pages packaged in a ZIP archive.
-                </p>
-              </li>
-            </ol>
-          </div>
-
-          {/* Pro Tips & Privacy Section */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="rounded-sm border border-[#dce5e0] bg-white p-5 space-y-3">
-              <h3 className="text-sm font-semibold text-[#1a3328] uppercase tracking-wider">
-                💡 Pro Tips for Best Results
-              </h3>
-              <ul className="space-y-2 text-xs leading-relaxed text-[#52675e]">
-                {content.tips.map((tip, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-[#235c4f] font-bold">•</span>
-                    <span>{tip}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="rounded-sm border border-[#dce5e0] bg-white p-5 space-y-3">
-              <h3 className="text-sm font-semibold text-[#1a3328] uppercase tracking-wider">
-                🔒 Privacy & Local Processing
-              </h3>
-              <p className="text-xs leading-relaxed text-[#52675e]">
-                {content.privacyText}
-              </p>
-            </div>
-          </div>
-
-          {/* FAQs */}
-          <div>
-            <h2 className="text-lg font-semibold text-[#1a3328] sm:text-xl">
-              Frequently Asked Questions (FAQs)
-            </h2>
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {content.faqs.map((faq, index) => (
-                <div
-                  key={index}
-                  className="rounded-sm border border-[#dce5e0] bg-white p-4"
-                >
-                  <h3 className="text-sm font-semibold text-[#263e36]">
-                    {faq.question}
-                  </h3>
-                  <p className="mt-2 text-xs leading-relaxed text-[#52675e]">
-                    {faq.answer}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
       </ToolLayout>
     </>
   );

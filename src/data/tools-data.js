@@ -88,7 +88,8 @@ export const toolsData = [
         name: "Sign PDF",
         slug: "sign-pdf",
         icon: "signature",
-        description: "Digitally sign PDF or request e-signatures from others.",
+        available: true,
+        description: "Sign PDF documents directly in your browser with drawn, typed, or uploaded signatures.",
       },
       {
         name: "Watermark PDF",

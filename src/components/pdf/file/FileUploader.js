@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useId, useRef, useState } from "react";
+import { useAdPauseWhile } from "@/hooks/useAdPause";
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
@@ -34,6 +35,8 @@ const FileUploader = ({
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState("");
   const dragDepth = useRef(0);
+  useAdPauseWhile("file-drag", dragActive);
+  useAdPauseWhile("uploader-error", Boolean(error));
 
   const isImageMode = accept.includes("image") || accept.includes("jpg") || accept.includes("png");
   const typeLabel = fileTypeLabel || (isImageMode ? "JPG image" : "PDF file");
@@ -97,6 +100,7 @@ const FileUploader = ({
 
   return (
     <div
+      data-dropzone="true"
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -106,7 +110,7 @@ const FileUploader = ({
           event.dataTransfer.dropEffect = "copy";
         }
       }}
-      className={`border border-dashed p-6 text-center transition-colors sm:p-10 ${
+      className={`border border-dashed p-4 text-center transition-colors sm:p-10 ${
         dragActive
           ? "border-[#235c4f] bg-[#eaf3ed]"
           : "border-[#b8c9c0] bg-white hover:border-[#7e9b8c]"

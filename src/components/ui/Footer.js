@@ -71,6 +71,22 @@ export default function Footer() {
                 About Tools360
               </Link>
             </li>
+            <li>
+              <Link
+                href="/privacy"
+                className="transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
+              >
+                Privacy
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/contact"
+                className="transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
+              >
+                Contact
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

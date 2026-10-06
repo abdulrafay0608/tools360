@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { useAdPauseWhile } from "@/hooks/useAdPause";
 import { PDFDocument } from "pdf-lib";
 import FileUploader from "@/components/pdf/file/FileUploader";
 import usePDFJS from "@/hooks/usePDFJS";
@@ -30,6 +31,9 @@ const SplitPDFTool = () => {
     pdfjs,
     "page"
   );
+  useAdPauseWhile("split-processing", isSplitting || isGenerating);
+  useAdPauseWhile("split-error", Boolean(error));
+  useAdPauseWhile("split-empty", !file);
 
   // Initialize with default range when file is uploaded
   useEffect(() => {

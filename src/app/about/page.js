@@ -18,8 +18,10 @@ export default function AboutPage() {
         </p>
         <p className="mt-4 leading-7 text-[#5d706a]">
           We add tools as their workflows are ready and tested. The catalog
-          currently includes PDF merge, split, comparison, and compression
-          utilities.
+          currently includes PDF merge, split, comparison, compression,
+          conversion, and signing utilities. Tool pages may show reserved
+          advertisement space; files you process are still handled only in
+          your browser.
         </p>
       </article>
     </main>

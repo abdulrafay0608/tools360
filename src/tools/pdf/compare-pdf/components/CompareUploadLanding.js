@@ -3,8 +3,6 @@
 import React, { useRef } from "react";
 import {
   FaExchangeAlt,
-  FaColumns,
-  FaLayerGroup,
   FaTrashAlt,
   FaFilePdf,
   FaArrowRight,
@@ -50,17 +48,7 @@ export default function CompareUploadLanding({
   const hasBothFiles = Boolean(originalFile && revisedFile);
 
   return (
-    <div className="space-y-6">
-      {/* Intro Header */}
-      <div className="border-b border-[#e5ece8] pb-4">
-        <h2 className="text-xl font-semibold text-[#1a3328] sm:text-2xl">
-          Compare PDF Documents
-        </h2>
-        <p className="mt-1 text-sm text-[#52675e]">
-          Upload the <strong>original</strong> and <strong>revised</strong> PDF files to analyze changes side-by-side, overlay transparency, or visual diffs. Processing is fast and 100% private in your browser.
-        </p>
-      </div>
-
+    <div>
       {error && (
         <div className="rounded-sm border border-[#f3cfc8] bg-[#fdf4f3] px-4 py-3 text-sm text-[#a13c2f]" role="alert">
           {error}
@@ -69,10 +57,7 @@ export default function CompareUploadLanding({
 
       {/* Upload Choice Area */}
       {!originalFile && !revisedFile ? (
-        <div className="space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#708079]">
-            Select 2 PDF files to compare
-          </p>
+        <div>
           <FileUploader
             onUpload={onBatchUpload}
             accept="application/pdf,.pdf"
@@ -230,37 +215,6 @@ export default function CompareUploadLanding({
         </div>
       )}
 
-      {/* Tool Features Summary */}
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {[
-          {
-            title: "Side-by-Side View",
-            desc: "View original and revised pages in synchronized scrollable panels.",
-            icon: FaColumns,
-          },
-          {
-            title: "Transparency Overlay",
-            desc: "Blend both pages with live opacity adjustment to spot position shifts.",
-            icon: FaLayerGroup,
-          },
-          {
-            title: "Difference Highlight",
-            desc: "Visual pixel diff highlights added, removed, or modified content in red.",
-            icon: FaExchangeAlt,
-          },
-        ].map(({ title, desc, icon: Icon }) => (
-          <div
-            key={title}
-            className="flex flex-col gap-2 rounded-sm border border-[#dce5e0] bg-[#f8faf9] p-4 transition-colors hover:bg-white"
-          >
-            <div className="flex h-9 w-9 items-center justify-center bg-[#e6f0eb] text-[#235c4f]">
-              <Icon className="h-4 w-4" />
-            </div>
-            <p className="text-sm font-semibold text-[#263e36]">{title}</p>
-            <p className="text-xs leading-5 text-[#627a6e]">{desc}</p>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

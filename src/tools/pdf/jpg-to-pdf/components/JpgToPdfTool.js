@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useCallback, useRef } from "react";
+import { useAdPauseWhile } from "@/hooks/useAdPause";
 import { saveAs } from "file-saver";
-import { FaDownload, FaRedo, FaFilePdf, FaImage, FaSlidersH, FaLock, FaFileArchive } from "react-icons/fa";
+import { FaDownload, FaRedo, FaFilePdf, FaFileArchive } from "react-icons/fa";
 import FileUploader from "@/components/pdf/file/FileUploader";
 import Button from "@/components/ui/Button";
 import ImagePreviewGrid from "./ImagePreviewGrid";
@@ -21,6 +22,9 @@ export default function JpgToPdfTool() {
   const [isConverting, setIsConverting] = useState(false);
   const [convertedBlob, setConvertedBlob] = useState(null);
   const [error, setError] = useState("");
+  useAdPauseWhile("jpg-to-pdf-processing", isConverting);
+  useAdPauseWhile("jpg-to-pdf-error", Boolean(error));
+  useAdPauseWhile("jpg-to-pdf-empty", images.length === 0);
 
   const hiddenInputRef = useRef(null);
 
@@ -133,17 +137,7 @@ export default function JpgToPdfTool() {
   };
 
   return (
-    <div className="p-4 sm:p-6 space-y-6">
-      {/* Page Header */}
-      <div className="border-b border-[#e5ece8] pb-4">
-        <h2 className="text-xl font-semibold text-[#1a3328] sm:text-2xl">
-          JPG to PDF Converter
-        </h2>
-        <p className="mt-1 text-sm text-[#52675e]">
-          Convert JPG, PNG, or WEBP images into individual PDFs (ZIP) or a single combined PDF document. Adjust orientation, margins, and page order easily. 100% private in your browser.
-        </p>
-      </div>
-
+    <div className="p-4 sm:p-6">
       <input
         ref={hiddenInputRef}
         type="file"
@@ -161,7 +155,7 @@ export default function JpgToPdfTool() {
 
       {/* State 1: No images uploaded */}
       {images.length === 0 && (
-        <div className="space-y-8">
+        <div>
           <FileUploader
             onUpload={handleUpload}
             accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
@@ -169,38 +163,6 @@ export default function JpgToPdfTool() {
             fileTypeLabel="JPG image"
             titleText="Drop JPG image / files here"
           />
-
-          {/* Feature Highlights */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {[
-              {
-                title: "Multiple Formats",
-                desc: "Supports JPG, PNG, WEBP, and BMP images seamlessly.",
-                icon: FaImage,
-              },
-              {
-                title: "ZIP & Single PDF Modes",
-                desc: "Export each image as a separate PDF in ZIP format or combine into 1 document.",
-                icon: FaSlidersH,
-              },
-              {
-                title: "Private & Secure",
-                desc: "All image processing is done locally in your browser context.",
-                icon: FaLock,
-              },
-            ].map(({ title, desc, icon: Icon }) => (
-              <div
-                key={title}
-                className="flex flex-col gap-2 rounded-sm border border-[#dce5e0] bg-[#f8faf9] p-4 transition-colors hover:bg-white"
-              >
-                <div className="flex h-9 w-9 items-center justify-center bg-[#e6f0eb] text-[#235c4f]">
-                  <Icon className="h-4 w-4" />
-                </div>
-                <p className="text-sm font-semibold text-[#263e36]">{title}</p>
-                <p className="text-xs leading-5 text-[#627a6e]">{desc}</p>
-              </div>
-            ))}
-          </div>
         </div>
       )}
 

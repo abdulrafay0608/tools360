@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useAdPauseWhile } from "@/hooks/useAdPause";
 import usePDFJS from "@/hooks/usePDFJS";
 import useThumbnails from "@/hooks/useThumbnails";
 import { mergePDFs } from "@/components/utils/pdfUtils";
@@ -15,6 +16,11 @@ const MergePDFTool = () => {
   const { thumbnails, isGenerating } = useThumbnails(files, pdfjs);
   const [isMerging, setIsMerging] = useState(false);
   const [message, setMessage] = useState("");
+  const hasError =
+    Boolean(message) && message !== "Your merged PDF is ready. The download has started.";
+  useAdPauseWhile("merge-processing", isMerging || isGenerating);
+  useAdPauseWhile("merge-error", hasError);
+  useAdPauseWhile("merge-empty", files.length === 0);
 
   const handleUpload = (uploadedFiles) => {
     const newFiles = Array.from(uploadedFiles).filter(
