@@ -258,17 +258,21 @@ export default async function ToolPage({ params }) {
           priceCurrency: "USD",
         },
       },
-      {
-        "@type": "FAQPage",
-        mainEntity: content.faqs.map((faq) => ({
-          "@type": "Question",
-          name: faq.question,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: faq.answer,
-          },
-        })),
-      },
+      ...(tool.slug === "organize-pdf" || tool.slug === "rotate-pdf"
+        ? []
+        : [
+            {
+              "@type": "FAQPage",
+              mainEntity: content.faqs.map((faq) => ({
+                "@type": "Question",
+                name: faq.question,
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: faq.answer,
+                },
+              })),
+            },
+          ]),
     ],
   };
 
@@ -282,8 +286,12 @@ export default async function ToolPage({ params }) {
 
       <ToolLayout
         title={tool.name}
-        description={tool.description}
-        seoContent={<ToolSEOContent tool={tool} content={content} />}
+        description={tool.slug === "rotate-pdf" ? null : tool.description}
+        seoContent={
+          tool.slug === "organize-pdf" || tool.slug === "rotate-pdf" ? null : (
+            <ToolSEOContent tool={tool} content={content} />
+          )
+        }
       >
         {/* Interactive Client Component Tool */}
         <ToolRenderer slug={tool.slug} />

@@ -30,6 +30,7 @@ const FileUploader = ({
   multiple = true,
   fileTypeLabel,
   titleText,
+  maxFileSizeBytes = MAX_FILE_SIZE_BYTES,
 }) => {
   const inputId = useId();
   const [dragActive, setDragActive] = useState(false);
@@ -76,9 +77,10 @@ const FileUploader = ({
       return;
     }
 
-    const invalidSizeFile = files.find((file) => file.size > MAX_FILE_SIZE_BYTES);
+    const invalidSizeFile = files.find((file) => file.size > maxFileSizeBytes);
     if (invalidSizeFile) {
-      setError(`${invalidSizeFile.name} exceeds the 10 MB file limit.`);
+      const maxFileSizeMb = Math.floor(maxFileSizeBytes / (1024 * 1024));
+      setError(`${invalidSizeFile.name} exceeds the ${maxFileSizeMb} MB file limit.`);
       return;
     }
 
@@ -157,7 +159,9 @@ const FileUploader = ({
           </label>
         </div>
         <p id={`${inputId}-help`} className="mt-4 text-xs text-[#708079]">
-          {multiple ? `${typeLabel}s up to 10 MB each` : `One ${typeLabel} up to 10 MB`}
+          {multiple
+            ? `${typeLabel}s up to ${Math.floor(maxFileSizeBytes / (1024 * 1024))} MB each`
+            : `One ${typeLabel} up to ${Math.floor(maxFileSizeBytes / (1024 * 1024))} MB`}
         </p>
         {error && (
           <p

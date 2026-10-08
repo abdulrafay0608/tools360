@@ -101,6 +101,7 @@ export const toolsData = [
         name: "Rotate PDF",
         slug: "rotate-pdf",
         icon: "rotate",
+        available: true,
         description: "Rotate PDFs as you like — even multiple at once!",
       },
       {
@@ -125,7 +126,8 @@ export const toolsData = [
         name: "Organize PDF",
         slug: "organize-pdf",
         icon: "organize",
-        description: "Sort, delete, or add PDF pages however you like.",
+        available: true,
+        description: "Reorder, rotate, duplicate, and remove PDF pages in your browser.",
       },
       {
         name: "PDF to PDF/A",

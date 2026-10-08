@@ -33,6 +33,14 @@ const toolMap = {
     ssr: false,
     loading: () => <ToolLoader />,
   }),
+  "organize-pdf": dynamic(() => import("@/tools/pdf/organize-pdf/page"), {
+    ssr: false,
+    loading: () => <ToolLoader />,
+  }),
+  "rotate-pdf": dynamic(() => import("@/tools/pdf/rotate-pdf/page"), {
+    ssr: false,
+    loading: () => <ToolLoader />,
+  }),
 };
 
 export default function ToolRenderer({ slug }) {
