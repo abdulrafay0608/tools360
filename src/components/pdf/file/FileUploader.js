@@ -31,6 +31,9 @@ const FileUploader = ({
   fileTypeLabel,
   titleText,
   maxFileSizeBytes = MAX_FILE_SIZE_BYTES,
+  maxFiles,
+  allowPartial = false,
+  onError,
 }) => {
   const inputId = useId();
   const [dragActive, setDragActive] = useState(false);
@@ -69,29 +72,84 @@ const FileUploader = ({
   };
 
   const validateAndUpload = (fileList) => {
-    const files = Array.from(fileList);
+    let files = Array.from(fileList);
     if (!files.length) return;
 
     if (!multiple && files.length > 1) {
-      setError(`Choose one ${typeLabel} at a time.`);
+      const msg = `Choose one ${typeLabel} at a time.`;
+      setError(msg);
+      onError?.(msg);
       return;
     }
 
-    const invalidSizeFile = files.find((file) => file.size > maxFileSizeBytes);
-    if (invalidSizeFile) {
-      const maxFileSizeMb = Math.floor(maxFileSizeBytes / (1024 * 1024));
-      setError(`${invalidSizeFile.name} exceeds the ${maxFileSizeMb} MB file limit.`);
+    if (!allowPartial) {
+      if (maxFiles && files.length > maxFiles) {
+        const msg = `Maximum ${maxFiles} files allowed at a time.`;
+        setError(msg);
+        onError?.(msg);
+        return;
+      }
+
+      const invalidSizeFile = files.find((file) => file.size > maxFileSizeBytes);
+      if (invalidSizeFile) {
+        const maxFileSizeMb = Math.floor(maxFileSizeBytes / (1024 * 1024));
+        const msg = `${invalidSizeFile.name} exceeds the ${maxFileSizeMb} MB file limit.`;
+        setError(msg);
+        onError?.(msg);
+        return;
+      }
+
+      const invalidTypeFile = files.find((file) => !isFileAccepted(file, accept));
+      if (invalidTypeFile) {
+        const msg = `${invalidTypeFile.name} is not a valid ${typeLabel}.`;
+        setError(msg);
+        onError?.(msg);
+        return;
+      }
+
+      setError("");
+      onUpload(files);
       return;
     }
 
-    const invalidTypeFile = files.find((file) => !isFileAccepted(file, accept));
-    if (invalidTypeFile) {
-      setError(`${invalidTypeFile.name} is not a valid ${typeLabel}.`);
-      return;
+    // allowPartial mode (allows valid files to process while reporting skipped files)
+    let notice = "";
+    if (maxFiles && files.length > maxFiles) {
+      notice = `Maximum ${maxFiles} files allowed at once. Only the first ${maxFiles} files were kept. `;
+      files = files.slice(0, maxFiles);
     }
 
-    setError("");
-    onUpload(files);
+    const validFiles = [];
+    const skippedErrors = [];
+
+    for (const file of files) {
+      if (file.size > maxFileSizeBytes) {
+        const maxFileSizeMb = Math.floor(maxFileSizeBytes / (1024 * 1024));
+        skippedErrors.push(`${file.name} exceeds ${maxFileSizeMb} MB limit`);
+      } else if (!isFileAccepted(file, accept)) {
+        skippedErrors.push(`${file.name} is not a valid ${typeLabel}`);
+      } else {
+        validFiles.push(file);
+      }
+    }
+
+    if (skippedErrors.length > 0 || notice) {
+      const combinedMsg = `${notice}${
+        skippedErrors.length > 0
+          ? `${skippedErrors.length} file(s) skipped: ${skippedErrors.slice(0, 2).join(", ")}${
+              skippedErrors.length > 2 ? ` (+${skippedErrors.length - 2} more)` : ""
+            }.`
+          : ""
+      }`.trim();
+      setError(combinedMsg);
+      onError?.(combinedMsg);
+    } else {
+      setError("");
+    }
+
+    if (validFiles.length > 0) {
+      onUpload(validFiles, skippedErrors.length > 0 || notice ? combinedMsg : "");
+    }
   };
 
   const displayTitle = titleText

@@ -572,6 +572,7 @@ export const toolsData = [
         name: "Image Compressor",
         slug: "image-compressor",
         icon: "image",
+        available: true,
         description: "Reduce image size without losing quality.",
       },
       {

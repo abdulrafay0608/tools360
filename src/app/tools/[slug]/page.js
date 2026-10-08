@@ -260,7 +260,8 @@ export default async function ToolPage({ params }) {
       },
       ...(tool.slug === "organize-pdf" ||
       tool.slug === "rotate-pdf" ||
-      tool.slug === "add-page-numbers"
+      tool.slug === "add-page-numbers" ||
+      tool.slug === "image-compressor"
         ? []
         : [
             {
@@ -289,14 +290,17 @@ export default async function ToolPage({ params }) {
       <ToolLayout
         title={tool.name}
         description={
-          tool.slug === "rotate-pdf" || tool.slug === "add-page-numbers"
+          tool.slug === "rotate-pdf" ||
+          tool.slug === "add-page-numbers" ||
+          tool.slug === "image-compressor"
             ? null
             : tool.description
         }
         seoContent={
           tool.slug === "organize-pdf" ||
           tool.slug === "rotate-pdf" ||
-          tool.slug === "add-page-numbers" ? null : (
+          tool.slug === "add-page-numbers" ||
+          tool.slug === "image-compressor" ? null : (
               <ToolSEOContent tool={tool} content={content} />
             )
         }

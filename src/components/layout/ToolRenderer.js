@@ -48,6 +48,13 @@ const toolMap = {
       loading: () => <ToolLoader />,
     }
   ),
+  "image-compressor": dynamic(
+    () => import("@/tools/image/image-compressor/page"),
+    {
+      ssr: false,
+      loading: () => <ToolLoader />,
+    }
+  ),
 };
 
 export default function ToolRenderer({ slug }) {
