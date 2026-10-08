@@ -121,6 +121,7 @@ const FileUploader = ({
 
     const validFiles = [];
     const skippedErrors = [];
+    let combinedMsg = "";
 
     for (const file of files) {
       if (file.size > maxFileSizeBytes) {
@@ -134,7 +135,7 @@ const FileUploader = ({
     }
 
     if (skippedErrors.length > 0 || notice) {
-      const combinedMsg = `${notice}${
+      combinedMsg = `${notice}${
         skippedErrors.length > 0
           ? `${skippedErrors.length} file(s) skipped: ${skippedErrors.slice(0, 2).join(", ")}${
               skippedErrors.length > 2 ? ` (+${skippedErrors.length - 2} more)` : ""

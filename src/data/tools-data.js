@@ -579,6 +579,7 @@ export const toolsData = [
         name: "Image Resizer",
         slug: "image-resizer",
         icon: "image",
+        available: true,
         description: "Resize images to specific dimensions.",
       },
       {

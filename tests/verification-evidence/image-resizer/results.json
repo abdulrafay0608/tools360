@@ -1,0 +1,125 @@
+{
+  "baseUrl": "http://127.0.0.1:4317",
+  "results": [
+    {
+      "name": "pixel dimensions and exact downloaded output",
+      "result": "PASS",
+      "evidence": "D:\\Abdul-Rafay\\service-type\\tools360\\tests\\verification-evidence\\image-resizer\\pixels-1080x1080.jpg (1080x1080, 37365 bytes)"
+    },
+    {
+      "name": "percentage dimensions",
+      "result": "PASS",
+      "evidence": "D:\\Abdul-Rafay\\service-type\\tools360\\tests\\verification-evidence\\image-resizer\\percentage-50.jpg (1200x800)"
+    },
+    {
+      "name": "all fit modes keep exact canvas dimensions",
+      "result": "PASS",
+      "evidence": {
+        "stretch": [
+          800,
+          800
+        ],
+        "contain": [
+          800,
+          800
+        ],
+        "cover": [
+          800,
+          800
+        ]
+      }
+    },
+    {
+      "name": "aspect lock, presets, upscale warning, and 8192 pixel cap",
+      "result": "PASS",
+      "evidence": {
+        "aspectLock": [
+          1200,
+          800
+        ],
+        "preset": "1080x1080",
+        "cap": [
+          8192,
+          1
+        ],
+        "displayedSize": "1.5 KB",
+        "downloadedBytes": 1525
+      }
+    },
+    {
+      "name": "EXIF orientation 6 exports upright",
+      "result": "PASS",
+      "evidence": "D:\\Abdul-Rafay\\service-type\\tools360\\tests\\verification-evidence\\image-resizer\\exif-upright.jpg (150x300)"
+    },
+    {
+      "name": "PNG transparency preserved and JPG conversion fills transparency with warning",
+      "result": "PASS",
+      "evidence": {
+        "pngCorner": "transparent",
+        "jpgCorner": [
+          255,
+          255,
+          255,
+          255
+        ]
+      }
+    },
+    {
+      "name": "ZIP count, duplicate-safe names, and single-file download",
+      "result": "PASS",
+      "evidence": {
+        "count": 2,
+        "names": [
+          "same-resized.jpg",
+          "same-resized (1).jpg"
+        ],
+        "singleFilename": "tiny-optimized-resized.jpg"
+      }
+    },
+    {
+      "name": "unsupported, corrupted, oversized, and mixed-file handling",
+      "result": "PASS",
+      "evidence": "Unsupported, corrupted, oversized files report errors; valid mixed file still completes."
+    },
+    {
+      "name": "31-file batch limit retains 30 and continues processing",
+      "result": "PASS",
+      "evidence": "31 selected; 30 processed, one skipped with a clear limit notice."
+    },
+    {
+      "name": "large 8000x6000 image leaves the UI responsive",
+      "result": "PASS",
+      "evidence": {
+        "heartbeat": 1,
+        "viewportWidth": 1280,
+        "outputDimensions": [
+          8000,
+          6000
+        ]
+      }
+    },
+    {
+      "name": "375px responsive layout and no ad/control overlap",
+      "result": "PASS",
+      "evidence": {
+        "viewport": 375,
+        "body": 375,
+        "overlaps": []
+      }
+    },
+    {
+      "name": "Image Compressor and PDF regression pages still load",
+      "result": "PASS",
+      "evidence": "Image Compressor and Rotate PDF pages rendered successfully."
+    },
+    {
+      "name": "local-only requests and browser console",
+      "result": "PASS",
+      "evidence": {
+        "nonLocalRequests": [],
+        "failedRequests": [],
+        "consoleErrors": []
+      }
+    }
+  ]
+}

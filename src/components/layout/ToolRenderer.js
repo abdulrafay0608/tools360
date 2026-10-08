@@ -55,6 +55,13 @@ const toolMap = {
       loading: () => <ToolLoader />,
     }
   ),
+  "image-resizer": dynamic(
+    () => import("@/tools/image/image-resizer/page"),
+    {
+      ssr: false,
+      loading: () => <ToolLoader />,
+    }
+  ),
 };
 
 export default function ToolRenderer({ slug }) {
