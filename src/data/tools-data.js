@@ -145,6 +145,7 @@ export const toolsData = [
         name: "Add Page Numbers",
         slug: "add-page-numbers",
         icon: "numbers",
+        available: true,
         description: "Add page numbers to PDF easily with positioning.",
       },
       {

@@ -258,7 +258,9 @@ export default async function ToolPage({ params }) {
           priceCurrency: "USD",
         },
       },
-      ...(tool.slug === "organize-pdf" || tool.slug === "rotate-pdf"
+      ...(tool.slug === "organize-pdf" ||
+      tool.slug === "rotate-pdf" ||
+      tool.slug === "add-page-numbers"
         ? []
         : [
             {
@@ -286,11 +288,17 @@ export default async function ToolPage({ params }) {
 
       <ToolLayout
         title={tool.name}
-        description={tool.slug === "rotate-pdf" ? null : tool.description}
+        description={
+          tool.slug === "rotate-pdf" || tool.slug === "add-page-numbers"
+            ? null
+            : tool.description
+        }
         seoContent={
-          tool.slug === "organize-pdf" || tool.slug === "rotate-pdf" ? null : (
-            <ToolSEOContent tool={tool} content={content} />
-          )
+          tool.slug === "organize-pdf" ||
+          tool.slug === "rotate-pdf" ||
+          tool.slug === "add-page-numbers" ? null : (
+              <ToolSEOContent tool={tool} content={content} />
+            )
         }
       >
         {/* Interactive Client Component Tool */}

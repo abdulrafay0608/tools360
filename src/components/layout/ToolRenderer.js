@@ -41,6 +41,13 @@ const toolMap = {
     ssr: false,
     loading: () => <ToolLoader />,
   }),
+  "add-page-numbers": dynamic(
+    () => import("@/tools/pdf/add-page-numbers/page"),
+    {
+      ssr: false,
+      loading: () => <ToolLoader />,
+    }
+  ),
 };
 
 export default function ToolRenderer({ slug }) {
