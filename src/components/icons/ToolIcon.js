@@ -33,6 +33,7 @@ import {
 
 const ToolIcon = ({ icon, className }) => {
   const iconMap = {
+    pdf: <FaFilePdf className={className} />,
     merge: <FaTools className={className} />,
     split: <FaFilePdf className={className} />,
     compress: <FaFilePdf className={className} />,

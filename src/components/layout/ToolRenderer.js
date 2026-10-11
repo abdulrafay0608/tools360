@@ -76,6 +76,34 @@ const toolMap = {
       loading: () => <ToolLoader />,
     }
   ),
+  "percentage-calculator": dynamic(
+    () => import("@/tools/finance/percentage-calculator/page"),
+    {
+      ssr: false,
+      loading: () => <ToolLoader />,
+    }
+  ),
+  "loan-emi-calculator": dynamic(
+    () => import("@/tools/finance/loan-emi-calculator/page"),
+    {
+      ssr: false,
+      loading: () => <ToolLoader />,
+    }
+  ),
+  "age-calculator": dynamic(
+    () => import("@/tools/finance/age-calculator/page"),
+    {
+      ssr: false,
+      loading: () => <ToolLoader />,
+    }
+  ),
+  "word-counter": dynamic(
+    () => import("@/tools/writing/word-counter/page"),
+    {
+      ssr: false,
+      loading: () => <ToolLoader />,
+    }
+  ),
 };
 
 export default function ToolRenderer({ slug }) {

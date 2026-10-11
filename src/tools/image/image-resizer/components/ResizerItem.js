@@ -1,7 +1,7 @@
 import React from "react";
 import { saveAs } from "file-saver";
 import { FaCheck, FaDownload, FaExclamationCircle, FaTrash } from "react-icons/fa";
-import { formatFileSize } from "../../utils/imageSharedUtils.js";
+import { formatFileSize } from "../../utils/imageToolUtils.js";
 
 export default function ResizerItem({ item, onRemove, onDownload }) {
   const {

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { toolsData } from "@/data/tools-data";
+import { getLiveTools, getToolCategory } from "@/data/toolsDataUtils";
 import ToolLayout from "@/components/layout/ToolLayout";
 import ToolRenderer from "@/components/layout/ToolRenderer";
 
@@ -8,18 +8,12 @@ export const dynamicParams = false;
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://tools360.com";
 
 export async function generateStaticParams() {
-  const slugs = toolsData.flatMap((cat) =>
-    cat.tools
-      .filter((tool) => tool.available)
-      .map((tool) => ({ slug: tool.slug }))
-  );
-  return slugs;
+  return getLiveTools().map((tool) => ({ slug: tool.slug }));
 }
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const allTools = toolsData.flatMap((cat) => cat.tools);
-  const tool = allTools.find((t) => t.slug === slug && t.available);
+  const tool = getLiveTools().find((entry) => entry.slug === slug);
 
   if (!tool) {
     return {
@@ -232,11 +226,11 @@ function ToolSEOContent({ tool, content }) {
 
 export default async function ToolPage({ params }) {
   const { slug } = await params;
-  const allTools = toolsData.flatMap((cat) => cat.tools);
-  const tool = allTools.find((t) => t.slug === slug && t.available);
+  const tool = getLiveTools().find((entry) => entry.slug === slug);
 
   if (!tool) notFound();
 
+  const category = getToolCategory(tool.slug);
   const content = getToolContent(tool);
   const toolUrl = `${BASE_URL}/tools/${tool.slug}`;
 
@@ -262,7 +256,11 @@ export default async function ToolPage({ params }) {
       tool.slug === "rotate-pdf" ||
       tool.slug === "add-page-numbers" ||
       tool.slug === "image-compressor" ||
-      tool.slug === "image-resizer"
+      tool.slug === "image-resizer" ||
+      tool.slug === "percentage-calculator" ||
+      tool.slug === "loan-emi-calculator" ||
+      tool.slug === "age-calculator" ||
+      tool.slug === "word-counter"
         ? []
         : [
             {
@@ -290,13 +288,19 @@ export default async function ToolPage({ params }) {
 
       <ToolLayout
         title={tool.name}
+        category={category}
+        currentToolSlug={tool.slug}
         description={
           tool.slug === "rotate-pdf" ||
           tool.slug === "add-page-numbers" ||
           tool.slug === "image-compressor" ||
           tool.slug === "image-resizer" ||
           tool.slug === "image-converter" ||
-          tool.slug === "svg-to-png"
+          tool.slug === "svg-to-png" ||
+          tool.slug === "percentage-calculator" ||
+          tool.slug === "loan-emi-calculator" ||
+          tool.slug === "age-calculator" ||
+          tool.slug === "word-counter"
             ? null
             : tool.description
         }
@@ -307,9 +311,18 @@ export default async function ToolPage({ params }) {
           tool.slug === "image-compressor" ||
           tool.slug === "image-resizer" ||
           tool.slug === "image-converter" ||
-          tool.slug === "svg-to-png" ? null : (
+          tool.slug === "svg-to-png" ||
+          tool.slug === "percentage-calculator" ||
+          tool.slug === "loan-emi-calculator" ||
+          tool.slug === "age-calculator" ||
+          tool.slug === "word-counter" ? null : (
               <ToolSEOContent tool={tool} content={content} />
             )
+        }
+        trustText={
+          ["percentage-calculator", "loan-emi-calculator", "age-calculator", "word-counter"].includes(tool.slug)
+            ? "Calculated in your browser. Nothing is stored or sent."
+            : undefined
         }
       >
         {/* Interactive Client Component Tool */}

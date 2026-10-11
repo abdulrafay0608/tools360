@@ -1,17 +1,12 @@
 // components/Footer.tsx
-import { toolsData } from "@/data/tools-data";
 import Link from "next/link";
 import { FaFilePdf } from "react-icons/fa";
+import { getCategoriesWithLiveTools } from "@/data/toolsDataUtils";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
-  const availableCategories = toolsData
-    .map((category) => ({
-      ...category,
-      tools: category.tools.filter((tool) => tool.available),
-    }))
-    .filter((category) => category.tools.length > 0);
+  const categories = getCategoriesWithLiveTools();
 
   return (
     <footer className="border-t border-[#dce5e0] bg-white text-sm text-[#5d706a]">
@@ -30,25 +25,23 @@ export default function Footer() {
           </p>
         </div>
 
-        {availableCategories.map((section) => (
-          <div key={section.category}>
-            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#405950]">
-              PDF tools
-            </h3>
-            <ul className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-1">
-              {section.tools.map((tool) => (
-                <li key={tool.slug}>
-                  <Link
-                    href={`/tools/${tool.slug}`}
-                    className="transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
-                  >
-                    {tool.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        <div>
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#405950]">
+            Categories
+          </h3>
+          <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
+            {categories.map((category) => (
+              <li key={category.id}>
+                <Link
+                  href={`/tools/category/${category.id}`}
+                  className="transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
+                >
+                  {category.category}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <div>
           <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#405950]">
@@ -60,7 +53,7 @@ export default function Footer() {
                 href="/"
                 className="transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
               >
-                All PDF tools
+                All tools
               </Link>
             </li>
             <li>

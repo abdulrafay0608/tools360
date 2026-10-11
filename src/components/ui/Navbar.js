@@ -4,10 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaFilePdf } from "react-icons/fa";
+import { getCategoriesWithLiveTools } from "@/data/toolsDataUtils";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const categories = getCategoriesWithLiveTools();
   const links = [
     { href: "/", label: "Tools" },
     { href: "/about", label: "About" },
@@ -44,6 +46,22 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
+          <details className="group relative flex h-full items-center">
+            <summary className="flex h-full cursor-pointer list-none items-center border-b-2 border-transparent text-[#62746d] transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#235c4f]">
+              Categories
+            </summary>
+            <div className="absolute right-0 top-full z-30 min-w-56 border border-[#dce5e0] bg-white p-2 shadow-lg">
+              {categories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={`/tools/category/${category.id}`}
+                  className="block px-3 py-2 text-sm text-[#405950] hover:bg-[#f4f7f5] hover:text-[#173d34]"
+                >
+                  {category.category}
+                </Link>
+              ))}
+            </div>
+          </details>
         </nav>
 
         <button
@@ -104,6 +122,23 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
+          <details className="border-b border-[#edf1ef] py-2">
+            <summary className="cursor-pointer py-2 text-sm font-medium text-[#405950]">
+              Categories
+            </summary>
+            <div className="pl-3">
+              {categories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={`/tools/category/${category.id}`}
+                  className="block py-2 text-sm text-[#62746d]"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {category.category}
+                </Link>
+              ))}
+            </div>
+          </details>
         </nav>
       )}
     </header>

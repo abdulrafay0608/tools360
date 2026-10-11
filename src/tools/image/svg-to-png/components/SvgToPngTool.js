@@ -1,7 +1,13 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useAdPauseWhile } from "@/hooks/useAdPause";
+import useTrackedObjectUrls from "@/hooks/useTrackedObjectUrls";
+import useImageBatchQueue from "@/hooks/useImageBatchQueue";
+import {
+  markBatchItemsCancelled,
+  updateBatchItemStatus,
+} from "@/hooks/imageBatchQueueUtils.js";
 import { saveAs } from "file-saver";
 import FileUploader from "@/components/pdf/file/FileUploader";
 import SvgOptionsBar from "./SvgOptionsBar";
@@ -28,46 +34,28 @@ export default function SvgToPngTool() {
     customWidth: 1024,
     backgroundColor: "transparent",
   });
-  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
 
   const hiddenInputRef = useRef(null);
-  const activeBatchIdRef = useRef(0);
-  const isCancelledRef = useRef(false);
-  const debounceTimerRef = useRef(null);
-  const objectUrlsRef = useRef(new Set());
   const itemsRef = useRef([]);
   const optionsRef = useRef(options);
+  const {
+    isProcessing,
+    processBatch,
+    cancelBatch,
+    scheduleReprocess,
+    invalidateBatch,
+    selectFiles,
+    addItems,
+    removeItem,
+    clearItems,
+  } = useImageBatchQueue();
+  const { createTrackedUrl, revokeTrackedUrl } = useTrackedObjectUrls();
 
   // Ad pause integration
   useAdPauseWhile("svg-to-png-processing", isProcessing);
   useAdPauseWhile("svg-to-png-error", Boolean(error));
   useAdPauseWhile("svg-to-png-empty", items.length === 0);
-
-  // Clean up object URLs on unmount
-  useEffect(() => {
-    const urls = objectUrlsRef.current;
-    return () => {
-      clearTimeout(debounceTimerRef.current);
-      activeBatchIdRef.current += 1;
-      for (const url of urls) {
-        URL.revokeObjectURL(url);
-      }
-      urls.clear();
-    };
-  }, []);
-
-  const createTrackedUrl = useCallback((blob) => {
-    const url = URL.createObjectURL(blob);
-    objectUrlsRef.current.add(url);
-    return url;
-  }, []);
-
-  const revokeTrackedUrl = useCallback((url) => {
-    if (url && objectUrlsRef.current.delete(url)) {
-      URL.revokeObjectURL(url);
-    }
-  }, []);
 
   const commitItems = useCallback((nextItems) => {
     itemsRef.current = nextItems;
@@ -78,103 +66,58 @@ export default function SvgToPngTool() {
    * Sequential rendering engine.
    * Renders each SVG to Canvas and exports PNG Blob.
    */
-  const processBatch = useCallback(
-    async (itemsToProcess, currentOptions) => {
-      const batchId = ++activeBatchIdRef.current;
-      isCancelledRef.current = false;
-      setIsProcessing(true);
-
-      for (let i = 0; i < itemsToProcess.length; i++) {
-        if (isCancelledRef.current || batchId !== activeBatchIdRef.current) {
-          break;
-        }
-
-        const currentItem = itemsToProcess[i];
-        if (currentItem.status === "error" && !currentItem.svgText) {
-          continue;
-        }
-
-        // Set status to processing
-        commitItems(
-          itemsRef.current.map((item) =>
-            item.id === currentItem.id ? { ...item, status: "processing" } : item
-          )
+  const runBatch = useCallback((itemsToProcess, currentOptions) => processBatch(
+    itemsToProcess,
+    currentOptions,
+    {
+      shouldProcess: (item) => !(item.status === "error" && !item.svgText),
+      onStart: (item) => commitItems(updateBatchItemStatus(
+        itemsRef.current,
+        item.id,
+        "processing"
+      )),
+      processItem: async (item, batchOptions) => {
+        const { width: targetWidth, height: targetHeight, wasCapped } =
+          calculateTargetDimensions(item.origWidth, item.origHeight, batchOptions);
+        const pngBlob = await renderSvgToPng(
+          item.svgText,
+          targetWidth,
+          targetHeight,
+          batchOptions.backgroundColor
         );
+        return { pngBlob, targetWidth, targetHeight, wasCapped };
+      },
+      onSuccess: (item, result) => {
+        const latestItem = itemsRef.current.find((current) => current.id === item.id);
+        if (!latestItem) return;
 
-        // Allow UI to breathe
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
-        if (isCancelledRef.current || batchId !== activeBatchIdRef.current) {
-          break;
-        }
-
-        try {
-          const { width: targetWidth, height: targetHeight, wasCapped } =
-            calculateTargetDimensions(
-              currentItem.origWidth,
-              currentItem.origHeight,
-              currentOptions
-            );
-
-          const pngBlob = await renderSvgToPng(
-            currentItem.svgText,
-            targetWidth,
-            targetHeight,
-            currentOptions.backgroundColor
-          );
-
-          if (isCancelledRef.current || batchId !== activeBatchIdRef.current) {
-            break;
+        const previewUrl = createTrackedUrl(result.pngBlob);
+        commitItems(itemsRef.current.map((current) => {
+          if (current.id !== item.id) return current;
+          if (current.previewUrl && current.previewUrl !== previewUrl) {
+            revokeTrackedUrl(current.previewUrl);
           }
-
-          const previewUrl = createTrackedUrl(pngBlob);
-
-          commitItems(
-            itemsRef.current.map((item) => {
-              if (item.id !== currentItem.id) return item;
-              if (item.previewUrl && item.previewUrl !== previewUrl) {
-                revokeTrackedUrl(item.previewUrl);
-              }
-              return {
-                ...item,
-                status: "done",
-                blob: pngBlob,
-                pngSize: pngBlob.size,
-                targetWidth,
-                targetHeight,
-                wasCapped,
-                previewUrl,
-                error: "",
-              };
-            })
-          );
-        } catch (err) {
-          if (isCancelledRef.current || batchId !== activeBatchIdRef.current) {
-            break;
-          }
-
-          commitItems(
-            itemsRef.current.map((item) =>
-              item.id === currentItem.id
-                ? {
-                    ...item,
-                    status: "error",
-                    error: err?.message || "Failed to render SVG image.",
-                  }
-                : item
-            )
-          );
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      }
-
-      if (batchId === activeBatchIdRef.current) {
-        setIsProcessing(false);
-      }
-    },
-    [commitItems, createTrackedUrl, revokeTrackedUrl]
-  );
+          return {
+            ...current,
+            status: "done",
+            blob: result.pngBlob,
+            pngSize: result.pngBlob.size,
+            targetWidth: result.targetWidth,
+            targetHeight: result.targetHeight,
+            wasCapped: result.wasCapped,
+            previewUrl,
+            error: "",
+          };
+        }));
+      },
+      onError: (item, cause) => commitItems(updateBatchItemStatus(
+        itemsRef.current,
+        item.id,
+        "error",
+        { error: cause?.message || "Failed to render SVG image." }
+      )),
+    }
+  ), [commitItems, createTrackedUrl, processBatch, revokeTrackedUrl]);
 
   /**
    * File upload and validation handler for .svg files.
@@ -182,20 +125,20 @@ export default function SvgToPngTool() {
   const handleUpload = useCallback(
     async (newFiles, uploadNotice = "") => {
       const currentList = itemsRef.current;
-      const remainingSlots = MAX_FILES - currentList.length;
-      const selected = Array.from(newFiles);
-
       const isSvgFile = (file) =>
         (file.type || "").toLowerCase().includes("svg") || /\.svg$/i.test(file.name || "");
-
-      const unsupported = selected.filter((file) => !isSvgFile(file));
-      const oversized = selected.filter((file) => file.size > MAX_FILE_SIZE_BYTES);
-      const eligible = selected.filter(
-        (file) => isSvgFile(file) && file.size <= MAX_FILE_SIZE_BYTES
+      const {
+        validFiles,
+        unsupported,
+        oversized,
+        skippedByLimit,
+      } = selectFiles(
+        newFiles,
+        currentList.length,
+        MAX_FILES,
+        MAX_FILE_SIZE_BYTES,
+        isSvgFile
       );
-
-      const validFiles = eligible.slice(0, Math.max(0, remainingSlots));
-      const skippedByLimit = eligible.length - validFiles.length;
 
       const noticeParts = [
         uploadNotice,
@@ -259,11 +202,11 @@ export default function SvgToPngTool() {
         })
       );
 
-      const updated = [...currentList, ...newItems];
+      const updated = addItems(currentList, newItems);
       commitItems(updated);
-      processBatch(updated, optionsRef.current);
+      runBatch(updated, optionsRef.current);
     },
-    [commitItems, processBatch]
+    [addItems, commitItems, runBatch, selectFiles]
   );
 
   /**
@@ -299,12 +242,12 @@ export default function SvgToPngTool() {
         error: "",
       };
 
-      const updated = [...currentList, newItem];
+      const updated = addItems(currentList, [newItem]);
       commitItems(updated);
-      processBatch(updated, optionsRef.current);
+      runBatch(updated, optionsRef.current);
       setError("");
     },
-    [commitItems, processBatch]
+    [addItems, commitItems, runBatch]
   );
 
   /**
@@ -315,12 +258,6 @@ export default function SvgToPngTool() {
       optionsRef.current = nextOptions;
       setOptions(nextOptions);
 
-      // Cancel current running batch
-      activeBatchIdRef.current += 1;
-      isCancelledRef.current = true;
-      setIsProcessing(false);
-      clearTimeout(debounceTimerRef.current);
-
       // Mark valid items as pending
       const resetItems = itemsRef.current.map((item) => ({
         ...item,
@@ -328,29 +265,24 @@ export default function SvgToPngTool() {
       }));
       commitItems(resetItems);
 
-      if (resetItems.length === 0) return;
+      if (resetItems.length === 0) {
+        invalidateBatch();
+        return;
+      }
 
-      debounceTimerRef.current = setTimeout(() => {
-        processBatch(itemsRef.current, nextOptions);
-      }, 300);
+      scheduleReprocess(() => runBatch(itemsRef.current, nextOptions));
     },
-    [commitItems, processBatch]
+    [commitItems, invalidateBatch, runBatch, scheduleReprocess]
   );
 
   const handleCancelBatch = useCallback(() => {
-    isCancelledRef.current = true;
-    activeBatchIdRef.current += 1;
-    clearTimeout(debounceTimerRef.current);
-    setIsProcessing(false);
-
-    commitItems(
-      itemsRef.current.map((item) =>
-        item.status === "processing" || item.status === "pending"
-          ? { ...item, status: "error", error: "Rendering cancelled" }
-          : item
-      )
-    );
-  }, [commitItems]);
+    cancelBatch(() => commitItems(markBatchItemsCancelled(
+      itemsRef.current,
+      ["processing", "pending"],
+      "error",
+      { error: "Rendering cancelled" }
+    )));
+  }, [cancelBatch, commitItems]);
 
   const handleRemove = useCallback(
     (id) => {
@@ -358,25 +290,22 @@ export default function SvgToPngTool() {
       if (target && target.previewUrl) {
         revokeTrackedUrl(target.previewUrl);
       }
-      commitItems(itemsRef.current.filter((item) => item.id !== id));
+      commitItems(removeItem(itemsRef.current, id));
     },
-    [commitItems, revokeTrackedUrl]
+    [commitItems, removeItem, revokeTrackedUrl]
   );
 
   const handleClearAll = useCallback(() => {
-    isCancelledRef.current = true;
-    activeBatchIdRef.current += 1;
-    clearTimeout(debounceTimerRef.current);
-    setIsProcessing(false);
+    invalidateBatch();
 
     for (const item of itemsRef.current) {
       if (item.previewUrl) {
         revokeTrackedUrl(item.previewUrl);
       }
     }
-    commitItems([]);
+    commitItems(clearItems());
     setError("");
-  }, [commitItems, revokeTrackedUrl]);
+  }, [clearItems, commitItems, invalidateBatch, revokeTrackedUrl]);
 
   const handleDownloadSingle = useCallback((item) => {
     if (!item.blob || !item.outputFilename) return;

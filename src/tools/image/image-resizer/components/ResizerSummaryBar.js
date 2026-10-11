@@ -1,6 +1,6 @@
 import React from "react";
 import { FaBan, FaDownload, FaPlus, FaTimes } from "react-icons/fa";
-import { formatFileSize } from "../../utils/imageSharedUtils.js";
+import { formatFileSize } from "../../utils/imageToolUtils.js";
 
 export default function ResizerSummaryBar({
   items,

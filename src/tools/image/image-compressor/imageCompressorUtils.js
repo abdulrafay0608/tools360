@@ -4,27 +4,29 @@
  */
 
 import {
-  MAX_FILES,
-  MAX_FILE_SIZE_BYTES,
+  IMAGE_BATCH_MAX_FILES,
+  IMAGE_FILE_MAX_SIZE_BYTES,
   SUPPORTED_MIME_TYPES,
   SUPPORTED_EXTENSIONS,
   FORMAT_PRESETS,
   formatFileSize,
+  formatFileSizeLimit,
   getOutputFilename as sharedGetOutputFilename,
   resolveTargetMimeType,
   generateUniqueFilenames as sharedGenerateUniqueFilenames,
   isPngFile,
   isAcceptedImage,
-  createZipArchive as sharedCreateZipArchive
-} from "../utils/imageSharedUtils.js";
+  createZipArchive as sharedCreateZipArchive,
+} from "../utils/imageToolUtils.js";
 
 export {
-  MAX_FILES,
-  MAX_FILE_SIZE_BYTES,
+  IMAGE_BATCH_MAX_FILES as MAX_FILES,
+  IMAGE_FILE_MAX_SIZE_BYTES as MAX_FILE_SIZE_BYTES,
   SUPPORTED_MIME_TYPES,
   SUPPORTED_EXTENSIONS,
   FORMAT_PRESETS,
   formatFileSize,
+  formatFileSizeLimit,
   resolveTargetMimeType,
   isPngFile,
   isAcceptedImage,

@@ -1,7 +1,10 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useAdPauseWhile } from "@/hooks/useAdPause";
+import useTrackedObjectUrls from "@/hooks/useTrackedObjectUrls";
+import useImageBatchQueue from "@/hooks/useImageBatchQueue";
+import { updateBatchItemStatus } from "@/hooks/imageBatchQueueUtils.js";
 import { saveAs } from "file-saver";
 import { FaCheckCircle, FaExclamationCircle, FaLock } from "react-icons/fa";
 import FileUploader from "@/components/pdf/file/FileUploader";
@@ -12,7 +15,12 @@ import {
   isPngFile,
   MAX_FILE_SIZE_BYTES,
   MAX_FILES,
-} from "../../utils/imageSharedUtils.js";
+  formatFileSizeLimit,
+} from "../../utils/imageToolUtils.js";
+import {
+  IMAGE_BATCH_MAX_FILES,
+  IMAGE_FILE_MAX_SIZE_BYTES,
+} from "../../utils/imageToolConfig.js";
 import { DEFAULT_QUALITY, resizeSingleImage } from "../imageResizerUtils.js";
 import ResizerOptionsBar from "./ResizerOptionsBar";
 import ResizerSummaryBar from "./ResizerSummaryBar";
@@ -32,19 +40,25 @@ const DEFAULT_OPTIONS = {
   selectedPreset: 0,
 };
 
-const yieldToBrowser = () => new Promise((resolve) => setTimeout(resolve, 10));
-
 export default function ImageResizerTool() {
   const [items, setItems] = useState([]);
   const [options, setOptions] = useState(DEFAULT_OPTIONS);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
   const hiddenInputRef = useRef(null);
   const itemsRef = useRef([]);
   const optionsRef = useRef(DEFAULT_OPTIONS);
-  const batchIdRef = useRef(0);
-  const debounceTimerRef = useRef(null);
-  const objectUrlsRef = useRef(new Set());
+  const {
+    isProcessing,
+    processBatch,
+    cancelBatch,
+    scheduleReprocess,
+    invalidateBatch,
+    selectFiles,
+    addItems,
+    removeItem,
+    clearItems,
+  } = useImageBatchQueue();
+  const { createTrackedUrl, revokeTrackedUrl } = useTrackedObjectUrls();
 
   useAdPauseWhile("image-resizer-processing", isProcessing);
   useAdPauseWhile("image-resizer-error", Boolean(error));
@@ -55,43 +69,19 @@ export default function ImageResizerTool() {
     setItems(nextItems);
   }, []);
 
-  const createTrackedUrl = useCallback((blob) => {
-    const url = URL.createObjectURL(blob);
-    objectUrlsRef.current.add(url);
-    return url;
-  }, []);
-
-  const revokeTrackedUrl = useCallback((url) => {
-    if (!url || !objectUrlsRef.current.delete(url)) return;
-    URL.revokeObjectURL(url);
-  }, []);
-
-  useEffect(() => () => {
-    clearTimeout(debounceTimerRef.current);
-    batchIdRef.current += 1;
-    for (const url of objectUrlsRef.current) URL.revokeObjectURL(url);
-    objectUrlsRef.current.clear();
-  }, []);
-
-  const processBatch = useCallback(async (itemsToProcess, currentOptions) => {
-    const batchId = ++batchIdRef.current;
-    setIsProcessing(true);
-
-    for (const currentItem of itemsToProcess) {
-      if (batchId !== batchIdRef.current) break;
-      const before = itemsRef.current.find((item) => item.id === currentItem.id);
-      if (!before) continue;
-      commitItems(itemsRef.current.map((item) =>
-        item.id === currentItem.id
-          ? { ...item, status: "resizing", progress: 15, error: "" }
-          : item
-      ));
-      await yieldToBrowser();
-      if (batchId !== batchIdRef.current) break;
-
-      try {
-        const result = await resizeSingleImage(currentItem.file, currentOptions);
-        if (batchId !== batchIdRef.current) break;
+  const runBatch = useCallback((itemsToProcess, currentOptions) => processBatch(
+    itemsToProcess,
+    currentOptions,
+    {
+      shouldProcess: (item) => itemsRef.current.some((current) => current.id === item.id),
+      onStart: (item) => commitItems(updateBatchItemStatus(
+        itemsRef.current,
+        item.id,
+        "resizing",
+        { progress: 15, error: "" }
+      )),
+      processItem: (item, batchOptions) => resizeSingleImage(item.file, batchOptions),
+      onSuccess: (item, result) => {
         if (!optionsRef.current.aspectRatio) {
           const nextOptions = {
             ...optionsRef.current,
@@ -100,17 +90,18 @@ export default function ImageResizerTool() {
           optionsRef.current = nextOptions;
           setOptions(nextOptions);
         }
+
         const thumbnailUrl = createTrackedUrl(result.blob);
-        const latestItem = itemsRef.current.find((item) => item.id === currentItem.id);
+        const latestItem = itemsRef.current.find((current) => current.id === item.id);
         if (!latestItem) {
           revokeTrackedUrl(thumbnailUrl);
-          continue;
+          return;
         }
 
-        commitItems(itemsRef.current.map((item) =>
-          item.id === currentItem.id
+        commitItems(itemsRef.current.map((current) =>
+          current.id === item.id
             ? {
-                ...item,
+                ...current,
                 status: "done",
                 progress: 100,
                 blob: result.blob,
@@ -128,44 +119,46 @@ export default function ImageResizerTool() {
                   : "",
                 error: "",
               }
-            : item
+            : current
         ));
         if (latestItem.thumbnailUrl !== thumbnailUrl) {
           revokeTrackedUrl(latestItem.thumbnailUrl);
         }
-      } catch (cause) {
-        if (batchId !== batchIdRef.current) break;
+      },
+      onError: (item, cause) => {
         const message = cause instanceof Error
           ? cause.message
           : "Unable to resize this image.";
-        commitItems(itemsRef.current.map((item) =>
-          item.id === currentItem.id
-            ? { ...item, status: "error", progress: 0, error: message }
-            : item
+        commitItems(updateBatchItemStatus(
+          itemsRef.current,
+          item.id,
+          "error",
+          { progress: 0, error: message }
         ));
-      }
-      await yieldToBrowser();
+      },
     }
-
-    if (batchId === batchIdRef.current) setIsProcessing(false);
-  }, [commitItems, createTrackedUrl, revokeTrackedUrl]);
+  ), [commitItems, createTrackedUrl, processBatch, revokeTrackedUrl]);
 
   const handleUpload = useCallback((newFiles, uploadNotice = "") => {
     const currentItems = itemsRef.current;
-    const remainingSlots = MAX_FILES - currentItems.length;
-    const selectedFiles = Array.from(newFiles);
-    const unsupportedCount = selectedFiles.filter((file) => !isAcceptedImage(file)).length;
-    const oversizedFiles = selectedFiles.filter((file) => file.size > MAX_FILE_SIZE_BYTES);
-    const eligibleFiles = selectedFiles.filter(
-      (file) => isAcceptedImage(file) && file.size <= MAX_FILE_SIZE_BYTES
+    const {
+      validFiles,
+      unsupported,
+      oversized: oversizedFiles,
+      skippedByLimit,
+    } = selectFiles(
+      newFiles,
+      currentItems.length,
+      IMAGE_BATCH_MAX_FILES,
+      IMAGE_FILE_MAX_SIZE_BYTES,
+      isAcceptedImage
     );
-    const validFiles = eligibleFiles.slice(0, Math.max(remainingSlots, 0));
-    const skippedByLimit = eligibleFiles.length - validFiles.length;
+    const unsupportedCount = unsupported.length;
     const notices = [
       uploadNotice,
       unsupportedCount ? `${unsupportedCount} unsupported image file(s) were skipped.` : "",
       oversizedFiles.length
-        ? `${oversizedFiles.map((file) => file.name).join(", ")} exceeds the 25 MB file limit.`
+        ? `${oversizedFiles.map((file) => file.name).join(", ")} exceeds the ${formatFileSizeLimit(IMAGE_FILE_MAX_SIZE_BYTES)} file limit.`
         : "",
       skippedByLimit
         ? `${skippedByLimit} image(s) skipped; the limit is ${MAX_FILES} files.`
@@ -192,17 +185,14 @@ export default function ImageResizerTool() {
         error: "",
       };
     });
-    const combined = [...currentItems, ...added];
+    const combined = addItems(currentItems, added);
     commitItems(combined);
-    processBatch(combined, optionsRef.current);
-  }, [commitItems, createTrackedUrl, processBatch]);
+    runBatch(combined, optionsRef.current);
+  }, [addItems, commitItems, createTrackedUrl, runBatch, selectFiles]);
 
   const handleOptionChange = useCallback((nextOptions) => {
     optionsRef.current = nextOptions;
     setOptions(nextOptions);
-    batchIdRef.current += 1;
-    setIsProcessing(false);
-    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     const pending = itemsRef.current.map((item) => ({
       ...item,
       status: "pending",
@@ -210,22 +200,20 @@ export default function ImageResizerTool() {
       outputFilename: getOutputFilename(item.file.name, nextOptions.outputFormat),
     }));
     commitItems(pending);
-    if (!pending.length) return;
-    debounceTimerRef.current = setTimeout(() => {
-      processBatch(itemsRef.current, nextOptions);
-    }, 300);
-  }, [commitItems, processBatch]);
+    if (!pending.length) {
+      invalidateBatch();
+      return;
+    }
+    scheduleReprocess(() => runBatch(itemsRef.current, nextOptions));
+  }, [commitItems, invalidateBatch, runBatch, scheduleReprocess]);
 
   const handleCancel = useCallback(() => {
-    batchIdRef.current += 1;
-    clearTimeout(debounceTimerRef.current);
-    setIsProcessing(false);
-    commitItems(itemsRef.current.map((item) =>
+    cancelBatch(() => commitItems(itemsRef.current.map((item) =>
       item.status === "pending" || item.status === "resizing"
         ? { ...item, status: "cancelled", progress: 0 }
         : item
-    ));
-  }, [commitItems]);
+    )));
+  }, [cancelBatch, commitItems]);
 
   const handleRemove = useCallback((id) => {
     const removed = itemsRef.current.find((item) => item.id === id);
@@ -235,22 +223,20 @@ export default function ImageResizerTool() {
         revokeTrackedUrl(removed.initialThumb);
       }
     }
-    commitItems(itemsRef.current.filter((item) => item.id !== id));
-  }, [commitItems, revokeTrackedUrl]);
+    commitItems(removeItem(itemsRef.current, id));
+  }, [commitItems, removeItem, revokeTrackedUrl]);
 
   const handleClearAll = useCallback(() => {
-    batchIdRef.current += 1;
-    clearTimeout(debounceTimerRef.current);
-    setIsProcessing(false);
+    invalidateBatch();
     for (const item of itemsRef.current) {
       revokeTrackedUrl(item.thumbnailUrl);
       if (item.initialThumb !== item.thumbnailUrl) {
         revokeTrackedUrl(item.initialThumb);
       }
     }
-    commitItems([]);
+    commitItems(clearItems());
     setError("");
-  }, [commitItems, revokeTrackedUrl]);
+  }, [clearItems, commitItems, invalidateBatch, revokeTrackedUrl]);
 
   const handleDownloadAll = useCallback(async () => {
     const ready = itemsRef.current.filter((item) => item.status === "done" && item.blob);

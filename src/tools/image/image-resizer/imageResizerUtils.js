@@ -1,7 +1,8 @@
 import {
   getOutputFilename as sharedGetOutputFilename,
   resolveTargetMimeType,
-} from "../utils/imageSharedUtils.js";
+  IMAGE_OUTPUT_MAX_DIMENSION,
+} from "../utils/imageToolUtils.js";
 
 export const DEFAULT_QUALITY = 80;
 
@@ -134,7 +135,11 @@ export function calculateResizedDimensions(
 
   targetWidth = Math.max(1, Math.round(Number(targetWidth) || 1));
   targetHeight = Math.max(1, Math.round(Number(targetHeight) || 1));
-  const scaleToCap = Math.min(1, 8192 / targetWidth, 8192 / targetHeight);
+  const scaleToCap = Math.min(
+    1,
+    IMAGE_OUTPUT_MAX_DIMENSION / targetWidth,
+    IMAGE_OUTPUT_MAX_DIMENSION / targetHeight
+  );
 
   return {
     width: Math.max(1, Math.floor(targetWidth * scaleToCap)),

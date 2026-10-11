@@ -1,5 +1,5 @@
 import React from "react";
-import { FORMAT_PRESETS } from "../../utils/imageSharedUtils.js";
+import { FORMAT_PRESETS } from "../../utils/imageToolUtils.js";
 import { FIT_MODES, RESIZE_MODES, RESIZE_PRESETS } from "../imageResizerUtils";
 import { FaShieldAlt } from "react-icons/fa";
 

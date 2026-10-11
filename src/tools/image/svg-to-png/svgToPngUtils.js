@@ -7,14 +7,18 @@ import {
   createZipArchive as sharedCreateZipArchive,
   formatFileSize,
   generateUniqueFilenames as sharedGenerateUniqueFilenames,
-} from "../utils/imageSharedUtils.js";
+  SVG_BATCH_MAX_FILES,
+  SVG_FILE_MAX_SIZE_BYTES,
+  IMAGE_OUTPUT_MAX_DIMENSION,
+  formatFileSizeLimit,
+} from "../utils/imageToolUtils.js";
 
-export { formatFileSize };
+export { formatFileSize, formatFileSizeLimit };
 
-export const MAX_FILES = 20;
-export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+export const MAX_FILES = SVG_BATCH_MAX_FILES;
+export const MAX_FILE_SIZE_BYTES = SVG_FILE_MAX_SIZE_BYTES;
 export const DEFAULT_DIMENSION = 512;
-export const MAX_DIMENSION = 8192;
+export const MAX_DIMENSION = IMAGE_OUTPUT_MAX_DIMENSION;
 
 export const SCALE_OPTIONS = [
   { value: "1", label: "1x (Original)" },

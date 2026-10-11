@@ -6,12 +6,16 @@
 import {
   createZipArchive as sharedCreateZipArchive,
   formatFileSize,
+  formatFileSizeLimit,
   generateUniqueFilenames as sharedGenerateUniqueFilenames,
-  MAX_FILE_SIZE_BYTES,
-  MAX_FILES,
-} from "../utils/imageSharedUtils.js";
+} from "../utils/imageToolUtils.js";
 
-export { formatFileSize, MAX_FILE_SIZE_BYTES, MAX_FILES };
+export {
+  formatFileSize,
+  formatFileSizeLimit,
+  IMAGE_FILE_MAX_SIZE_BYTES as MAX_FILE_SIZE_BYTES,
+  IMAGE_BATCH_MAX_FILES as MAX_FILES,
+} from "../utils/imageToolUtils.js";
 
 export const DEFAULT_QUALITY = 85;
 

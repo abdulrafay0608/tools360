@@ -1,0 +1,7 @@
+export const IMAGE_BATCH_MAX_FILES = 30;
+export const IMAGE_FILE_MAX_SIZE_BYTES = 25 * 1024 * 1024;
+export const SVG_BATCH_MAX_FILES = 20;
+export const SVG_FILE_MAX_SIZE_BYTES = 5 * 1024 * 1024;
+export const IMAGE_OUTPUT_MAX_DIMENSION = 8192;
+export const IMAGE_REPROCESS_DEBOUNCE_MS = 300;
+export const IMAGE_BATCH_YIELD_DELAY_MS = 10;

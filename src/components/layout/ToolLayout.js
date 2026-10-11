@@ -1,8 +1,11 @@
 // components/layout/ToolLayout.js
 import React from "react";
 import { FaFilePdf, FaLaptop } from "react-icons/fa";
+import Link from "next/link";
 import AdSlot from "@/components/ads/AdSlot";
 import ToolAdFrame from "@/components/ads/ToolAdFrame";
+import ToolIcon from "@/components/icons/ToolIcon";
+import RelatedTools from "@/components/layout/RelatedTools";
 
 /**
  * ToolLayout — Responsive layout for tool pages.
@@ -15,14 +18,46 @@ import ToolAdFrame from "@/components/ads/ToolAdFrame";
  * - Below tool: "tool-below" (horizontal, both breakpoints)
  * - Content section: "content-mid" (inside SEO content area)
  */
-const ToolLayout = ({ title, description, children, seoContent }) => {
+const ToolLayout = ({
+  title,
+  description,
+  children,
+  seoContent,
+  category,
+  currentToolSlug,
+  trustText = "Files are not uploaded",
+}) => {
   return (
     <main className="min-h-[70vh] bg-[#f4f7f5] text-[#172c27]">
       <div className="border-b border-[#dce5e0] bg-white">
         <div className="mx-auto max-w-7xl px-5 py-5 sm:px-8 sm:py-8 lg:px-12">
           <div className="max-w-4xl">
+            {category && (
+              <nav aria-label="Breadcrumb" className="mb-4 text-sm text-[#62746d]">
+                <ol className="flex flex-wrap items-center gap-2">
+                  <li><Link href="/" className="hover:text-[#173d34]">Home</Link></li>
+                  <li aria-hidden="true">/</li>
+                  <li>
+                    <Link
+                      href={`/tools/category/${category.id}`}
+                      className="inline-flex items-center gap-1.5 hover:text-[#173d34]"
+                    >
+                      <ToolIcon icon={category.icon} className="h-3.5 w-3.5" />
+                      {category.category}
+                    </Link>
+                  </li>
+                  <li aria-hidden="true">/</li>
+                  <li aria-current="page" className="font-medium text-[#173d34]">{title}</li>
+                </ol>
+              </nav>
+            )}
             <div className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#527268] sm:mb-4">
-              <FaFilePdf aria-hidden="true" /> PDF workspace
+              {category ? (
+                <ToolIcon icon={category.icon} className="h-4 w-4" />
+              ) : (
+                <FaFilePdf aria-hidden="true" />
+              )}
+              {category?.category || "Tools workspace"}
             </div>
             <h1 className="text-2xl font-semibold leading-tight sm:text-4xl">
               {title}
@@ -52,7 +87,7 @@ const ToolLayout = ({ title, description, children, seoContent }) => {
                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                   />
                 </svg>
-                Files are not uploaded
+                {trustText}
               </div>
               <div className="flex items-center gap-2 text-sm text-[#527268]">
                 <svg
@@ -81,6 +116,7 @@ const ToolLayout = ({ title, description, children, seoContent }) => {
           <div className="flex flex-col lg:flex-row lg:gap-8">
             <div className="min-w-0 flex-1">
               <div className="border border-[#dce5e0] bg-white">{children}</div>
+              <RelatedTools category={category} currentToolSlug={currentToolSlug} />
 
               <div className="mt-6 lg:mt-8">
                 <AdSlot placement="tool-below" />

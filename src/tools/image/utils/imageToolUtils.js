@@ -1,20 +1,21 @@
 import { downloadZip } from "client-zip";
 
-export const MAX_FILES = 30;
-export const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
+export {
+  IMAGE_BATCH_MAX_FILES,
+  IMAGE_FILE_MAX_SIZE_BYTES,
+  SVG_BATCH_MAX_FILES,
+  SVG_FILE_MAX_SIZE_BYTES,
+  IMAGE_OUTPUT_MAX_DIMENSION,
+  IMAGE_REPROCESS_DEBOUNCE_MS,
+  IMAGE_BATCH_YIELD_DELAY_MS,
+} from "./imageToolConfig.js";
+export {
+  IMAGE_BATCH_MAX_FILES as MAX_FILES,
+  IMAGE_FILE_MAX_SIZE_BYTES as MAX_FILE_SIZE_BYTES,
+} from "./imageToolConfig.js";
 
-export const SUPPORTED_MIME_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-];
-
-export const SUPPORTED_EXTENSIONS = [
-  ".jpg",
-  ".jpeg",
-  ".png",
-  ".webp",
-];
+export const SUPPORTED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
+export const SUPPORTED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
 
 export const FORMAT_PRESETS = [
   { value: "original", label: "Keep original" },
@@ -28,6 +29,10 @@ export function formatFileSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+export function formatFileSizeLimit(maxBytes) {
+  return `${Math.floor(maxBytes / (1024 * 1024))} MB`;
 }
 
 export function getOutputFilename(originalName, outputFormat = "original", suffix = "processed") {
@@ -106,17 +111,12 @@ export async function createZipArchive(
   }
 
   const uniqueNames = generateUniqueFilenames(readyItems, fallbackFilename);
-
   const zipEntries = await Promise.all(
-    readyItems.map(async (item, index) => {
-      const buffer = await item.blob.arrayBuffer();
-      return {
-        name: uniqueNames[index],
-        input: new Uint8Array(buffer),
-      };
-    })
+    readyItems.map(async (item, index) => ({
+      name: uniqueNames[index],
+      input: new Uint8Array(await item.blob.arrayBuffer()),
+    }))
   );
 
-  const zipBlob = await downloadZip(zipEntries).blob();
-  return zipBlob;
+  return downloadZip(zipEntries).blob();
 }

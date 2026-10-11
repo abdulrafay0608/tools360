@@ -1,7 +1,13 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useAdPauseWhile } from "@/hooks/useAdPause";
+import useTrackedObjectUrls from "@/hooks/useTrackedObjectUrls";
+import useImageBatchQueue from "@/hooks/useImageBatchQueue";
+import {
+  markBatchItemsCancelled,
+  updateBatchItemStatus,
+} from "@/hooks/imageBatchQueueUtils.js";
 import { saveAs } from "file-saver";
 import FileUploader from "@/components/pdf/file/FileUploader";
 import ConverterOptionsBar from "./ConverterOptionsBar";
@@ -17,6 +23,7 @@ import {
   DEFAULT_QUALITY,
   MAX_FILES,
   MAX_FILE_SIZE_BYTES,
+  formatFileSizeLimit,
 } from "../imageConverterUtils";
 import { FaLock, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
 
@@ -27,145 +34,80 @@ export default function ImageConverterTool() {
     quality: DEFAULT_QUALITY,
     backgroundColor: "#FFFFFF",
   });
-  const [isProcessing, setIsProcessing] = useState(false);
+  const {
+    isProcessing,
+    processBatch,
+    cancelBatch,
+    scheduleReprocess,
+    invalidateBatch,
+    selectFiles,
+    addItems,
+    removeItem,
+    clearItems,
+  } = useImageBatchQueue();
   const [error, setError] = useState("");
 
   const hiddenInputRef = useRef(null);
-  const activeBatchIdRef = useRef(0);
-  const isCancelledRef = useRef(false);
-  const debounceTimerRef = useRef(null);
-  const objectUrlsRef = useRef(new Set());
   const imagesRef = useRef([]);
   const optionsRef = useRef(options);
+  const { createTrackedUrl, revokeTrackedUrl } = useTrackedObjectUrls();
 
   // Ad pause integration:
   useAdPauseWhile("image-converter-processing", isProcessing);
   useAdPauseWhile("image-converter-error", Boolean(error));
   useAdPauseWhile("image-converter-empty", images.length === 0);
 
-  // Clean up object URLs on unmount
-  useEffect(() => {
-    const urls = objectUrlsRef.current;
-    return () => {
-      clearTimeout(debounceTimerRef.current);
-      activeBatchIdRef.current += 1;
-      for (const url of urls) {
-        URL.revokeObjectURL(url);
-      }
-      urls.clear();
-    };
-  }, []);
-
-  const createTrackedUrl = useCallback((blob) => {
-    const url = URL.createObjectURL(blob);
-    objectUrlsRef.current.add(url);
-    return url;
-  }, []);
-
-  const revokeTrackedUrl = useCallback((url) => {
-    if (url && objectUrlsRef.current.delete(url)) {
-      URL.revokeObjectURL(url);
-    }
-  }, []);
-
   const commitImages = useCallback((nextImages) => {
     imagesRef.current = nextImages;
     setImages(nextImages);
   }, []);
 
-  /**
-   * Sequential batch conversion engine.
-   * Processes images one by one with UI yielding, supporting cancellation.
-   */
-  const processBatch = useCallback(
-    async (itemsToProcess, currentOptions) => {
-      const batchId = ++activeBatchIdRef.current;
-      isCancelledRef.current = false;
-      setIsProcessing(true);
-
-      for (let i = 0; i < itemsToProcess.length; i++) {
-        if (isCancelledRef.current || batchId !== activeBatchIdRef.current) {
-          break;
-        }
-
-        const currentItem = itemsToProcess[i];
-        if (currentItem.status === "error" && !currentItem.file) {
-          continue;
-        }
-
-        // Set status to processing
-        commitImages(
-          imagesRef.current.map((img) =>
-            img.id === currentItem.id ? { ...img, status: "processing" } : img
-          )
-        );
-
-        // Allow UI to breathe
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
-        if (isCancelledRef.current || batchId !== activeBatchIdRef.current) {
-          break;
-        }
-
-        try {
-          const result = await convertSingleImage(currentItem.file, currentOptions);
-
-          if (isCancelledRef.current || batchId !== activeBatchIdRef.current) {
-            break;
+  const runBatch = useCallback((itemsToProcess, currentOptions) => processBatch(
+    itemsToProcess,
+    currentOptions,
+    {
+      shouldProcess: (item) => !(item.status === "error" && !item.file),
+      onStart: (item) => commitImages(updateBatchItemStatus(
+        imagesRef.current,
+        item.id,
+        "processing"
+      )),
+      processItem: (item, batchOptions) => convertSingleImage(item.file, batchOptions),
+      onSuccess: (item, result) => {
+        const targetUrl = createTrackedUrl(result.blob);
+        commitImages(imagesRef.current.map((image) => {
+          if (image.id !== item.id) return image;
+          if (image.thumbnailUrl && image.thumbnailUrl !== targetUrl) {
+            revokeTrackedUrl(image.thumbnailUrl);
           }
-
-          const targetUrl = createTrackedUrl(result.blob);
-
-          commitImages(
-            imagesRef.current.map((img) => {
-              if (img.id !== currentItem.id) return img;
-              if (img.thumbnailUrl && img.thumbnailUrl !== targetUrl) {
-                revokeTrackedUrl(img.thumbnailUrl);
-              }
-              return {
-                ...img,
-                status: result.isSkipped ? "skipped" : "done",
-                blob: result.blob,
-                outputFilename: result.outputFilename,
-                originalFormat: result.originalFormat,
-                targetFormat: result.targetFormat,
-                originalSize: result.originalSize,
-                convertedSize: result.convertedSize,
-                width: result.width || img.width,
-                height: result.height || img.height,
-                note: result.note,
-                thumbnailUrl: targetUrl,
-                error: "",
-              };
-            })
-          );
-        } catch (err) {
-          if (isCancelledRef.current || batchId !== activeBatchIdRef.current) {
-            break;
-          }
-
-          commitImages(
-            imagesRef.current.map((img) =>
-              img.id === currentItem.id
-                ? {
-                    ...img,
-                    status: "error",
-                    error: err?.message || "Failed to convert image.",
-                  }
-                : img
-            )
-          );
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      }
-
-      if (batchId === activeBatchIdRef.current) {
-        setIsProcessing(false);
-      }
-    },
-    [commitImages, createTrackedUrl, revokeTrackedUrl]
-  );
+          return {
+            ...image,
+            status: result.isSkipped ? "skipped" : "done",
+            blob: result.blob,
+            outputFilename: result.outputFilename,
+            originalFormat: result.originalFormat,
+            targetFormat: result.targetFormat,
+            originalSize: result.originalSize,
+            convertedSize: result.convertedSize,
+            width: result.width || image.width,
+            height: result.height || image.height,
+            note: result.note,
+            thumbnailUrl: targetUrl,
+            error: "",
+          };
+        }));
+      },
+      onError: (item, cause) => commitImages(imagesRef.current.map((image) =>
+        image.id === item.id
+          ? {
+              ...image,
+              status: "error",
+              error: cause?.message || "Failed to convert image.",
+            }
+          : image
+      )),
+    }
+  ), [commitImages, createTrackedUrl, processBatch, revokeTrackedUrl]);
 
   /**
    * File upload and validation handler.
@@ -173,17 +115,18 @@ export default function ImageConverterTool() {
   const handleUpload = useCallback(
     (newFiles, uploadNotice = "") => {
       const currentList = imagesRef.current;
-      const remainingSlots = MAX_FILES - currentList.length;
-      const selected = Array.from(newFiles);
-
-      const unsupported = selected.filter((file) => !isAcceptedConvertInput(file));
-      const oversized = selected.filter((file) => file.size > MAX_FILE_SIZE_BYTES);
-      const eligible = selected.filter(
-        (file) => isAcceptedConvertInput(file) && file.size <= MAX_FILE_SIZE_BYTES
+      const {
+        validFiles,
+        unsupported,
+        oversized,
+        skippedByLimit,
+      } = selectFiles(
+        newFiles,
+        currentList.length,
+        MAX_FILES,
+        MAX_FILE_SIZE_BYTES,
+        isAcceptedConvertInput
       );
-
-      const validFiles = eligible.slice(0, Math.max(0, remainingSlots));
-      const skippedByLimit = eligible.length - validFiles.length;
 
       const noticeParts = [
         uploadNotice,
@@ -191,7 +134,7 @@ export default function ImageConverterTool() {
           ? `${unsupported.length} unsupported file(s) (e.g., SVG, HEIC, PDF) were skipped.`
           : "",
         oversized.length
-          ? `${oversized.map((f) => f.name).join(", ")} exceeds the 25 MB file limit.`
+          ? `${oversized.map((f) => f.name).join(", ")} exceeds the ${formatFileSizeLimit(MAX_FILE_SIZE_BYTES)} file limit.`
           : "",
         skippedByLimit
           ? `${skippedByLimit} image(s) skipped; maximum limit is ${MAX_FILES} images.`
@@ -225,11 +168,11 @@ export default function ImageConverterTool() {
         };
       });
 
-      const updated = [...currentList, ...newItems];
+      const updated = addItems(currentList, newItems);
       commitImages(updated);
-      processBatch(updated, optionsRef.current);
+      runBatch(updated, optionsRef.current);
     },
-    [commitImages, createTrackedUrl, processBatch]
+    [addItems, commitImages, createTrackedUrl, runBatch, selectFiles]
   );
 
   /**
@@ -241,12 +184,6 @@ export default function ImageConverterTool() {
       optionsRef.current = nextOptions;
       setOptions(nextOptions);
 
-      // Cancel current running batch
-      activeBatchIdRef.current += 1;
-      isCancelledRef.current = true;
-      setIsProcessing(false);
-      clearTimeout(debounceTimerRef.current);
-
       // Reset items to pending with new target format
       const targetUpper = nextOptions.targetFormat.toUpperCase() === "JPEG" ? "JPG" : nextOptions.targetFormat.toUpperCase();
       const resetItems = imagesRef.current.map((img) => ({
@@ -257,30 +194,24 @@ export default function ImageConverterTool() {
       }));
       commitImages(resetItems);
 
-      if (resetItems.length === 0) return;
+      if (resetItems.length === 0) {
+        invalidateBatch();
+        return;
+      }
 
-      // Debounce re-processing
-      debounceTimerRef.current = setTimeout(() => {
-        processBatch(imagesRef.current, nextOptions);
-      }, 300);
+      scheduleReprocess(() => runBatch(imagesRef.current, nextOptions));
     },
-    [commitImages, processBatch]
+    [commitImages, invalidateBatch, runBatch, scheduleReprocess]
   );
 
   const handleCancelBatch = useCallback(() => {
-    isCancelledRef.current = true;
-    activeBatchIdRef.current += 1;
-    clearTimeout(debounceTimerRef.current);
-    setIsProcessing(false);
-
-    commitImages(
-      imagesRef.current.map((img) =>
-        img.status === "processing" || img.status === "pending"
-          ? { ...img, status: "error", error: "Conversion cancelled" }
-          : img
-      )
-    );
-  }, [commitImages]);
+    cancelBatch(() => commitImages(markBatchItemsCancelled(
+      imagesRef.current,
+      ["processing", "pending"],
+      "error",
+      { error: "Conversion cancelled" }
+    )));
+  }, [cancelBatch, commitImages]);
 
   const handleRemove = useCallback(
     (id) => {
@@ -288,25 +219,22 @@ export default function ImageConverterTool() {
       if (target && target.thumbnailUrl) {
         revokeTrackedUrl(target.thumbnailUrl);
       }
-      commitImages(imagesRef.current.filter((img) => img.id !== id));
+      commitImages(removeItem(imagesRef.current, id));
     },
-    [commitImages, revokeTrackedUrl]
+    [commitImages, removeItem, revokeTrackedUrl]
   );
 
   const handleClearAll = useCallback(() => {
-    isCancelledRef.current = true;
-    activeBatchIdRef.current += 1;
-    clearTimeout(debounceTimerRef.current);
-    setIsProcessing(false);
+    invalidateBatch();
 
     for (const img of imagesRef.current) {
       if (img.thumbnailUrl) {
         revokeTrackedUrl(img.thumbnailUrl);
       }
     }
-    commitImages([]);
+    commitImages(clearItems());
     setError("");
-  }, [commitImages, revokeTrackedUrl]);
+  }, [clearItems, commitImages, invalidateBatch, revokeTrackedUrl]);
 
   const handleDownloadSingle = useCallback((item) => {
     if (!item.blob || !item.outputFilename) return;
@@ -369,7 +297,7 @@ export default function ImageConverterTool() {
             <FaCheckCircle className="h-3 w-3 text-[#235c4f]" /> Up to {MAX_FILES} images
           </span>
           <span className="flex items-center gap-1.5">
-            <FaCheckCircle className="h-3 w-3 text-[#235c4f]" /> Up to 25 MB each
+            <FaCheckCircle className="h-3 w-3 text-[#235c4f]" /> Up to {formatFileSizeLimit(MAX_FILE_SIZE_BYTES)} each
           </span>
         </div>
       </div>

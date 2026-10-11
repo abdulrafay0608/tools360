@@ -1,7 +1,10 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useAdPauseWhile } from "@/hooks/useAdPause";
+import useTrackedObjectUrls from "@/hooks/useTrackedObjectUrls";
+import useImageBatchQueue from "@/hooks/useImageBatchQueue";
+import { updateBatchItemStatus } from "@/hooks/imageBatchQueueUtils.js";
 import { saveAs } from "file-saver";
 import FileUploader from "@/components/pdf/file/FileUploader";
 import ImageCompressorOptionsBar from "./ImageCompressorOptionsBar";
@@ -15,6 +18,7 @@ import {
   MAX_FILES,
   MAX_FILE_SIZE_BYTES,
   DEFAULT_QUALITY,
+  formatFileSizeLimit,
 } from "../imageCompressorUtils";
 import { FaLock, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
 
@@ -25,136 +29,73 @@ export default function ImageCompressorTool() {
     outputFormat: "original",
     maxDimension: "none",
   });
-  const [isProcessing, setIsProcessing] = useState(false);
+  const {
+    isProcessing,
+    processBatch,
+    cancelBatch,
+    scheduleReprocess,
+    invalidateBatch,
+    addItems,
+    removeItemAt,
+    clearItems,
+  } = useImageBatchQueue();
   const [error, setError] = useState("");
 
   const hiddenInputRef = useRef(null);
-  const activeBatchIdRef = useRef(0);
-  const isCancelledRef = useRef(false);
-  const objectUrlsRef = useRef(new Set());
+  const { createTrackedUrl, revokeTrackedUrl } = useTrackedObjectUrls();
 
   // Ad pause integration:
   useAdPauseWhile("image-compressor-processing", isProcessing);
   useAdPauseWhile("image-compressor-error", Boolean(error));
   useAdPauseWhile("image-compressor-empty", images.length === 0);
 
-  // Clean up all allocated object URLs on unmount
-  useEffect(() => {
-    return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      for (const url of objectUrlsRef.current) {
-        URL.revokeObjectURL(url);
-      }
-    };
-  }, []);
-
-  const createTrackedUrl = useCallback((blob) => {
-    const url = URL.createObjectURL(blob);
-    objectUrlsRef.current.add(url);
-    return url;
-  }, []);
-
-  const revokeTrackedUrl = useCallback((url) => {
-    if (url) {
-      objectUrlsRef.current.delete(url);
-      URL.revokeObjectURL(url);
+  const runBatch = useCallback((itemsToProcess, currentOptions) => processBatch(
+    itemsToProcess,
+    currentOptions,
+    {
+      shouldProcess: (item) => !(item.status === "error" && !item.file),
+      onStart: (item) => setImages((prev) =>
+        updateBatchItemStatus(prev, item.id, "processing")
+      ),
+      processItem: (item, batchOptions) => compressSingleImage(item.file, batchOptions),
+      onSuccess: (item, result) => {
+        if (item.thumbnailUrl && item.thumbnailUrl !== item.initialThumb) {
+          revokeTrackedUrl(item.thumbnailUrl);
+        }
+        const newThumbnail = createTrackedUrl(result.blob);
+        setImages((prev) => prev.map((image) => image.id === item.id
+          ? {
+              ...image,
+              status: result.isAlreadyOptimized ? "already-optimized" : "done",
+              blob: result.blob,
+              outputFilename: result.outputFilename,
+              compressedSize: result.compressedSize,
+              savedBytes: result.savedBytes,
+              percentageSaved: result.percentageSaved,
+              originalWidth: result.originalWidth,
+              originalHeight: result.originalHeight,
+              targetWidth: result.targetWidth,
+              targetHeight: result.targetHeight,
+              wasDownscaled: result.wasDownscaled,
+              thumbnailUrl: newThumbnail,
+              error: false,
+              errorMessage: "",
+            }
+          : image
+        ));
+      },
+      onError: (item, cause) => setImages((prev) => prev.map((image) =>
+        image.id === item.id
+          ? {
+              ...image,
+              status: "error",
+              error: true,
+              errorMessage: cause.message || "Failed to compress",
+            }
+          : image
+      )),
     }
-  }, []);
-
-  /**
-   * Sequential compression engine.
-   * Processes images one by one with UI yielding, supporting cancellation.
-   */
-  const processBatch = useCallback(
-    async (itemsToProcess, currentOptions) => {
-      const batchId = ++activeBatchIdRef.current;
-      isCancelledRef.current = false;
-      setIsProcessing(true);
-
-      for (let i = 0; i < itemsToProcess.length; i++) {
-        if (isCancelledRef.current || batchId !== activeBatchIdRef.current) {
-          break;
-        }
-
-        const currentItem = itemsToProcess[i];
-        if (currentItem.status === "error" && !currentItem.file) {
-          continue;
-        }
-
-        // Set status to processing
-        setImages((prev) =>
-          prev.map((img) =>
-            img.id === currentItem.id ? { ...img, status: "processing" } : img
-          )
-        );
-
-        // Allow UI to breathe
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
-        try {
-          const result = await compressSingleImage(currentItem.file, currentOptions);
-
-          if (isCancelledRef.current || batchId !== activeBatchIdRef.current) {
-            break;
-          }
-
-          // Revoke prior thumbnail URL if different
-          if (currentItem.thumbnailUrl && currentItem.thumbnailUrl !== currentItem.initialThumb) {
-            revokeTrackedUrl(currentItem.thumbnailUrl);
-          }
-
-          const newThumbnail = createTrackedUrl(result.blob);
-
-          setImages((prev) =>
-            prev.map((img) => {
-              if (img.id !== currentItem.id) return img;
-              return {
-                ...img,
-                status: result.isAlreadyOptimized ? "already-optimized" : "done",
-                blob: result.blob,
-                outputFilename: result.outputFilename,
-                compressedSize: result.compressedSize,
-                savedBytes: result.savedBytes,
-                percentageSaved: result.percentageSaved,
-                originalWidth: result.originalWidth,
-                originalHeight: result.originalHeight,
-                targetWidth: result.targetWidth,
-                targetHeight: result.targetHeight,
-                wasDownscaled: result.wasDownscaled,
-                thumbnailUrl: newThumbnail,
-                error: false,
-                errorMessage: "",
-              };
-            })
-          );
-        } catch (err) {
-          if (isCancelledRef.current || batchId !== activeBatchIdRef.current) {
-            break;
-          }
-
-          setImages((prev) =>
-            prev.map((img) => {
-              if (img.id !== currentItem.id) return img;
-              return {
-                ...img,
-                status: "error",
-                error: true,
-                errorMessage: err.message || "Failed to compress",
-              };
-            })
-          );
-        }
-
-        // Allow UI to update between images
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      }
-
-      if (batchId === activeBatchIdRef.current) {
-        setIsProcessing(false);
-      }
-    },
-    [createTrackedUrl, revokeTrackedUrl]
-  );
+  ), [createTrackedUrl, processBatch, revokeTrackedUrl]);
 
   /**
    * Upload handler for FileUploader and Add More
@@ -184,8 +125,7 @@ export default function ImageCompressorTool() {
 
       for (const file of filesArray) {
         if (file.size > MAX_FILE_SIZE_BYTES) {
-          const maxMb = Math.floor(MAX_FILE_SIZE_BYTES / (1024 * 1024));
-          skippedErrors.push(`${file.name} exceeds ${maxMb} MB limit`);
+          skippedErrors.push(`${file.name} exceeds ${formatFileSizeLimit(MAX_FILE_SIZE_BYTES)} limit`);
         } else if (!isAcceptedImage(file)) {
           skippedErrors.push(`${file.name} is not a valid image format`);
         } else {
@@ -221,48 +161,39 @@ export default function ImageCompressorTool() {
       });
 
       setImages((prev) => {
-        const combined = [...prev, ...newItems];
-        processBatch(newItems, options);
+        const combined = addItems(prev, newItems);
+        runBatch(newItems, options);
         return combined;
       });
     },
-    [images.length, createTrackedUrl, processBatch, options]
+    [addItems, images.length, createTrackedUrl, runBatch, options]
   );
 
   /**
    * Options change handler with debouncing
    */
-  const debounceTimerRef = useRef(null);
-
   const handleOptionChange = useCallback(
     (key, value) => {
       setOptions((prev) => {
         const next = { ...prev, [key]: value };
-        setIsProcessing(true);
-
-        if (debounceTimerRef.current) {
-          clearTimeout(debounceTimerRef.current);
-        }
-
-        debounceTimerRef.current = setTimeout(() => {
+        scheduleReprocess(() => {
           setImages((currImages) => {
             if (currImages.length > 0) {
               const itemsToRecompress = currImages.map((img) => ({
                 ...img,
                 status: "pending",
               }));
-              processBatch(itemsToRecompress, next);
+              runBatch(itemsToRecompress, next);
               return itemsToRecompress;
             }
-            setIsProcessing(false);
             return currImages;
           });
-        }, 300);
+        }, true);
 
         return next;
       });
     },
-    [processBatch]
+    [runBatch, scheduleReprocess]
   );
 
   /**
@@ -298,19 +229,17 @@ export default function ImageCompressorTool() {
         if (itemToRemove?.initialThumb && itemToRemove.initialThumb !== itemToRemove.thumbnailUrl) {
           revokeTrackedUrl(itemToRemove.initialThumb);
         }
-        return prev.filter((_, i) => i !== index);
+        return removeItemAt(prev, index);
       });
     },
-    [revokeTrackedUrl]
+    [removeItemAt, revokeTrackedUrl]
   );
 
   /**
    * Clear all images
    */
   const handleClearAll = useCallback(() => {
-    isCancelledRef.current = true;
-    activeBatchIdRef.current++;
-    setIsProcessing(false);
+    invalidateBatch();
 
     images.forEach((img) => {
       if (img.thumbnailUrl) revokeTrackedUrl(img.thumbnailUrl);
@@ -319,21 +248,19 @@ export default function ImageCompressorTool() {
       }
     });
 
-    setImages([]);
+    setImages(clearItems());
     setError("");
-  }, [images, revokeTrackedUrl]);
+  }, [clearItems, images, invalidateBatch, revokeTrackedUrl]);
 
   /**
    * Cancel batch
    */
   const handleCancelBatch = useCallback(() => {
-    isCancelledRef.current = true;
-    activeBatchIdRef.current++;
-    setIsProcessing(false);
+    cancelBatch();
     setImages((prev) =>
       prev.map((img) => (img.status === "processing" || img.status === "pending" ? { ...img, status: "pending" } : img))
     );
-  }, []);
+  }, [cancelBatch]);
 
   const handleAddMoreClick = () => {
     if (hiddenInputRef.current) {
@@ -377,11 +304,11 @@ export default function ImageCompressorTool() {
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
             <FaCheckCircle className="h-3 w-3 text-[#235c4f]" />
-            Batch up to 30 files
+            Batch up to {MAX_FILES} files
           </span>
           <span className="flex items-center gap-1.5">
             <FaCheckCircle className="h-3 w-3 text-[#235c4f]" />
-            Up to 25 MB each
+            Up to {formatFileSizeLimit(MAX_FILE_SIZE_BYTES)} each
           </span>
         </div>
       </div>
