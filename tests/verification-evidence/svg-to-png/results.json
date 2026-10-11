@@ -1,0 +1,205 @@
+{
+  "baseUrl": "http://127.0.0.1:4321",
+  "date": "2026-10-11T11:44:05.572Z",
+  "results": [
+    {
+      "name": "PNG magic bytes and exact dimensions — original / 2x / custom-width",
+      "result": "PASS",
+      "evidence": {
+        "original": [
+          100,
+          100
+        ],
+        "scale2x": [
+          200,
+          200
+        ],
+        "custom": [
+          400,
+          400
+        ]
+      }
+    },
+    {
+      "name": "8192px cap preserves aspect ratio",
+      "result": "PASS",
+      "evidence": {
+        "scale4x": [
+          6400,
+          3600
+        ],
+        "cappedAt8192": [
+          8192,
+          4608
+        ]
+      }
+    },
+    {
+      "name": "viewBox-only SVG uses viewBox dimensions (200×150)",
+      "result": "PASS",
+      "evidence": {
+        "viewBoxDimensions": [
+          200,
+          150
+        ]
+      }
+    },
+    {
+      "name": "no-dimensions SVG defaults to 512×512 and shows user badge",
+      "result": "PASS",
+      "evidence": {
+        "defaultDimensions": [
+          512,
+          512
+        ],
+        "badgeVisible": true
+      }
+    },
+    {
+      "name": "transparent background preserves alpha=0 at transparent corners",
+      "result": "PASS",
+      "evidence": {
+        "dimensions": [
+          80,
+          80
+        ],
+        "cornerAlpha": 0
+      }
+    },
+    {
+      "name": "colored background fills PNG with the chosen color",
+      "result": "PASS",
+      "evidence": {
+        "cornerPixel": [
+          255,
+          255,
+          255,
+          255
+        ]
+      }
+    },
+    {
+      "name": "SECURITY upload: malicious SVG script does not execute, sanitized badge shown",
+      "result": "PASS",
+      "evidence": {
+        "scriptRan": false,
+        "badgeText": "Sanitized (9 unsafe elements removed)"
+      }
+    },
+    {
+      "name": "SECURITY paste: malicious SVG script does not execute in preview or queue",
+      "result": "PASS",
+      "evidence": {
+        "scriptAfterPreview": false,
+        "scriptAfterQueue": false,
+        "pasteInfoVisible": true,
+        "pasteInfoText": "Sanitized (9 unsafe SVG items removed)",
+        "externalRequests": []
+      }
+    },
+    {
+      "name": "SECURITY: zero external network requests during malicious SVG processing",
+      "result": "PASS",
+      "evidence": {
+        "externalRequestsDuringUpload": 0,
+        "maliciousRequests": [],
+        "scriptRan": false
+      }
+    },
+    {
+      "name": "errors: invalid XML shows error; non-SVG and oversized skipped; valid file still processes",
+      "result": "PASS",
+      "evidence": {
+        "oversizedSkipped": true,
+        "invalidXmlShowsError": true
+      }
+    },
+    {
+      "name": "20-file batch limit: 21st file is rejected with clear message",
+      "result": "PASS",
+      "evidence": {
+        "itemCount": 20,
+        "bannerShown": true
+      }
+    },
+    {
+      "name": "paste mode: textarea → live preview → add to queue → download PNG",
+      "result": "PASS",
+      "evidence": {
+        "previewIsBlobUrl": true,
+        "dimensions": [
+          100,
+          100
+        ]
+      }
+    },
+    {
+      "name": "single file download uses .png extension and correct base filename",
+      "result": "PASS",
+      "evidence": {
+        "filename": "with-text.png"
+      }
+    },
+    {
+      "name": "multi-file download creates ZIP with all PNG files and unique names",
+      "result": "PASS",
+      "evidence": {
+        "zipCount": 3,
+        "names": [
+          "simple-shape.png",
+          "viewbox-only.png",
+          "with-text.png"
+        ]
+      }
+    },
+    {
+      "name": "375px mobile layout: no horizontal overflow, no ad overlap",
+      "result": "PASS",
+      "evidence": {
+        "viewportWidth": 375,
+        "bodyScrollWidth": 375,
+        "overlaps": []
+      }
+    },
+    {
+      "name": "regression: Image Converter upload → convert → download",
+      "result": "PASS",
+      "evidence": {
+        "filename": "large-photo.png",
+        "magicBytes": "PNG",
+        "dimensions": [
+          2400,
+          1600
+        ],
+        "initialJpgState": "skipped",
+        "convertedState": "done"
+      }
+    },
+    {
+      "name": "regression: Rotate PDF upload, rotate, export, and reopen result",
+      "result": "PASS",
+      "evidence": {
+        "pageCards": 6,
+        "downloadedFilename": "organize-six-page-rotated-rotated.pdf",
+        "reopenedPageCount": 6,
+        "rotations": [
+          90,
+          180,
+          90,
+          90,
+          0,
+          90
+        ]
+      }
+    },
+    {
+      "name": "no console errors or file data requests throughout the run",
+      "result": "PASS",
+      "evidence": {
+        "errorCount": 0,
+        "totalRequests": 727,
+        "postRequests": 0
+      }
+    }
+  ]
+}

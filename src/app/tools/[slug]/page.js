@@ -294,7 +294,9 @@ export default async function ToolPage({ params }) {
           tool.slug === "rotate-pdf" ||
           tool.slug === "add-page-numbers" ||
           tool.slug === "image-compressor" ||
-          tool.slug === "image-resizer"
+          tool.slug === "image-resizer" ||
+          tool.slug === "image-converter" ||
+          tool.slug === "svg-to-png"
             ? null
             : tool.description
         }
@@ -303,7 +305,9 @@ export default async function ToolPage({ params }) {
           tool.slug === "rotate-pdf" ||
           tool.slug === "add-page-numbers" ||
           tool.slug === "image-compressor" ||
-          tool.slug === "image-resizer" ? null : (
+          tool.slug === "image-resizer" ||
+          tool.slug === "image-converter" ||
+          tool.slug === "svg-to-png" ? null : (
               <ToolSEOContent tool={tool} content={content} />
             )
         }

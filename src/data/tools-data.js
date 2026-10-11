@@ -583,6 +583,13 @@ export const toolsData = [
         description: "Resize images to specific dimensions.",
       },
       {
+        name: "Image Converter",
+        slug: "image-converter",
+        icon: "image",
+        available: true,
+        description: "Convert images between JPG, PNG and WebP.",
+      },
+      {
         name: "Favicon Generator",
         slug: "favicon-generator",
         icon: "color",
@@ -604,6 +611,7 @@ export const toolsData = [
         name: "SVG to PNG Converter",
         slug: "svg-to-png",
         icon: "image",
+        available: true,
         description: "Convert SVG images to PNG format.",
       },
       {

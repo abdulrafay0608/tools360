@@ -1,0 +1,24 @@
+{
+  "result": "PASS",
+  "fixture": "tests\\fixtures\\organize-six-page-rotated.pdf",
+  "pageCards": 6,
+  "filename": "organize-six-page-rotated-rotated.pdf",
+  "expectedRotations": [
+    90,
+    180,
+    90,
+    90,
+    0,
+    90
+  ],
+  "exportedRotations": [
+    90,
+    180,
+    90,
+    90,
+    0,
+    90
+  ],
+  "consoleErrors": [],
+  "outputPath": "D:\\Abdul-Rafay\\service-type\\tools360\\tests\\verification-evidence\\svg-to-png\\rotate-pdf-isolated\\rotated-result.pdf"
+}

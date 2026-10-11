@@ -62,6 +62,20 @@ const toolMap = {
       loading: () => <ToolLoader />,
     }
   ),
+  "image-converter": dynamic(
+    () => import("@/tools/image/image-converter/page"),
+    {
+      ssr: false,
+      loading: () => <ToolLoader />,
+    }
+  ),
+  "svg-to-png": dynamic(
+    () => import("@/tools/image/svg-to-png/page"),
+    {
+      ssr: false,
+      loading: () => <ToolLoader />,
+    }
+  ),
 };
 
 export default function ToolRenderer({ slug }) {

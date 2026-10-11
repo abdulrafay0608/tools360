@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="100">
+  <rect width="300" height="100" fill="#f8faf9"/>
+  <text x="150" y="60" font-family="sans-serif" font-size="24" text-anchor="middle" fill="#173d34">Hello SVG</text>
+</svg>

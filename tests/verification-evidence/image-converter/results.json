@@ -1,0 +1,118 @@
+{
+  "baseUrl": "http://127.0.0.1:4318",
+  "results": [
+    {
+      "name": "input to output conversion pairs verify valid magic bytes and unchanged dimensions",
+      "result": "PASS",
+      "evidence": {
+        "pngDimensions": [
+          2400,
+          1600
+        ],
+        "outputTypesVerified": [
+          "png",
+          "webp"
+        ]
+      }
+    },
+    {
+      "name": "transparency to JPG fills background and displays clear warning",
+      "result": "PASS",
+      "evidence": {
+        "warningText": "Converting transparent image(s) to JPG fills background with the selected color.",
+        "pixelSample": [
+          255,
+          255,
+          255,
+          255
+        ]
+      }
+    },
+    {
+      "name": "EXIF orientation 6 image exports upright",
+      "result": "PASS",
+      "evidence": {
+        "width": 150,
+        "height": 300
+      }
+    },
+    {
+      "name": "same-format files are skipped with clear UI note",
+      "result": "PASS",
+      "evidence": {
+        "badgeText": "Already JPG"
+      }
+    },
+    {
+      "name": "multi-file ZIP packaging produces correct extensions and duplicate-safe names",
+      "result": "PASS",
+      "evidence": {
+        "count": 2,
+        "names": [
+          "large-photo.png",
+          "sample.png"
+        ],
+        "entries": [
+          {
+            "name": "large-photo.png",
+            "size": 1536338
+          },
+          {
+            "name": "sample.png",
+            "size": 51392
+          }
+        ]
+      }
+    },
+    {
+      "name": "unsupported, corrupted, oversized files are handled without halting batch",
+      "result": "PASS",
+      "evidence": {
+        "bannerText": "1 unsupported file(s) (e.g., SVG, HEIC, PDF) were skipped. oversized-26mb.jpg exceeds the 25 MB file limit.Dismiss"
+      }
+    },
+    {
+      "name": "31-file batch limit retains 30 and continues processing",
+      "result": "PASS",
+      "evidence": {
+        "count": 30,
+        "bannerText": "1 image(s) skipped; maximum limit is 30 images.Dismiss"
+      }
+    },
+    {
+      "name": "large 8000x6000 image leaves UI responsive",
+      "result": "PASS",
+      "evidence": {
+        "heartbeat": 9,
+        "viewportWidth": 1280,
+        "outputDimensions": [
+          8000,
+          6000
+        ]
+      }
+    },
+    {
+      "name": "375px responsive layout and no ad overlap",
+      "result": "PASS",
+      "evidence": {
+        "viewport": 375,
+        "body": 375,
+        "overlaps": []
+      }
+    },
+    {
+      "name": "Image Compressor, Image Resizer, and PDF tool pages render successfully",
+      "result": "PASS",
+      "evidence": "Compressor, Resizer, and Rotate PDF tools rendered cleanly."
+    },
+    {
+      "name": "privacy and console integrity (local only, no external payloads)",
+      "result": "PASS",
+      "evidence": {
+        "nonLocalRequests": [],
+        "failedRequests": [],
+        "consoleErrors": []
+      }
+    }
+  ]
+}
