@@ -5,8 +5,7 @@ import {
   getAvailableCategories,
   getCategoryBySlug,
 } from "@/data/toolsDataUtils";
-
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://tools360.com";
+import { getAbsoluteUrl } from "@/config/site";
 
 export const dynamicParams = false;
 
@@ -22,7 +21,7 @@ export async function generateMetadata({ params }) {
   }
 
   const title = `${category.category} | Tools360`;
-  const url = `${BASE_URL}/tools/category/${category.id}`;
+  const url = getAbsoluteUrl(`/tools/category/${category.id}`);
   return {
     title,
     description: category.description,

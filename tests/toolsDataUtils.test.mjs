@@ -12,6 +12,7 @@ import {
   getVisibleTools,
 } from "../src/data/toolsDataUtils.js";
 import sitemap from "../src/app/sitemap.js";
+import { SITE_URL } from "../src/config/site.js";
 
 test("all tools belong to exactly one uniquely slugged category", () => {
   const categories = getCategories();
@@ -104,11 +105,11 @@ test("sitemap contains only live tools and categories with live tools", () => {
   const entries = sitemap();
   const urls = entries.map((entry) => entry.url);
   const liveToolUrls = getLiveTools().map(
-    (tool) => `https://techtools360.com.pk/tools/${tool.slug}`
+    (tool) => `${SITE_URL}/tools/${tool.slug}`
   );
   const liveCategoryUrls = getCategoriesWithLiveTools().map(
     (category) =>
-      `https://techtools360.com.pk/tools/category/${category.id}`
+      `${SITE_URL}/tools/category/${category.id}`
   );
 
   assert.ok(liveToolUrls.every((url) => urls.includes(url)));

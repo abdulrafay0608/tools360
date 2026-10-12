@@ -1,7 +1,18 @@
+import { getAbsoluteUrl } from "@/config/site";
+
+const pageUrl = getAbsoluteUrl("/privacy");
+
 export const metadata = {
   title: "Privacy Policy | Tools360",
   description:
     "How Tools360 handles files, cookies, advertising, and analytics.",
+  alternates: { canonical: pageUrl },
+  openGraph: {
+    title: "Privacy Policy | Tools360",
+    description:
+      "How Tools360 handles files, cookies, advertising, and analytics.",
+    url: pageUrl,
+  },
 };
 
 export default function PrivacyPage() {

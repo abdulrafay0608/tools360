@@ -1,6 +1,24 @@
 import Link from "next/link";
 import ToolCard from "@/components/ui/ToolCard";
 import { getCategoriesWithLiveTools } from "@/data/toolsDataUtils";
+import { SITE_URL } from "@/config/site";
+
+const title = "Tools360 | Simple PDF Tools";
+const description =
+  "Merge, split, and process PDF files with focused tools that run in your browser.";
+
+export const metadata = {
+  title,
+  description,
+  alternates: { canonical: SITE_URL },
+  openGraph: {
+    title,
+    description,
+    url: SITE_URL,
+    siteName: "Tools360",
+    type: "website",
+  },
+};
 
 export default function Home() {
   const categories = getCategoriesWithLiveTools();

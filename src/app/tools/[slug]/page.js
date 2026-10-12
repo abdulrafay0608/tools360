@@ -2,10 +2,9 @@ import { notFound } from "next/navigation";
 import { getLiveTools, getToolCategory } from "@/data/toolsDataUtils";
 import ToolLayout from "@/components/layout/ToolLayout";
 import ToolRenderer from "@/components/layout/ToolRenderer";
+import { getAbsoluteUrl } from "@/config/site";
 
 export const dynamicParams = false;
-
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://tools360.com";
 
 export async function generateStaticParams() {
   return getLiveTools().map((tool) => ({ slug: tool.slug }));
@@ -26,7 +25,7 @@ export async function generateMetadata({ params }) {
   const description =
     tool.description ||
     `Use ${tool.name} in your browser. Files are processed locally and are not uploaded.`;
-  const url = `${BASE_URL}/tools/${tool.slug}`;
+  const url = getAbsoluteUrl(`/tools/${tool.slug}`);
 
   return {
     title,
@@ -232,7 +231,7 @@ export default async function ToolPage({ params }) {
 
   const category = getToolCategory(tool.slug);
   const content = getToolContent(tool);
-  const toolUrl = `${BASE_URL}/tools/${tool.slug}`;
+  const toolUrl = getAbsoluteUrl(`/tools/${tool.slug}`);
 
   // JSON-LD Schemas: WebApplication + FAQPage
   const jsonLd = {
