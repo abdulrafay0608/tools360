@@ -16,7 +16,7 @@ import { useState, useCallback, useEffect } from "react";
  */
 
 const CONSENT_ENABLED = false;
-const CONSENT_KEY = "tools360_ad_consent";
+const CONSENT_KEY = "techtools360_ad_consent";
 
 /**
  * @returns {{

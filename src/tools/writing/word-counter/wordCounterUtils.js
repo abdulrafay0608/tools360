@@ -1,8 +1,6 @@
-const ENGLISH_STOP_WORDS = new Set([
-  "a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "from",
-  "in", "is", "it", "of", "on", "or", "that", "the", "this", "to", "was",
-  "were", "with",
-]);
+import { ENGLISH_STOP_WORDS } from "./wordCounterData.js";
+
+export { ENGLISH_STOP_WORDS };
 
 function getSegmenter(granularity) {
   if (typeof Intl !== "undefined" && typeof Intl.Segmenter === "function") {

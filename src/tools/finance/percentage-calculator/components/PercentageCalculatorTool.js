@@ -2,26 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Button from "@/components/ui/Button";
+import { calculatePercentage } from "../percentageCalculatorUtils";
 import {
-  calculatePercentage,
   PERCENTAGE_MODES,
-} from "../percentageCalculatorUtils";
-
-const MODE_LABELS = {
-  "percent-of": "X% of Y",
-  "is-what-percent": "X is what % of Y",
-  change: "Percentage change",
-  "add-percent": "Add X% to Y",
-  "subtract-percent": "Subtract X% from Y",
-};
-
-const FIELD_LABELS = {
-  "percent-of": ["Percentage (X)", "Value (Y)"],
-  "is-what-percent": ["Part (X)", "Whole (Y)"],
-  change: ["Original value", "New value"],
-  "add-percent": ["Percentage (X)", "Value (Y)"],
-  "subtract-percent": ["Percentage (X)", "Value (Y)"],
-};
+  MODE_LABELS,
+  FIELD_LABELS,
+} from "../percentageCalculatorData";
 
 export default function PercentageCalculatorTool() {
   const [mode, setMode] = useState(PERCENTAGE_MODES[0]);

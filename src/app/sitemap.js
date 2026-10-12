@@ -1,48 +1,35 @@
+import { SITE_URL, SITE_LAST_UPDATED } from "../config/site.js";
 import {
   getCategoriesWithLiveTools,
   getLiveTools,
 } from "../data/toolsDataUtils.js";
 
 export default function sitemap() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://techtools360.com.pk";
-
   const availableTools = getLiveTools().map((tool) => ({
-    url: `${baseUrl}/tools/${tool.slug}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly",
-    priority: 0.8,
+    url: `${SITE_URL}/tools/${tool.slug}`,
+    lastModified: tool.updatedAt ? new Date(tool.updatedAt) : SITE_LAST_UPDATED,
   }));
   const categories = getCategoriesWithLiveTools().map((category) => ({
-    url: `${baseUrl}/tools/category/${category.id}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly",
-    priority: 0.7,
+    url: `${SITE_URL}/tools/category/${category.id}`,
+    lastModified: SITE_LAST_UPDATED,
   }));
 
   return [
     {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 1.0,
+      url: SITE_URL,
+      lastModified: SITE_LAST_UPDATED,
     },
     {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.5,
+      url: `${SITE_URL}/about`,
+      lastModified: SITE_LAST_UPDATED,
     },
     {
-      url: `${baseUrl}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.4,
+      url: `${SITE_URL}/privacy`,
+      lastModified: SITE_LAST_UPDATED,
     },
     {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.4,
+      url: `${SITE_URL}/contact`,
+      lastModified: SITE_LAST_UPDATED,
     },
     ...categories,
     ...availableTools,

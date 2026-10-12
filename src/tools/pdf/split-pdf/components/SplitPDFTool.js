@@ -6,7 +6,7 @@ import { useAdPauseWhile } from "@/hooks/useAdPause";
 import { PDFDocument } from "pdf-lib";
 import FileUploader from "@/components/pdf/file/FileUploader";
 import usePDFJS from "@/hooks/usePDFJS";
-import download from "downloadjs";
+import { saveAs } from "file-saver";
 import { downloadZip } from "client-zip";
 import RangeInputs from "./RangeInputs";
 import FixedSplitInput from "./FixedSplitInput";
@@ -234,7 +234,7 @@ const SplitPDFTool = () => {
 
     const blob = await downloadZip(files).blob();
     const fileName = `split-document-${Date.now()}.zip`;
-    download(blob, fileName, "application/zip");
+    saveAs(blob, fileName);
     setStatusMessage(`${files.length} PDF files are ready. ZIP download started.`);
   };
 
@@ -268,7 +268,7 @@ const SplitPDFTool = () => {
 
     const blob = await downloadZip(files).blob();
     const fileName = `split-document-${Date.now()}.zip`;
-    download(blob, fileName, "application/zip");
+    saveAs(blob, fileName);
     setStatusMessage(`${files.length} PDF files are ready. ZIP download started.`);
   };
 

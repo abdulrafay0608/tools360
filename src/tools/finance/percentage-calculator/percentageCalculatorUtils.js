@@ -1,10 +1,6 @@
-export const PERCENTAGE_MODES = [
-  "percent-of",
-  "is-what-percent",
-  "change",
-  "add-percent",
-  "subtract-percent",
-];
+import { PERCENTAGE_MODES } from "./percentageCalculatorData.js";
+
+export { PERCENTAGE_MODES };
 
 function parseValue(value, label) {
   if (value === "" || value === null || value === undefined) {

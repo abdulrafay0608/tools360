@@ -33,6 +33,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -40,3 +41,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated verification evidence
+tests/verification-evidence/
+
+# generated pdf worker
+public/pdf.worker.min.mjs
+
+# generated large test fixtures
+tests/fixtures/huge-8000x6000.jpg
+tests/fixtures/oversized-26mb.jpg
+tests/fixtures/batch-test-*.jpg
+tests/fixtures/svg/oversized-6mb.svg

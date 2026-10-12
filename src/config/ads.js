@@ -1,7 +1,7 @@
 /**
  * src/config/ads.js
  *
- * Central advertising configuration for Tools360.
+ * Central advertising configuration.
  *
  * To activate real AdSense:
  * 1. Set `enabled` to true.

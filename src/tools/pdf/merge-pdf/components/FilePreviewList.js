@@ -11,14 +11,14 @@ const FilePreviewList = ({
 }) => {
   const handleDragStart = (e, index) => {
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("application/x-tools360-file-index", String(index));
+    e.dataTransfer.setData("application/x-techtools360-file-index", String(index));
   };
 
   const handleDrop = (e, index) => {
     e.preventDefault();
     e.stopPropagation();
     const draggedIndex = Number(
-      e.dataTransfer.getData("application/x-tools360-file-index")
+      e.dataTransfer.getData("application/x-techtools360-file-index")
     );
     if (!Number.isInteger(draggedIndex) || draggedIndex === index) return;
     onReorder(draggedIndex, index);

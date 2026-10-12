@@ -5,8 +5,7 @@ import {
   getAvailableCategories,
   getCategoryBySlug,
 } from "@/data/toolsDataUtils";
-
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://tools360.com";
+import { SITE_URL, SITE_NAME } from "@/config/site";
 
 export const dynamicParams = false;
 
@@ -18,20 +17,20 @@ export async function generateMetadata({ params }) {
   const { category: categorySlug } = await params;
   const category = getCategoryBySlug(categorySlug);
   if (!category || !category.tools.some((tool) => tool.available === true)) {
-    return { title: "Category Not Found | Tools360" };
+    return { title: "Category Not Found" };
   }
 
-  const title = `${category.category} | Tools360`;
-  const url = `${BASE_URL}/tools/category/${category.id}`;
+  const fullTitle = `${category.category} | ${SITE_NAME}`;
+  const url = `${SITE_URL}/tools/category/${category.id}`;
   return {
-    title,
+    title: category.category,
     description: category.description,
     alternates: { canonical: url },
     openGraph: {
-      title,
+      title: fullTitle,
       description: category.description,
       url,
-      siteName: "Tools360",
+      siteName: SITE_NAME,
       type: "website",
     },
   };

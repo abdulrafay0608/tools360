@@ -17,33 +17,19 @@ export {
   IMAGE_BATCH_MAX_FILES as MAX_FILES,
 } from "../utils/imageToolUtils.js";
 
-export const DEFAULT_QUALITY = 85;
+import {
+  DEFAULT_QUALITY,
+  TARGET_FORMATS,
+  SUPPORTED_INPUT_EXTENSIONS,
+  SUPPORTED_INPUT_MIMES,
+} from "./imageConverterData.js";
 
-export const TARGET_FORMATS = [
-  { value: "jpg", label: "JPG", ext: ".jpg", mime: "image/jpeg" },
-  { value: "png", label: "PNG", ext: ".png", mime: "image/png" },
-  { value: "webp", label: "WebP", ext: ".webp", mime: "image/webp" },
-];
-
-export const SUPPORTED_INPUT_EXTENSIONS = [
-  ".jpg",
-  ".jpeg",
-  ".png",
-  ".webp",
-  ".bmp",
-  ".gif",
-  ".avif",
-];
-
-export const SUPPORTED_INPUT_MIMES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/bmp",
-  "image/x-ms-bmp",
-  "image/gif",
-  "image/avif",
-];
+export {
+  DEFAULT_QUALITY,
+  TARGET_FORMATS,
+  SUPPORTED_INPUT_EXTENSIONS,
+  SUPPORTED_INPUT_MIMES,
+};
 
 /**
  * Detects the input format normalized as "JPG", "PNG", "WebP", "GIF", "BMP", "AVIF".

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ToolCard from "@/components/ui/ToolCard";
 import { getCategoriesWithLiveTools } from "@/data/toolsDataUtils";
+import { HOME_CONTENT } from "@/content/site/home";
 
 export default function Home() {
   const categories = getCategoriesWithLiveTools();
@@ -11,18 +12,17 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10 lg:px-12">
           <div className="max-w-4xl">
             <h1 className="max-w-3xl text-3xl font-semibold leading-tight text-[#173d34] sm:text-4xl">
-              Tools for everyday tasks.
+              {HOME_CONTENT.hero.title}
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-[#5d706a] sm:text-base">
-              Find focused tools for documents, images, code, writing, finance,
-              and more.
+              {HOME_CONTENT.hero.subtitle}
             </p>
           </div>
         </div>
       </section>
 
       <nav
-        aria-label="Tool categories"
+        aria-label={HOME_CONTENT.categoriesNavAriaLabel}
         className="sticky top-0 z-20 border-b border-[#dce5e0] bg-white/95 backdrop-blur"
       >
         <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-5 py-3 sm:px-8 lg:px-12">
@@ -47,7 +47,7 @@ export default function Home() {
         >
           <div className="mb-7 flex flex-wrap items-end justify-between gap-3 border-b border-[#d7e0dc] pb-5">
             <div>
-              <p className="text-sm font-medium text-[#527268]">Browse category</p>
+              <p className="text-sm font-medium text-[#527268]">{HOME_CONTENT.browseCategoryLabel}</p>
               <h2 className="mt-1 text-2xl font-semibold">{category.category}</h2>
             </div>
             <p className="max-w-sm text-sm leading-6 text-[#5d706a]">
@@ -71,7 +71,7 @@ export default function Home() {
               href={`/tools/category/${category.id}`}
               className="mt-5 inline-flex text-sm font-medium text-[#235c4f] hover:underline"
             >
-              View all {category.category.toLowerCase()} →
+              {HOME_CONTENT.viewAllCategoryTemplate(category.category)}
             </Link>
           )}
         </section>

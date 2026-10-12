@@ -6,13 +6,15 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const genRef = useRef(0); // for stale-async guard
+  const filesRef = useRef(files);
+  filesRef.current = files;
 
   // create a stable dependency for files
   const fileKeys = useMemo(() => {
     if (Array.isArray(files)) {
-      return files.map((f) => f.name + "|" + f.size);
+      return files.map((f) => f.name + "|" + f.size + "|" + f.lastModified);
     } else if (files instanceof File) {
-      return [files.name + "|" + files.size];
+      return [files.name + "|" + files.size + "|" + files.lastModified];
     }
     return [];
   }, [files]);
@@ -20,9 +22,10 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
   useEffect(() => {
     const generateThumbnails = async () => {
       const thisGen = ++genRef.current; // increment generation ID
+      const currentFiles = filesRef.current;
       if (
         !pdfjs ||
-        ((!files || fileKeys.length === 0) &&
+        ((!currentFiles || fileKeys.length === 0) &&
           (mode === "file" || mode === "page"))
       ) {
         setThumbnails([]);
@@ -35,7 +38,7 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
         if (mode === "file") {
           // For merge tool - generate first page of each file
           const thumbs = await Promise.all(
-            files.map(async (file) => {
+            currentFiles.map(async (file) => {
               try {
                 const data = await file.arrayBuffer();
                 const pdf = await pdfjs.getDocument({ data }).promise;
@@ -62,7 +65,7 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
           if (thisGen === genRef.current) setThumbnails(thumbs);
         } else {
           // For split tool - generate all pages of a single file
-          const data = await files.arrayBuffer();
+          const data = await currentFiles.arrayBuffer();
           const pdf = await pdfjs.getDocument({ data }).promise;
           setTotalPages(pdf.numPages);
 

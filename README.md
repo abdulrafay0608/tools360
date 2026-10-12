@@ -1,94 +1,113 @@
-# Tools360
+# Tech Tools 360
 
-Tools360 is a fast, browser-based web application for common PDF tasks and developer utilities. All processing runs 100% client-side in the browser for privacy and speed.
-
----
-
-## Working Tool Routes
-
-- **Merge PDF** (`/tools/merge-pdf`): Accepts multiple PDFs, previews pages with draggable reordering, and merges them directly in the browser.
-- **Split PDF** (`/tools/split-pdf`): Splits a PDF by custom page ranges or fixed-size page groups and downloads a ZIP file.
-- **Compress PDF** (`/tools/compress-pdf`): Rewrites PDF structures and metadata in the browser and reports actual size savings.
-- **Compare PDF** (`/tools/compare-pdf`): Advanced dual-document comparison tool featuring side-by-side view, transparency overlay (10-90% opacity), visual difference map, and progressive background scanning.
-- **JPG to PDF** (`/tools/jpg-to-pdf`): Converts single or multiple JPG, PNG, WEBP, or BMP images into individual PDFs (ZIP) or a single combined PDF document. Includes page orientation controls, page size presets, margins, and individual rotation.
-- **PDF to JPG** (`/tools/pdf-to-jpg`): Converts PDF pages into high-resolution JPG images with adjustable image quality (Low/Medium/High) and DPI scaling (1x ~96 DPI, 1.5x ~150 DPI, 2x ~300 DPI). Supports instant single-page JPG downloads or batch selected-pages ZIP export.
+Tech Tools 360 is a fast, privacy-focused, browser-based web application providing everyday utility tools for documents, images, and calculations. All core processing executes 100% client-side in the user's browser—no user files or private data are ever uploaded to external servers.
 
 ---
 
-## Component Architecture
+## Live Tools Catalog
 
-### PDF to JPG (`src/tools/pdf/pdf-to-jpg/`)
-```
-src/tools/pdf/pdf-to-jpg/
-├── page.js                             # Tool route entry point
-├── pdfToJpgUtils.js                    # PDF.js rasterization & ZIP packaging engine
-└── components/
-    ├── PdfToJpgTool.js                # State orchestrator component
-    ├── PdfToJpgHeader.js              # Selected PDF summary bar & size warnings
-    ├── PdfToJpgPageGrid.js            # Page thumbnails grid with selection & quick download
-    └── PdfToJpgOptionsBar.js          # Settings panel for quality, DPI resolution, and ZIP export
-```
+Tech Tools 360 currently features 18 live client-side tools across 3 categories:
 
-### JPG to PDF (`src/tools/pdf/jpg-to-pdf/`)
-```
-src/tools/pdf/jpg-to-pdf/
-├── page.js                             # Tool route entry point
-├── jpgToPdfUtils.js                    # pdf-lib image embedding & page positioning engine
-└── components/
-    ├── JpgToPdfTool.js                # State orchestrator component
-    ├── ImagePreviewGrid.js            # Interactive grid of images with reorder, rotate & delete
-    └── JpgToPdfOptionsBar.js          # Settings panel for orientation, page size, margins & filename
-```
+### PDF Tools
+- **Merge PDF** (`/tools/merge-pdf`): Combine multiple PDF documents in custom order.
+- **Split PDF** (`/tools/split-pdf`): Extract page ranges or split into fixed-size chunks packaged as a ZIP.
+- **Compress PDF** (`/tools/compress-pdf`): Optimize and reduce PDF file size in the browser.
+- **Organize PDF** (`/tools/organize-pdf`): Reorder, rotate, delete, and duplicate pages with drag-and-drop.
+- **Rotate PDF** (`/tools/rotate-pdf`): Rotate individual or all PDF pages at 90-degree increments.
+- **Add Page Numbers** (`/tools/add-page-numbers`): Add customized page numbers with positioning, formatting, and margin controls.
+- **PDF to JPG** (`/tools/pdf-to-jpg`): Convert PDF pages to high-resolution JPG images with DPI and quality settings.
+- **JPG to PDF** (`/tools/jpg-to-pdf`): Convert JPG, PNG, and other images to standardized PDF documents.
+- **Sign PDF** (`/tools/sign-pdf`): Draw, type, or upload signatures and place them on PDF pages.
+- **Compare PDF** (`/tools/compare-pdf`): Compare two PDF documents with side-by-side, overlay, and diff-map views.
 
-### Compare PDF (`src/tools/pdf/compare-pdf/`)
-```
-src/tools/pdf/compare-pdf/
-├── page.js                             # Tool route entry point
-├── compareUtils.js                     # Pixel diff algorithm & severity calculations
-└── components/
-    ├── ComparePDFTool.js              # State orchestrator & layout container
-    ├── CompareUploadLanding.js        # Consistent initial 2-slot file uploader
-    ├── CompareHeaderBar.js            # Selected files bar, swap button, & stats summary
-    ├── CompareControlsToolbar.js      # View mode tabs, page navigation & zoom controls
-    ├── PageThumbnailStrip.js          # Sidebar thumbnail list with diff status badges
-    ├── SideBySideView.js              # Synchronized dual-pane page viewer
-    ├── OverlayView.js                 # Transparency overlay page viewer with opacity slider
-    ├── DiffMapView.js                 # Pixel difference map viewer & legend
-    └── KeyboardShortcutsModal.js      # Accessible keyboard shortcut guide popover
-```
+### Image Tools
+- **Image Compressor** (`/tools/image-compressor`): Batch compress images (JPG, PNG, WebP) with live preview and savings calculation.
+- **Image Resizer** (`/tools/image-resizer`): Resize images by exact pixels, percentage, or social media presets with aspect locking.
+- **Image Converter** (`/tools/image-converter`): Convert between JPG, PNG, WebP, GIF, and BMP formats client-side.
+- **SVG to PNG** (`/tools/svg-to-png`): Rasterize SVG vector graphics into high-resolution PNG images with sanitization.
+
+### Calculators
+- **Percentage Calculator** (`/tools/percentage-calculator`): Calculate percentage differences, increases, decreases, and fractions.
+- **Loan EMI Calculator** (`/tools/loan-emi-calculator`): Compute monthly loan payments, total interest, and amortization breakdowns.
+- **Age Calculator** (`/tools/age-calculator`): Calculate precise age in years, months, days, hours, and minutes.
+- **Word Counter** (`/tools/word-counter`): Real-time analysis of words, characters, sentences, paragraphs, and reading time.
 
 ---
 
-## Local Development
+## Quick Start & Local Development
 
 ### Requirements
-
-- Node.js (18+ recommended)
+- Node.js 18+ (tested with Node 20 / 22 / 24)
 - npm
 
-### Quick Start
-
+### Installation & Server
 ```bash
-# Install dependencies
+# Install dependencies (automatically runs postinstall to copy pdf worker)
 npm install
 
-# Run dev server
+# Start local Next.js development server
 npm run dev
-
-# Run linting
-npm run lint
-
-# Run unit tests
-npm test
 
 # Run production build
 npm run build
-```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+# Start production server
+npm run start
+```
 
 ---
 
-## License & Privacy
+## Scripts & Testing
 
-All file processing runs locally inside the user's browser context. No uploaded documents are sent to any external server.
+### Package Scripts
+- `npm run dev`: Launch the Next.js dev server at `http://localhost:3000`
+- `npm run build`: Compile the production Next.js build
+- `npm run start`: Serve the compiled production build
+- `npm run lint`: Run ESLint across all codebase files (must report 0 errors, 0 warnings)
+- `npm run test`: Run the native Node.js test runner (`node --test`)
+
+### Running Unit Tests
+Unit tests cover pure mathematical algorithms, parsing logic, boundary conditions, and data invariants:
+```bash
+npm test
+```
+
+### Generating Test Fixtures
+To generate synthetic test fixtures for automated testing:
+```bash
+# PDF test fixtures (multipage, corrupted, protected, etc.)
+node scripts/generate-fixtures.mjs
+
+# Image test fixtures (large photos, transparent PNG, EXIF orientation, etc.)
+node scripts/generate-image-fixtures.mjs
+
+# SVG test fixtures (sanitization tests, viewBox, oversized, etc.)
+node scripts/generate-svg-fixtures.mjs
+```
+
+### Running Automated Playwright Verifiers
+Playwright verifiers execute end-to-end user journeys against a running server:
+```bash
+node scripts/verify-image-compressor.mjs
+node scripts/verify-image-resizer.mjs
+node scripts/verify-image-converter.mjs
+node scripts/verify-svg-to-png.mjs
+node scripts/verify-rotate-pdf.mjs
+node scripts/verify-add-page-numbers.mjs
+node scripts/verify-organize-pdf.mjs
+node scripts/verify-four-calculators.mjs
+node scripts/verify-ad-slots.mjs
+```
+
+---
+
+## Documentation
+
+- [Architecture Guide](docs/ARCHITECTURE.md): Comprehensive system design, data flow, and directory structure.
+- [How to Add a Tool](docs/HOW_TO_ADD_A_TOOL.md): Step-by-step checklist and guide for implementing new tools.
+
+---
+
+## Privacy & Security
+
+Tech Tools 360 processes all files and data strictly inside the user's web browser using WebAssembly, HTML5 Canvas, and client-side JavaScript. No document content, images, or calculation inputs are transmitted to or stored on any server.

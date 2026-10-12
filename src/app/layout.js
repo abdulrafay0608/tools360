@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
+import { SITE_URL, SITE_NAME } from "@/config/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,9 +15,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Tools360 | Simple PDF Tools",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} | Free PDF, Image & Calculator Tools`,
+    template: `%s | ${SITE_NAME}`,
+  },
   description:
-    "Merge, split, and process PDF files with focused tools that run in your browser.",
+    "Free and private browser-based utilities for PDF documents, image editing and conversion, and everyday calculators. All processing runs locally in your browser.",
+  openGraph: {
+    title: `${SITE_NAME} | Free PDF, Image & Calculator Tools`,
+    description:
+      "Free and private browser-based utilities for PDF documents, image editing and conversion, and everyday calculators. All processing runs locally in your browser.",
+    siteName: SITE_NAME,
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -24,9 +36,7 @@ export default function RootLayout({ children }) {
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        data-new-gr-c-s-check-loaded="14.1246.0"
-        data-gr-ext-installed=""
-        cz-shortcut-listen="true"
+        suppressHydrationWarning
       >
         <Navbar />
         {children}

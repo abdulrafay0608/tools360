@@ -60,6 +60,7 @@ const PDFPreviewItem = ({
       <div className="flex h-32 items-center justify-center overflow-hidden bg-[#f4f7f5]">
         {pdfjsLoaded ? (
           thumbnail ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={thumbnail}
               alt={

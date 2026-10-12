@@ -1,8 +1,11 @@
-# Tools360 Product Implementation Plan
+# Tech Tools 360 Product Implementation Plan
+
+> [!WARNING]
+> **OBSOLETE DOCUMENT**: This implementation plan reflects the initial prototype state prior to Waves 1–6 and Wave 0 cleanup. The codebase has evolved to include 18 live client-side tools across PDF, Image, and Calculator suites with a unified category model and tool configuration registry. Retained for historical reference only.
 
 ## Goal
 
-Turn Tools360 from a broad prototype catalog into a reliable, accessible, and maintainable toolkit that can earn user trust before ads or subscriptions are introduced. Work in small releases; only mark and index a tool as available after its complete workflow and failure states are verified.
+Turn Tech Tools 360 from a broad prototype catalog into a reliable, accessible, and maintainable toolkit that can earn user trust before ads or subscriptions are introduced. Work in small releases; only mark and index a tool as available after its complete workflow and failure states are verified.
 
 ## Current Baseline
 

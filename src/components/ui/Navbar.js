@@ -5,34 +5,30 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaFilePdf } from "react-icons/fa";
 import { getCategoriesWithLiveTools } from "@/data/toolsDataUtils";
+import { SITE_NAME } from "@/config/site";
+import { NAV_LINKS } from "@/content/site/navigation";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const categories = getCategoriesWithLiveTools();
-  const links = [
-    { href: "/", label: "Tools" },
-    { href: "/about", label: "About" },
-    { href: "/privacy", label: "Privacy" },
-    { href: "/contact", label: "Contact" },
-  ];
 
   return (
     <header className="border-b border-[#dce5e0] bg-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center px-5 sm:px-8 lg:px-12">
         <Link
           href="/"
-          aria-label="Tools360 home"
+          aria-label={`${SITE_NAME} home`}
           className="inline-flex shrink-0 items-center gap-2.5 text-lg font-semibold text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#235c4f]"
         >
           <span className="flex size-8 items-center justify-center bg-[#eaf3ed] text-[#235c4f]">
             <FaFilePdf aria-hidden="true" className="h-4 w-4" />
           </span>
-          <span>Tools360</span>
+          <span>{SITE_NAME}</span>
         </Link>
 
         <nav aria-label="Main navigation" className="ml-auto hidden h-full items-center gap-7 text-sm font-medium md:flex">
-          {links.map(({ href, label }) => (
+          {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
@@ -111,7 +107,7 @@ export default function Navbar() {
           aria-label="Mobile navigation"
           className="border-t border-[#e6ece9] bg-white px-5 py-2 sm:px-8 md:hidden"
         >
-          {links.map(({ href, label }) => (
+          {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
               href={href}

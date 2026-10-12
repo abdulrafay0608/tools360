@@ -1,14 +1,9 @@
-export const CURRENCY_OPTIONS = [
-  { code: "USD", label: "USD — US Dollar" },
-  { code: "EUR", label: "EUR — Euro" },
-  { code: "GBP", label: "GBP — British Pound" },
-  { code: "INR", label: "INR — Indian Rupee" },
-  { code: "PKR", label: "PKR — Pakistani Rupee" },
-  { code: "AED", label: "AED — UAE Dirham" },
-  { code: "CUSTOM", label: "Custom symbol" },
-];
+import {
+  CURRENCY_OPTIONS,
+  MAX_TENURE_MONTHS,
+} from "./loanEmiCalculatorData.js";
 
-const MAX_TENURE_MONTHS = 40 * 12;
+export { CURRENCY_OPTIONS, MAX_TENURE_MONTHS };
 
 function roundMoney(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100;

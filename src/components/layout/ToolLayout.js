@@ -6,6 +6,7 @@ import AdSlot from "@/components/ads/AdSlot";
 import ToolAdFrame from "@/components/ads/ToolAdFrame";
 import ToolIcon from "@/components/icons/ToolIcon";
 import RelatedTools from "@/components/layout/RelatedTools";
+import { TRUST_POINTS } from "@/content/site/common";
 
 /**
  * ToolLayout — Responsive layout for tool pages.
@@ -25,7 +26,7 @@ const ToolLayout = ({
   seoContent,
   category,
   currentToolSlug,
-  trustText = "Files are not uploaded",
+  trustText = TRUST_POINTS.filesNotUploaded,
 }) => {
   return (
     <main className="min-h-[70vh] bg-[#f4f7f5] text-[#172c27]">
@@ -70,7 +71,7 @@ const ToolLayout = ({
 
             <div className="mt-3 flex flex-wrap justify-start gap-x-5 gap-y-2 sm:mt-5">
               <div className="flex items-center gap-2 text-sm text-[#527268]">
-                <FaLaptop className="mr-1" aria-hidden="true" /> Processed in your browser
+                <FaLaptop className="mr-1" aria-hidden="true" /> {TRUST_POINTS.processedInBrowser}
               </div>
               <div className="flex items-center gap-2 text-sm text-[#527268]">
                 <svg
@@ -104,7 +105,7 @@ const ToolLayout = ({
                     d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                   />
                 </svg>
-                No account required
+                {TRUST_POINTS.noAccountRequired}
               </div>
             </div>
           </div>
