@@ -1,6 +1,16 @@
+import { getAbsoluteUrl } from "@/config/site";
+
+const pageUrl = getAbsoluteUrl("/contact");
+
 export const metadata = {
   title: "Contact | Tools360",
   description: "How to reach Tools360 about the browser-based PDF tools.",
+  alternates: { canonical: pageUrl },
+  openGraph: {
+    title: "Contact | Tools360",
+    description: "How to reach Tools360 about the browser-based PDF tools.",
+    url: pageUrl,
+  },
 };
 
 export default function ContactPage() {
