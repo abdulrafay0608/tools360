@@ -5,7 +5,7 @@ import {
   getAvailableCategories,
   getCategoryBySlug,
 } from "@/data/toolsDataUtils";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { getAbsoluteUrl, SITE_NAME } from "@/config/site";
 
 export const dynamicParams = false;
 
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }) {
   }
 
   const fullTitle = `${category.category} | ${SITE_NAME}`;
-  const url = `${SITE_URL}/tools/category/${category.id}`;
+  const url = getAbsoluteUrl(`/tools/category/${category.id}`);
   return {
     title: category.category,
     description: category.description,

@@ -2,6 +2,21 @@ import Link from "next/link";
 import ToolCard from "@/components/ui/ToolCard";
 import { getCategoriesWithLiveTools } from "@/data/toolsDataUtils";
 import { HOME_CONTENT } from "@/content/site/home";
+import { SITE_NAME, SITE_URL } from "@/config/site";
+
+export const metadata = {
+  alternates: {
+    canonical: SITE_URL,
+  },
+  openGraph: {
+    title: `${SITE_NAME} | Free PDF, Image & Calculator Tools`,
+    description:
+      "Free and private browser-based utilities for PDF documents, image editing and conversion, and everyday calculators. All processing runs locally in your browser.",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    type: "website",
+  },
+};
 
 export default function Home() {
   const categories = getCategoriesWithLiveTools();

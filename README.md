@@ -2,6 +2,11 @@
 
 Tech Tools 360 is a fast, privacy-focused, browser-based web application providing everyday utility tools for documents, images, and calculations. All core processing executes 100% client-side in the user's browser—no user files or private data are ever uploaded to external servers.
 
+The configured production origin is `https://techtools360.vercel.app`. Set
+`NEXT_PUBLIC_SITE_URL` to that exact origin in production so canonical metadata,
+Open Graph URLs, `robots.txt`, and `sitemap.xml` remain aligned. The build rejects
+values containing a path, query, hash, or credentials.
+
 ---
 
 ## Live Tools Catalog

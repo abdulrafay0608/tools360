@@ -1,4 +1,4 @@
-import { SITE_URL } from "@/config/site";
+import { getAbsoluteUrl } from "../config/site.js";
 
 export default function robots() {
   return {
@@ -7,6 +7,6 @@ export default function robots() {
       allow: "/",
       disallow: ["/api/"],
     },
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    sitemap: getAbsoluteUrl("/sitemap.xml"),
   };
 }

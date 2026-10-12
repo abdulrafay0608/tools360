@@ -1,15 +1,18 @@
-import { CONTACT_EMAIL, SITE_NAME } from "@/config/site";
+import { CONTACT_EMAIL, getAbsoluteUrl, SITE_NAME } from "@/config/site";
 import { getContactContent } from "@/content/pages/contact";
 import ArticlePageLayout from "@/components/layout/ArticlePageLayout";
 
 const content = getContactContent({ siteName: SITE_NAME, contactEmail: CONTACT_EMAIL });
+const pageUrl = getAbsoluteUrl("/contact");
 
 export const metadata = {
   title: content.metaTitle,
   description: content.metaDescription,
+  alternates: { canonical: pageUrl },
   openGraph: {
     title: `${content.metaTitle} | ${SITE_NAME}`,
     description: content.metaDescription,
+    url: pageUrl,
   },
 };
 

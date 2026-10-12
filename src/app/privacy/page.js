@@ -1,16 +1,19 @@
 import { Fragment } from "react";
-import { SITE_NAME } from "@/config/site";
+import { getAbsoluteUrl, SITE_NAME } from "@/config/site";
 import { getPrivacyContent } from "@/content/pages/privacy";
 import ArticlePageLayout from "@/components/layout/ArticlePageLayout";
 
 const content = getPrivacyContent({ siteName: SITE_NAME });
+const pageUrl = getAbsoluteUrl("/privacy");
 
 export const metadata = {
   title: content.metaTitle,
   description: content.metaDescription,
+  alternates: { canonical: pageUrl },
   openGraph: {
     title: `${content.metaTitle} | ${SITE_NAME}`,
     description: content.metaDescription,
+    url: pageUrl,
   },
 };
 

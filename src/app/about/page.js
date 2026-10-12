@@ -1,15 +1,18 @@
-import { SITE_NAME } from "@/config/site";
+import { getAbsoluteUrl, SITE_NAME } from "@/config/site";
 import { getAboutContent } from "@/content/pages/about";
 import ArticlePageLayout from "@/components/layout/ArticlePageLayout";
 
 const content = getAboutContent({ siteName: SITE_NAME });
+const pageUrl = getAbsoluteUrl("/about");
 
 export const metadata = {
   title: content.metaTitle,
   description: content.metaDescription,
+  alternates: { canonical: pageUrl },
   openGraph: {
     title: `${content.metaTitle} | ${SITE_NAME}`,
     description: content.metaDescription,
+    url: pageUrl,
   },
 };
 

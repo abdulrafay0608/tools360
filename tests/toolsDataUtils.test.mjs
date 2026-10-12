@@ -12,6 +12,7 @@ import {
   getVisibleTools,
 } from "../src/data/toolsDataUtils.js";
 import sitemap from "../src/app/sitemap.js";
+import robots from "../src/app/robots.js";
 import { SITE_URL } from "../src/config/site.js";
 
 test("all tools belong to exactly one uniquely slugged category", () => {
@@ -131,4 +132,11 @@ test("sitemap contains only live tools and categories with live tools", () => {
         .some((tool) => url.endsWith(`/tools/${tool.slug}`))
     )
   );
+});
+
+test("sitemap and robots use one canonical production origin", () => {
+  const entries = sitemap();
+  assert.ok(entries.length > 0);
+  assert.ok(entries.every((entry) => new URL(entry.url).origin === SITE_URL));
+  assert.equal(robots().sitemap, `${SITE_URL}/sitemap.xml`);
 });

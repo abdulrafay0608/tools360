@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getLiveTools, getToolCategory } from "@/data/toolsDataUtils";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { getAbsoluteUrl, SITE_URL, SITE_NAME } from "@/config/site";
 import { getToolPageConfig } from "@/config/toolPageConfig";
 import { getToolContent } from "@/content/tools";
 import ToolLayout from "@/components/layout/ToolLayout";
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }) {
   const description =
     tool.description ||
     `Use ${tool.name} in your browser. Files are processed locally and are not uploaded.`;
-  const url = `${SITE_URL}/tools/${tool.slug}`;
+  const url = getAbsoluteUrl(`/tools/${tool.slug}`);
 
   return {
     title: `${tool.name} Online`,
@@ -149,7 +149,7 @@ export default async function ToolPage({ params }) {
   const category = getToolCategory(tool.slug);
   const config = getToolPageConfig(tool.slug);
   const content = config.hasSeoContent ? getToolContent(tool.slug) : null;
-  const toolUrl = `${SITE_URL}/tools/${tool.slug}`;
+  const toolUrl = getAbsoluteUrl(`/tools/${tool.slug}`);
 
   const shouldRenderFaq = Boolean(
     config.showFaqSchema &&
