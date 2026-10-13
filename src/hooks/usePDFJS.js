@@ -1,5 +1,6 @@
 // src/hooks/usePDFJS.js
 import { useState, useEffect, useCallback } from "react";
+import { initializePDFJS, PDFJS_LOAD_ERROR } from "./pdfjsLoader.js";
 
 const usePDFJS = () => {
   const [pdfjs, setPdfjs] = useState(null);
@@ -11,11 +12,11 @@ const usePDFJS = () => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       setIsLoading(true);
-      import("pdfjs-dist/build/pdf")
+      initializePDFJS({
+        importPDFJS: () => import("pdfjs-dist/build/pdf"),
+        origin: window.location.origin,
+      })
         .then((pdfjsModule) => {
-          // Use local same-origin worker from /public or fallback to exact version CDN
-          pdfjsModule.GlobalWorkerOptions.workerSrc =
-            window.location.origin + "/pdf.worker.min.mjs";
           setPdfjs(pdfjsModule);
           setError("");
           setIsLoading(false);
@@ -23,7 +24,7 @@ const usePDFJS = () => {
         .catch((error) => {
           console.error("Error loading PDF.js:", error);
           setPdfjs(null);
-          setError("PDF processing could not start. Check your connection and retry.");
+          setError(error.message || PDFJS_LOAD_ERROR);
           setIsLoading(false);
         });
     }

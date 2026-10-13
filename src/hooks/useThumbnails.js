@@ -1,11 +1,16 @@
 // src/hooks/usePDFThumbnails.js
 import { useState, useEffect, useMemo, useRef } from "react";
+import {
+  createPdfThumbnailLifecycle,
+  createThumbnailGenerationGuard,
+} from "./pdfThumbnailLifecycle.js";
 
 const usePDFThumbnails = (files, pdfjs, mode = "file") => {
   const [thumbnails, setThumbnails] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
-  const genRef = useRef(0); // for stale-async guard
+  const generationGuardRef = useRef(null);
+  if (!generationGuardRef.current) generationGuardRef.current = createThumbnailGenerationGuard();
 
   // create a stable dependency for files
   const fileKeys = useMemo(() => {
@@ -19,22 +24,9 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
 
   useEffect(() => {
     let active = true;
-    const loadingTasks = new Set();
-    const documents = new Set();
-    const renderTasks = new Set();
-    const thisGen = ++genRef.current;
-    const isCurrent = () => active && thisGen === genRef.current;
-    const destroyDocument = async (pdf) => {
-      if (!pdf) return;
-      documents.delete(pdf);
-      try { await pdf.cleanup?.(); } catch { /* ignore cleanup failures */ }
-      try { await pdf.destroy?.(); } catch { /* ignore destroy failures */ }
-    };
-    const cancelRender = (task) => {
-      if (!task) return;
-      try { task.cancel?.(); } catch { /* ignore cancellation failures */ }
-      renderTasks.delete(task);
-    };
+    const lifecycle = createPdfThumbnailLifecycle();
+    const thisGen = generationGuardRef.current.next();
+    const isCurrent = () => generationGuardRef.current.isCurrent(thisGen, active);
     const generateThumbnails = async () => {
       if (
         !pdfjs ||
@@ -60,10 +52,10 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
               const data = await file.arrayBuffer();
               if (!isCurrent()) break;
               loadingTask = pdfjs.getDocument({ data });
-              loadingTasks.add(loadingTask);
+              lifecycle.addLoadingTask(loadingTask);
               pdf = await loadingTask.promise;
-              loadingTasks.delete(loadingTask);
-              documents.add(pdf);
+              lifecycle.removeLoadingTask(loadingTask);
+              lifecycle.addDocument(pdf);
               if (!isCurrent()) break;
               const page = await pdf.getPage(1);
               if (!isCurrent()) break;
@@ -74,17 +66,17 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
               const context = canvas.getContext("2d");
               if (!context) throw new Error("Canvas context unavailable");
               const renderTask = page.render({ canvasContext: context, viewport });
-              renderTasks.add(renderTask);
+              lifecycle.addRenderTask(renderTask);
               await renderTask.promise;
-              renderTasks.delete(renderTask);
+              lifecycle.removeRenderTask(renderTask);
               thumbs.push(canvas.toDataURL());
             } catch (error) {
               if (!isCurrent()) break;
               console.error("Error generating thumbnail:", error);
               thumbs.push("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23666' font-family='Arial' font-size='12'%3EPDF%3C/text%3E%3C/svg%3E");
             } finally {
-              if (loadingTask) loadingTasks.delete(loadingTask);
-              await destroyDocument(pdf);
+              if (loadingTask) lifecycle.removeLoadingTask(loadingTask);
+              await lifecycle.destroyDocument(pdf);
             }
           }
           if (isCurrent()) setThumbnails(thumbs);
@@ -93,10 +85,10 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
           const data = await files.arrayBuffer();
           if (!isCurrent()) return;
           const loadingTask = pdfjs.getDocument({ data });
-          loadingTasks.add(loadingTask);
+          lifecycle.addLoadingTask(loadingTask);
           const pdf = await loadingTask.promise;
-          loadingTasks.delete(loadingTask);
-          documents.add(pdf);
+          lifecycle.removeLoadingTask(loadingTask);
+          lifecycle.addDocument(pdf);
           if (!isCurrent()) return;
           setTotalPages(pdf.numPages);
 
@@ -118,9 +110,9 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
                 canvasContext: context,
                 viewport: viewport,
               });
-              renderTasks.add(renderTask);
+              lifecycle.addRenderTask(renderTask);
               await renderTask.promise;
-              renderTasks.delete(renderTask);
+              lifecycle.removeRenderTask(renderTask);
 
               thumbs.push(canvas.toDataURL());
             } catch (error) {
@@ -135,34 +127,20 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
             setThumbnails(thumbs);
             setTotalPages(pdf.numPages);
           }
-          await destroyDocument(pdf);
+          await lifecycle.destroyDocument(pdf);
         }
       } catch (error) {
         if (isCurrent()) console.error("Error generating thumbnails:", error);
       } finally {
-        for (const task of loadingTasks) {
-          try { task.destroy?.(); } catch { /* ignore cancellation failures */ }
-        }
-        loadingTasks.clear();
-        for (const pdf of [...documents]) {
-          await destroyDocument(pdf);
-        }
+        await lifecycle.cleanup();
         if (isCurrent()) setIsGenerating(false);
       }
     };
     generateThumbnails();
     return () => {
       active = false;
-      genRef.current += 1;
-      for (const task of renderTasks) cancelRender(task);
-      for (const task of loadingTasks) {
-        try { task.destroy?.(); } catch { /* ignore cancellation failures */ }
-      }
-      loadingTasks.clear();
-      for (const pdf of documents) {
-        void destroyDocument(pdf);
-      }
-      documents.clear();
+      generationGuardRef.current.next();
+      void lifecycle.cleanup();
     };
   }, [files, fileKeys, pdfjs, mode]);
 
