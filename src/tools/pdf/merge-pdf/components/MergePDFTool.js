@@ -9,10 +9,11 @@ import { mergePDFs } from "@/components/utils/pdfUtils";
 import ActionBar from "./ActionBar";
 import FileUploader from "@/components/pdf/file/FileUploader";
 import FilePreviewList from "@/tools/pdf/merge-pdf/components/FilePreviewList";
+import PDFJSStatus from "@/components/pdf/PDFJSStatus";
 
 const MergePDFTool = () => {
   const [files, setFiles] = useState([]);
-  const { pdfjs, isLoading: isPDFJSLoading } = usePDFJS();
+  const { pdfjs, isLoading: isPDFJSLoading, error: pdfjsError, retry: retryPDFJS } = usePDFJS();
   const { thumbnails, isGenerating } = useThumbnails(files, pdfjs);
   const [isMerging, setIsMerging] = useState(false);
   const [message, setMessage] = useState("");
@@ -81,6 +82,7 @@ const MergePDFTool = () => {
 
   return (
     <div className="p-4 sm:p-6">
+      <PDFJSStatus error={pdfjsError} onRetry={retryPDFJS} />
       <FileUploader
         onUpload={handleUpload}
         accept="application/pdf,.pdf"

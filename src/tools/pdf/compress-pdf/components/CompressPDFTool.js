@@ -13,6 +13,7 @@ import Button from "@/components/ui/Button";
 import { formatFileSize } from "@/components/utils/pdfUtils";
 import usePDFJS from "@/hooks/usePDFJS";
 import usePDFThumbnails from "@/hooks/useThumbnails";
+import PDFJSStatus from "@/components/pdf/PDFJSStatus";
 
 /**
  * Compress a PDF file by removing metadata and enabling compression.
@@ -49,7 +50,7 @@ const CompressPDFTool = () => {
   const [compressedBlob, setCompressedBlob] = useState(null);
   const [error, setError] = useState("");
 
-  const { pdfjs, isLoading: isPDFJSLoading } = usePDFJS();
+  const { pdfjs, isLoading: isPDFJSLoading, error: pdfjsError, retry: retryPDFJS } = usePDFJS();
   const { thumbnails, isGenerating } = usePDFThumbnails(files, pdfjs);
   useAdPauseWhile("compress-processing", processing || isGenerating);
   useAdPauseWhile("compress-error", Boolean(error));
@@ -97,6 +98,7 @@ const CompressPDFTool = () => {
 
   return (
     <div className="p-4 sm:p-6">
+      <PDFJSStatus error={pdfjsError} onRetry={retryPDFJS} />
       {files.length === 0 ? (
         <FileUploader
           onUpload={handleUpload}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useAdPauseWhile } from "@/hooks/useAdPause";
 import { saveAs } from "file-saver";
 import { FaDownload, FaRedo, FaFilePdf, FaFileArchive } from "react-icons/fa";
@@ -21,15 +21,24 @@ export default function JpgToPdfTool() {
   const [filename, setFilename] = useState("converted-images.pdf");
   const [isConverting, setIsConverting] = useState(false);
   const [convertedBlob, setConvertedBlob] = useState(null);
+  const [convertedIsZip, setConvertedIsZip] = useState(false);
   const [error, setError] = useState("");
   useAdPauseWhile("jpg-to-pdf-processing", isConverting);
   useAdPauseWhile("jpg-to-pdf-error", Boolean(error));
   useAdPauseWhile("jpg-to-pdf-empty", images.length === 0);
 
   const hiddenInputRef = useRef(null);
+  const conversionGenerationRef = useRef(0);
+  const mountedRef = useRef(true);
+
+  useEffect(() => () => {
+    mountedRef.current = false;
+    conversionGenerationRef.current += 1;
+  }, []);
 
   /* ── Upload handlers ── */
   const handleUpload = useCallback((uploadedFiles) => {
+    conversionGenerationRef.current += 1;
     const validImages = Array.from(uploadedFiles).filter((file) => {
       const isImg =
         file.type.startsWith("image/") ||
@@ -51,6 +60,7 @@ export default function JpgToPdfTool() {
     setImages((prev) => [...prev, ...newItems]);
     setError("");
     setConvertedBlob(null);
+    setConvertedIsZip(false);
   }, []);
 
   const handleAddMore = () => {
@@ -89,13 +99,17 @@ export default function JpgToPdfTool() {
   }, []);
 
   const handleRemove = useCallback((index) => {
+    conversionGenerationRef.current += 1;
     setImages((prev) => prev.filter((_, i) => i !== index));
     setConvertedBlob(null);
+    setConvertedIsZip(false);
   }, []);
 
   const handleClearAll = useCallback(() => {
+    conversionGenerationRef.current += 1;
     setImages([]);
     setConvertedBlob(null);
+    setConvertedIsZip(false);
     setError("");
   }, []);
 
@@ -104,23 +118,30 @@ export default function JpgToPdfTool() {
   }, []);
 
   /* ── Conversion execution ── */
-  const isZipMode = options.outputMode === "zip" && images.length > 1;
-
   const handleConvert = async () => {
     if (images.length === 0) return;
+    const generation = ++conversionGenerationRef.current;
+    const imageSnapshot = images.map(({ file, rotation }) => ({ file, rotation }));
+    const optionsSnapshot = { ...options };
+    const outputIsZip = optionsSnapshot.outputMode === "zip" && imageSnapshot.length > 1;
     setIsConverting(true);
     setError("");
     try {
       let blob;
-      if (isZipMode) {
-        blob = await convertImagesToZipPdfs(images, options);
+      if (outputIsZip) {
+        blob = await convertImagesToZipPdfs(imageSnapshot, optionsSnapshot);
       } else {
-        blob = await convertImagesToSinglePdf(images, options);
+        blob = await convertImagesToSinglePdf(imageSnapshot, optionsSnapshot);
       }
-      setConvertedBlob(blob);
+      if (mountedRef.current && generation === conversionGenerationRef.current) {
+        setConvertedIsZip(outputIsZip);
+        setConvertedBlob(blob);
+      }
     } catch (err) {
       console.error("Conversion failed:", err);
-      setError(err.message || "Failed to convert images to PDF. Please try again.");
+      if (mountedRef.current && generation === conversionGenerationRef.current) {
+        setError(err.message || "Failed to convert images to PDF. Please try again.");
+      }
     } finally {
       setIsConverting(false);
     }
@@ -128,7 +149,7 @@ export default function JpgToPdfTool() {
 
   const handleDownload = () => {
     if (!convertedBlob) return;
-    if (isZipMode) {
+    if (convertedIsZip) {
       saveAs(convertedBlob, "converted-pdfs.zip");
     } else {
       const saveName = filename.endsWith(".pdf") ? filename : `${filename}.pdf`;
@@ -177,6 +198,7 @@ export default function JpgToPdfTool() {
             onRemove={handleRemove}
             onClearAll={handleClearAll}
             onAddMore={handleAddMore}
+            disabled={isConverting}
           />
 
           {/* Settings panel */}
@@ -188,6 +210,7 @@ export default function JpgToPdfTool() {
             onConvert={handleConvert}
             isConverting={isConverting}
             imageCount={images.length}
+            disabled={isConverting}
           />
         </div>
       )}
@@ -196,15 +219,15 @@ export default function JpgToPdfTool() {
       {convertedBlob && (
         <div className="mx-auto max-w-xl text-center space-y-5 rounded-sm border border-[#dce5e0] bg-white p-6 shadow-sm">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#e6f0eb] text-[#235c4f]">
-            {isZipMode ? <FaFileArchive className="h-7 w-7" /> : <FaFilePdf className="h-7 w-7" />}
+            {convertedIsZip ? <FaFileArchive className="h-7 w-7" /> : <FaFilePdf className="h-7 w-7" />}
           </div>
 
           <div>
             <h3 className="text-lg font-bold text-[#1a3328]">
-              {isZipMode ? "Your PDF ZIP Archive is ready!" : "Your PDF Document is ready!"}
+              {convertedIsZip ? "Your PDF ZIP Archive is ready!" : "Your PDF Document is ready!"}
             </h3>
             <p className="mt-1 text-xs text-[#708079]">
-              {isZipMode
+              {convertedIsZip
                 ? `Converted ${images.length} images into individual PDFs inside a ZIP archive.`
                 : `Successfully converted ${images.length} image${images.length !== 1 ? "s" : ""} into a single PDF document.`}
             </p>
@@ -220,7 +243,7 @@ export default function JpgToPdfTool() {
               iconPosition="left"
               className="w-full sm:w-auto"
             >
-              {isZipMode ? "Download ZIP Archive" : "Download PDF Document"}
+              {convertedIsZip ? "Download ZIP Archive" : "Download PDF Document"}
             </Button>
 
             <Button

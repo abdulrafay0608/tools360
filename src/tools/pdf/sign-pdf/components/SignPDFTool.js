@@ -5,6 +5,7 @@ import { useAdPauseWhile } from "@/hooks/useAdPause";
 import { saveAs } from "file-saver";
 import { FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import FileUploader from "@/components/pdf/file/FileUploader";
+import PDFJSStatus from "@/components/pdf/PDFJSStatus";
 
 import usePDFJS from "@/hooks/usePDFJS";
 import SignHeaderBar from "./SignHeaderBar";
@@ -38,7 +39,7 @@ export default function SignPDFTool() {
   useAdPauseWhile("sign-error", Boolean(error));
   useAdPauseWhile("sign-empty", !file);
 
-  const { pdfjs } = usePDFJS();
+  const { pdfjs, error: pdfjsError, retry: retryPDFJS } = usePDFJS();
   const activeDocRef = useRef(null);
 
   /* ── File Selection & Validation ── */
@@ -232,6 +233,7 @@ export default function SignPDFTool() {
 
   return (
     <div className="p-4 sm:p-6">
+      <PDFJSStatus error={pdfjsError} onRetry={retryPDFJS} />
       {/* Error Message */}
       {error && (
         <div className="mb-5 flex items-start gap-3 rounded-sm border border-red-200 bg-red-50 p-4 text-xs text-red-800">

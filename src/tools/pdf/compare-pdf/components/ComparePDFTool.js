@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAdPauseWhile } from "@/hooks/useAdPause";
 import usePDFJS from "@/hooks/usePDFJS";
+import PDFJSStatus from "@/components/pdf/PDFJSStatus";
 import {
   createDifferenceImageData,
   classifyDifference,
@@ -97,7 +98,7 @@ export default function ComparePDFTool() {
   const syncingRight = useRef(false);
   const currentAlignedRef = useRef({ left: null, right: null });
 
-  const { pdfjs } = usePDFJS();
+  const { pdfjs, error: pdfjsError, retry: retryPDFJS } = usePDFJS();
 
   const maxPages =
     documents.length === 2
@@ -470,6 +471,7 @@ export default function ComparePDFTool() {
   /* ── Active Viewer View ── */
   return (
     <div className="p-4 sm:p-6">
+      <PDFJSStatus error={pdfjsError} onRetry={retryPDFJS} />
       {/* Header Bar */}
       <CompareHeaderBar
         originalFile={originalFile}
