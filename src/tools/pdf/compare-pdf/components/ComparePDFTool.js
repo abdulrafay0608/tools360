@@ -5,8 +5,14 @@ import { useAdPauseWhile } from "@/hooks/useAdPause";
 import usePDFJS from "@/hooks/usePDFJS";
 import PDFJSStatus from "@/components/pdf/PDFJSStatus";
 import {
+  PDF_PROCESSING_LIMITS,
+  assertPdfPageCount,
+  assertPdfViewport,
+} from "@/utils/fileProcessingLimits";
+import {
   createDifferenceImageData,
   classifyDifference,
+  validateComparePageViewport,
 } from "../compareUtils.js";
 
 import CompareUploadLanding from "./CompareUploadLanding";
@@ -25,11 +31,20 @@ const THUMBNAIL_SCALE = 0.18;
 const ZOOM_LEVELS = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
 const DEFAULT_ZOOM_INDEX = 2; // 1.0
 
+async function destroyDocumentSafely(documentProxy) {
+  try {
+    await documentProxy?.destroy?.();
+  } catch {
+    // Preserve the actionable processing error when PDF.js cleanup itself fails.
+  }
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    Canvas helpers
 ───────────────────────────────────────────────────────────────────────────── */
 async function renderPageToCanvas(page, scale, renderTasks) {
   const viewport = page.getViewport({ scale });
+  assertPdfViewport(viewport, PDF_PROCESSING_LIMITS.maxRenderPixels);
   const canvas = document.createElement("canvas");
   canvas.width = Math.ceil(viewport.width);
   canvas.height = Math.ceil(viewport.height);
@@ -178,7 +193,20 @@ export default function ComparePDFTool() {
             const data = await file.arrayBuffer();
             const task = pdfjs.getDocument({ data });
             loadingTasks.push(task);
-            return task.promise;
+            const documentProxy = await task.promise;
+            try {
+              assertPdfPageCount(documentProxy.numPages);
+              const firstPage = await documentProxy.getPage(1);
+              const baseViewport = firstPage.getViewport({ scale: 1 });
+              validateComparePageViewport(
+                baseViewport,
+                PDF_PROCESSING_LIMITS.maxRenderPixels
+              );
+            } catch (limitError) {
+              await destroyDocumentSafely(documentProxy);
+              throw limitError;
+            }
+            return documentProxy;
           })
         );
         if (isActive) {
@@ -191,7 +219,7 @@ export default function ComparePDFTool() {
           setError(
             err.name === "PasswordException"
               ? "Password-protected PDFs are not supported. Remove password and try again."
-              : "One or both files could not be opened. Verify both files are valid PDFs."
+            : err.message || "One or both files could not be opened. Verify both files are valid PDFs."
           );
         }
       } finally {
@@ -235,6 +263,7 @@ export default function ComparePDFTool() {
           const thumbPage = p0 || p1;
           if (thumbPage) {
             const thumbVp = thumbPage.getViewport({ scale: THUMBNAIL_SCALE });
+            assertPdfViewport(thumbVp, PDF_PROCESSING_LIMITS.maxThumbnailPixels);
             const tc = document.createElement("canvas");
             tc.width = Math.ceil(thumbVp.width);
             tc.height = Math.ceil(thumbVp.height);

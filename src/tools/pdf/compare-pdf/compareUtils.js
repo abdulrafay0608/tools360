@@ -86,3 +86,19 @@ export function severityColor(severity) {
     default:         return "#94a3b8";
   }
 }
+
+/**
+ * Validates a PDF page's unscaled render area before the compare workspace
+ * starts loading thumbnails or allocating canvases.
+ */
+export function validateComparePageViewport(viewport, maxPixels) {
+  const width = Math.ceil(Number(viewport?.width));
+  const height = Math.ceil(Number(viewport?.height));
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width < 1 || height < 1) {
+    throw new Error("The PDF page has invalid dimensions.");
+  }
+  if (!Number.isFinite(maxPixels) || width * height > maxPixels) {
+    throw new Error("PDF page dimensions are too large for safe browser rendering.");
+  }
+  return { width, height };
+}

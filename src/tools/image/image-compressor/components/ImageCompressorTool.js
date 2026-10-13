@@ -7,6 +7,7 @@ import useImageBatchQueue from "@/hooks/useImageBatchQueue";
 import { updateBatchItemStatus } from "@/hooks/imageBatchQueueUtils.js";
 import { saveAs } from "file-saver";
 import FileUploader from "@/components/pdf/file/FileUploader";
+import { IMAGE_PROCESSING_LIMITS, validateFileSelection } from "@/utils/fileProcessingLimits";
 import ImageCompressorOptionsBar from "./ImageCompressorOptionsBar";
 import ImageCompressorSummaryBar from "./ImageCompressorSummaryBar";
 import ImageCompressorGrid from "./ImageCompressorGrid";
@@ -102,44 +103,15 @@ export default function ImageCompressorTool() {
    */
   const handleUpload = useCallback(
     (newFiles, uploadNotice) => {
-      const currentTotal = images.length;
-      const remainingSlots = MAX_FILES - currentTotal;
-
-      if (remainingSlots <= 0) {
-        setError(`Batch limit reached: maximum ${MAX_FILES} images allowed.`);
-        return;
-      }
-
-      let filesArray = Array.from(newFiles);
-      let limitNotice = "";
-
-      if (filesArray.length > remainingSlots) {
-        limitNotice = `Maximum ${MAX_FILES} images allowed. Added ${remainingSlots} images, skipped ${
-          filesArray.length - remainingSlots
-        }. `;
-        filesArray = filesArray.slice(0, remainingSlots);
-      }
-
-      const validFiles = [];
-      const skippedErrors = [];
-
-      for (const file of filesArray) {
-        if (file.size > MAX_FILE_SIZE_BYTES) {
-          skippedErrors.push(`${file.name} exceeds ${formatFileSizeLimit(MAX_FILE_SIZE_BYTES)} limit`);
-        } else if (!isAcceptedImage(file)) {
-          skippedErrors.push(`${file.name} is not a valid image format`);
-        } else {
-          validFiles.push(file);
-        }
-      }
-
-      const combinedError = `${uploadNotice ? `${uploadNotice} ` : ""}${limitNotice}${
-        skippedErrors.length > 0
-          ? `${skippedErrors.length} file(s) skipped: ${skippedErrors.slice(0, 2).join(", ")}${
-              skippedErrors.length > 2 ? ` (+${skippedErrors.length - 2} more)` : ""
-            }.`
-          : ""
-      }`.trim();
+      const selection = validateFileSelection({
+        files: newFiles,
+        existingFiles: images.map((item) => item.file),
+        limits: IMAGE_PROCESSING_LIMITS,
+        isAccepted: isAcceptedImage,
+        label: "image",
+      });
+      const validFiles = selection.accepted;
+      const combinedError = `${uploadNotice ? `${uploadNotice} ` : ""}${selection.rejected.slice(0, 2).join(" ")}`.trim();
 
       setError(combinedError);
 
@@ -166,7 +138,7 @@ export default function ImageCompressorTool() {
         return combined;
       });
     },
-    [addItems, images.length, createTrackedUrl, runBatch, options]
+    [addItems, images, createTrackedUrl, runBatch, options]
   );
 
   /**

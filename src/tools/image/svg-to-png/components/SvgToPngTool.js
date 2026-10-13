@@ -6,10 +6,10 @@ import useTrackedObjectUrls from "@/hooks/useTrackedObjectUrls";
 import useImageBatchQueue from "@/hooks/useImageBatchQueue";
 import {
   markBatchItemsCancelled,
-  updateBatchItemStatus,
 } from "@/hooks/imageBatchQueueUtils.js";
 import { saveAs } from "file-saver";
 import FileUploader from "@/components/pdf/file/FileUploader";
+import { SVG_PROCESSING_LIMITS } from "@/utils/fileProcessingLimits";
 import SvgOptionsBar from "./SvgOptionsBar";
 import SvgSummaryBar from "./SvgSummaryBar";
 import SvgGrid from "./SvgGrid";
@@ -71,11 +71,18 @@ export default function SvgToPngTool() {
     currentOptions,
     {
       shouldProcess: (item) => !(item.status === "error" && !item.svgText),
-      onStart: (item) => commitItems(updateBatchItemStatus(
-        itemsRef.current,
-        item.id,
-        "processing"
-      )),
+      onStart: (item) => commitItems(itemsRef.current.map((current) => {
+        if (current.id !== item.id) return current;
+        if (current.previewUrl) revokeTrackedUrl(current.previewUrl);
+        return {
+          ...current,
+          status: "processing",
+          blob: null,
+          pngSize: null,
+          previewUrl: null,
+          error: "",
+        };
+      })),
       processItem: async (item, batchOptions) => {
         const { width: targetWidth, height: targetHeight, wasCapped } =
           calculateTargetDimensions(item.origWidth, item.origHeight, batchOptions);
@@ -110,12 +117,18 @@ export default function SvgToPngTool() {
           };
         }));
       },
-      onError: (item, cause) => commitItems(updateBatchItemStatus(
-        itemsRef.current,
-        item.id,
-        "error",
-        { error: cause?.message || "Failed to render SVG image." }
-      )),
+      onError: (item, cause) => commitItems(itemsRef.current.map((current) => {
+        if (current.id !== item.id) return current;
+        if (current.previewUrl) revokeTrackedUrl(current.previewUrl);
+        return {
+          ...current,
+          status: "error",
+          blob: null,
+          pngSize: null,
+          previewUrl: null,
+          error: cause?.message || "Failed to render SVG image.",
+        };
+      })),
     }
   ), [commitItems, createTrackedUrl, processBatch, revokeTrackedUrl]);
 
@@ -131,13 +144,16 @@ export default function SvgToPngTool() {
         validFiles,
         unsupported,
         oversized,
+        overTotal,
         skippedByLimit,
       } = selectFiles(
         newFiles,
         currentList.length,
         MAX_FILES,
         MAX_FILE_SIZE_BYTES,
-        isSvgFile
+        isSvgFile,
+        currentList.reduce((total, item) => total + (item.fileSize || 0), 0),
+        SVG_PROCESSING_LIMITS.maxTotalBytes
       );
 
       const noticeParts = [
@@ -147,6 +163,9 @@ export default function SvgToPngTool() {
           : "",
         oversized.length
           ? `${oversized.map((f) => f.name).join(", ")} exceeds the 5 MB file limit.`
+          : "",
+        overTotal.length
+          ? `Selected SVG files exceed the ${Math.round(SVG_PROCESSING_LIMITS.maxTotalBytes / (1024 * 1024))} MB total browser-processing limit.`
           : "",
         skippedByLimit
           ? `${skippedByLimit} file(s) skipped; maximum limit is ${MAX_FILES} SVG files.`
@@ -217,6 +236,11 @@ export default function SvgToPngTool() {
       const currentList = itemsRef.current;
       if (currentList.length >= MAX_FILES) {
         setError(`Maximum limit of ${MAX_FILES} items reached.`);
+        return;
+      }
+      const currentBytes = currentList.reduce((total, item) => total + (item.fileSize || 0), 0);
+      if (pastedData.size > SVG_PROCESSING_LIMITS.maxMarkupBytes || currentBytes + pastedData.size > SVG_PROCESSING_LIMITS.maxTotalBytes) {
+        setError(`Pasted SVG exceeds the ${Math.round(SVG_PROCESSING_LIMITS.maxTotalBytes / (1024 * 1024))} MB total browser-processing limit.`);
         return;
       }
 
@@ -308,7 +332,7 @@ export default function SvgToPngTool() {
   }, [clearItems, commitItems, invalidateBatch, revokeTrackedUrl]);
 
   const handleDownloadSingle = useCallback((item) => {
-    if (!item.blob || !item.outputFilename) return;
+    if (item.status !== "done" || !item.blob || !item.outputFilename) return;
     saveAs(item.blob, item.outputFilename);
   }, []);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   FaExchangeAlt,
   FaTrashAlt,
@@ -10,6 +10,7 @@ import {
 import FileUploader from "@/components/pdf/file/FileUploader";
 import Button from "@/components/ui/Button";
 import { formatFileSize } from "@/components/utils/pdfUtils";
+import { PDF_PROCESSING_LIMITS, validateFileSelection } from "@/utils/fileProcessingLimits";
 
 /**
  * CompareUploadLanding
@@ -30,13 +31,25 @@ export default function CompareUploadLanding({
 }) {
   const originalInputRef = useRef(null);
   const revisedInputRef = useRef(null);
+  const [validationError, setValidationError] = useState("");
 
   const handleSingleUpload = (e, slot) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+    const existing = slot === "original" ? [revisedFile].filter(Boolean) : [originalFile].filter(Boolean);
+    const selection = validateFileSelection({
+      files: [file],
+      existingFiles: existing,
+      limits: { ...PDF_PROCESSING_LIMITS, maxFiles: 2 },
+      isAccepted: (candidate) => candidate.type === "application/pdf" || candidate.name.toLowerCase().endsWith(".pdf"),
+      label: "PDF file",
+    });
+    if (!selection.accepted.length) {
+      setValidationError(selection.rejected[0] || "Choose a valid PDF file.");
+      e.target.value = "";
       return;
     }
+    setValidationError("");
     if (slot === "original") {
       onSelectOriginal(file);
     } else {
@@ -49,9 +62,9 @@ export default function CompareUploadLanding({
 
   return (
     <div>
-      {error && (
+      {(error || validationError) && (
         <div className="rounded-sm border border-[#f3cfc8] bg-[#fdf4f3] px-4 py-3 text-sm text-[#a13c2f]" role="alert">
-          {error}
+          {error || validationError}
         </div>
       )}
 
@@ -62,6 +75,9 @@ export default function CompareUploadLanding({
             onUpload={onBatchUpload}
             accept="application/pdf,.pdf"
             multiple
+            maxFiles={2}
+            maxFileSizeBytes={PDF_PROCESSING_LIMITS.maxFileBytes}
+            maxTotalBytes={PDF_PROCESSING_LIMITS.maxTotalBytes}
           />
         </div>
       ) : (

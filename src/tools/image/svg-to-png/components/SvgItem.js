@@ -165,7 +165,7 @@ export default function SvgItem({
             type="button"
             data-download-single="true"
             onClick={() => onDownloadSingle(item)}
-            disabled={!item.blob || isProcessing}
+            disabled={!item.blob || isProcessing || isError}
             className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#c8d6cf] text-[#235c4f] transition-colors hover:bg-[#eaf3ed] disabled:cursor-not-allowed disabled:opacity-40"
             title="Download PNG"
             aria-label={`Download ${item.outputFilename}`}

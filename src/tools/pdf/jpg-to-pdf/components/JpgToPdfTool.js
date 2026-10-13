@@ -9,6 +9,7 @@ import Button from "@/components/ui/Button";
 import ImagePreviewGrid from "./ImagePreviewGrid";
 import JpgToPdfOptionsBar from "./JpgToPdfOptionsBar";
 import { convertImagesToSinglePdf, convertImagesToZipPdfs } from "../jpgToPdfUtils";
+import { IMAGE_PROCESSING_LIMITS, validateFileSelection } from "@/utils/fileProcessingLimits";
 
 export default function JpgToPdfTool() {
   const [images, setImages] = useState([]);
@@ -39,15 +40,19 @@ export default function JpgToPdfTool() {
   /* ── Upload handlers ── */
   const handleUpload = useCallback((uploadedFiles) => {
     conversionGenerationRef.current += 1;
-    const validImages = Array.from(uploadedFiles).filter((file) => {
-      const isImg =
-        file.type.startsWith("image/") ||
-        /\.(jpg|jpeg|png|webp|gif|bmp)$/i.test(file.name);
-      return isImg;
+    const selection = validateFileSelection({
+      files: uploadedFiles,
+      existingFiles: images.map(({ file }) => file),
+      limits: IMAGE_PROCESSING_LIMITS,
+      isAccepted: (file) =>
+        ["image/jpeg", "image/png", "image/webp"].includes((file.type || "").toLowerCase()) ||
+        /\.(jpe?g|png|webp)$/i.test(file.name || ""),
+      label: "image",
     });
+    const validImages = selection.accepted;
 
     if (validImages.length === 0) {
-      setError("Please select valid image files (JPG, PNG, WEBP).");
+      setError(selection.rejected[0] || "Please select valid JPG, PNG, or WebP image files.");
       return;
     }
 
@@ -58,10 +63,10 @@ export default function JpgToPdfTool() {
     }));
 
     setImages((prev) => [...prev, ...newItems]);
-    setError("");
+    setError(selection.rejected[0] || "");
     setConvertedBlob(null);
     setConvertedIsZip(false);
-  }, []);
+  }, [images]);
 
   const handleAddMore = () => {
     if (hiddenInputRef.current) {
@@ -183,6 +188,10 @@ export default function JpgToPdfTool() {
             multiple
             fileTypeLabel="JPG image"
             titleText="Drop JPG image / files here"
+            maxFiles={IMAGE_PROCESSING_LIMITS.maxFiles}
+            maxFileSizeBytes={IMAGE_PROCESSING_LIMITS.maxFileBytes}
+            maxTotalBytes={IMAGE_PROCESSING_LIMITS.maxTotalBytes}
+            existingFiles={images.map(({ file }) => file)}
           />
         </div>
       )}

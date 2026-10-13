@@ -12,6 +12,7 @@ import {
   IMAGE_OUTPUT_MAX_DIMENSION,
   formatFileSizeLimit,
 } from "../utils/imageToolUtils.js";
+import { assertCanvasDimensions, assertPixelArea, assertSvgMarkup, SVG_PROCESSING_LIMITS } from "../../../utils/fileProcessingLimits.js";
 
 export { formatFileSize, formatFileSizeLimit };
 
@@ -114,6 +115,7 @@ export function sanitizeAndParseSvg(svgText) {
   if (!svgText || typeof svgText !== "string" || svgText.trim().length === 0) {
     throw new Error("SVG file is empty.");
   }
+  assertSvgMarkup(svgText);
 
   if (typeof DOMParser === "undefined") {
     // Fallback for non-browser environments / tests
@@ -224,6 +226,10 @@ export function sanitizeAndParseSvg(svgText) {
     origHeight = DEFAULT_DIMENSION;
     hasDefaultDimensions = true;
   }
+  if (origWidth > SVG_PROCESSING_LIMITS.maxDimension || origHeight > SVG_PROCESSING_LIMITS.maxDimension) {
+    throw new Error(`SVG dimensions must be no larger than ${SVG_PROCESSING_LIMITS.maxDimension} pixels on either side.`);
+  }
+  assertPixelArea(origWidth, origHeight, SVG_PROCESSING_LIMITS.maxCanvasPixels, "SVG image");
 
   // Explicitly set width, height, and viewBox on root for reliable canvas rasterization
   root.setAttribute("width", String(origWidth));
@@ -249,6 +255,7 @@ export function sanitizeAndParseSvg(svgText) {
  * Uses <img> from Blob URL (never DOM insertion, scripts do not execute).
  */
 export async function renderSvgToPng(cleanSvgString, targetWidth, targetHeight, backgroundColor = "transparent") {
+  assertCanvasDimensions(targetWidth, targetHeight, SVG_PROCESSING_LIMITS.maxCanvasPixels);
   const blob = new Blob([cleanSvgString], { type: "image/svg+xml;charset=utf-8" });
   const objectUrl = URL.createObjectURL(blob);
 

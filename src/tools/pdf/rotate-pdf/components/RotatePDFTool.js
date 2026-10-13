@@ -4,6 +4,11 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FaDownload, FaRedo, FaUndo } from "react-icons/fa";
 import Button from "@/components/ui/Button";
 import FileUploader from "@/components/pdf/file/FileUploader";
+import {
+  PDF_PROCESSING_LIMITS,
+  assertPdfPageCount,
+  assertPdfViewport,
+} from "@/utils/fileProcessingLimits";
 import usePDFJS from "@/hooks/usePDFJS";
 import PDFJSStatus from "@/components/pdf/PDFJSStatus";
 import { useAdPauseWhile } from "@/hooks/useAdPause";
@@ -12,7 +17,6 @@ import {
   createPageEntries,
   exportPdfRotations,
   getPdfLoadErrorMessage,
-  MAX_PDF_FILE_SIZE_BYTES,
   rotatePages,
 } from "@/components/utils/pdfPageUtils";
 
@@ -62,6 +66,7 @@ function PageThumbnail({
           scale: 0.28,
           rotation: visibleRotation,
         });
+        assertPdfViewport(viewport, PDF_PROCESSING_LIMITS.maxThumbnailPixels);
         canvas.width = Math.ceil(viewport.width);
         canvas.height = Math.ceil(viewport.height);
         const context = canvas.getContext("2d");
@@ -240,6 +245,12 @@ export default function RotatePDFTool() {
         const loadingTask = pdfjs.getDocument({ data: bytes.slice() });
         activeLoadingTaskRef.current = loadingTask;
         const documentProxy = await loadingTask.promise;
+        try {
+          assertPdfPageCount(documentProxy.numPages);
+        } catch (limitError) {
+          await documentProxy.destroy();
+          throw limitError;
+        }
         if (!isActive) {
           await documentProxy.destroy();
           return;
@@ -264,7 +275,7 @@ export default function RotatePDFTool() {
         setSelectedIds([]);
       } catch (loadError) {
         if (isActive) {
-          setError(getPdfLoadErrorMessage(loadError));
+          setError(loadError.message || getPdfLoadErrorMessage(loadError));
           setPdfDoc(null);
           setSourceBytes(null);
           setPages([]);
@@ -429,7 +440,8 @@ export default function RotatePDFTool() {
           multiple={false}
           fileTypeLabel="PDF file"
           titleText="Drop PDF file here"
-          maxFileSizeBytes={MAX_PDF_FILE_SIZE_BYTES}
+          maxFileSizeBytes={PDF_PROCESSING_LIMITS.maxFileBytes}
+          maxTotalBytes={PDF_PROCESSING_LIMITS.maxTotalBytes}
         />
       ) : (
         <div className="space-y-4">
