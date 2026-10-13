@@ -83,8 +83,8 @@ export default function useImageBatchQueue() {
   }, []);
 
   const selectFiles = useCallback(
-    (files, currentCount, maxFiles, maxFileSizeBytes, isAccepted) =>
-      selectEligibleFiles(files, currentCount, maxFiles, maxFileSizeBytes, isAccepted),
+    (files, currentCount, maxFiles, maxFileSizeBytes, isAccepted, currentTotalBytes, maxTotalBytes) =>
+      selectEligibleFiles(files, currentCount, maxFiles, maxFileSizeBytes, isAccepted, currentTotalBytes, maxTotalBytes),
     []
   );
 

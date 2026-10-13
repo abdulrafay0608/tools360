@@ -3,8 +3,9 @@
 
 import React, { useId, useRef, useState } from "react";
 import { useAdPauseWhile } from "@/hooks/useAdPause";
+import { PDF_PROCESSING_LIMITS, validateFileSelection } from "@/utils/fileProcessingLimits";
 
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_FILE_SIZE_BYTES = PDF_PROCESSING_LIMITS.maxFileBytes;
 
 const isFileAccepted = (file, acceptStr) => {
   if (!acceptStr || acceptStr === "*") return true;
@@ -32,6 +33,8 @@ const FileUploader = ({
   titleText,
   maxFileSizeBytes = MAX_FILE_SIZE_BYTES,
   maxFiles,
+  maxTotalBytes = PDF_PROCESSING_LIMITS.maxTotalBytes,
+  existingFiles = [],
   allowPartial = false,
   onError,
 }) => {
@@ -72,7 +75,7 @@ const FileUploader = ({
   };
 
   const validateAndUpload = (fileList) => {
-    let files = Array.from(fileList);
+    const files = Array.from(fileList);
     if (!files.length) return;
 
     if (!multiple && files.length > 1) {
@@ -82,75 +85,33 @@ const FileUploader = ({
       return;
     }
 
-    if (!allowPartial) {
-      if (maxFiles && files.length > maxFiles) {
-        const msg = `Maximum ${maxFiles} files allowed at a time.`;
-        setError(msg);
-        onError?.(msg);
-        return;
-      }
+    const limits = {
+      maxFiles: maxFiles ?? (multiple ? PDF_PROCESSING_LIMITS.maxFiles : 1),
+      maxFileBytes: maxFileSizeBytes,
+      maxTotalBytes,
+    };
+    const result = validateFileSelection({
+      files,
+      existingFiles,
+      limits,
+      isAccepted: (file) => isFileAccepted(file, accept),
+      label: typeLabel,
+    });
+    const notice = result.rejected.slice(0, 2).join(" ");
 
-      const invalidSizeFile = files.find((file) => file.size > maxFileSizeBytes);
-      if (invalidSizeFile) {
-        const maxFileSizeMb = Math.floor(maxFileSizeBytes / (1024 * 1024));
-        const msg = `${invalidSizeFile.name} exceeds the ${maxFileSizeMb} MB file limit.`;
-        setError(msg);
-        onError?.(msg);
-        return;
-      }
-
-      const invalidTypeFile = files.find((file) => !isFileAccepted(file, accept));
-      if (invalidTypeFile) {
-        const msg = `${invalidTypeFile.name} is not a valid ${typeLabel}.`;
-        setError(msg);
-        onError?.(msg);
-        return;
-      }
-
-      setError("");
-      onUpload(files);
+    if (!allowPartial && result.rejected.length) {
+      setError(notice);
+      onError?.(notice);
       return;
     }
 
-    // allowPartial mode (allows valid files to process while reporting skipped files)
-    let notice = "";
-    if (maxFiles && files.length > maxFiles) {
-      notice = `Maximum ${maxFiles} files allowed at once. Only the first ${maxFiles} files were kept. `;
-      files = files.slice(0, maxFiles);
-    }
-
-    const validFiles = [];
-    const skippedErrors = [];
-    let combinedMsg = "";
-
-    for (const file of files) {
-      if (file.size > maxFileSizeBytes) {
-        const maxFileSizeMb = Math.floor(maxFileSizeBytes / (1024 * 1024));
-        skippedErrors.push(`${file.name} exceeds ${maxFileSizeMb} MB limit`);
-      } else if (!isFileAccepted(file, accept)) {
-        skippedErrors.push(`${file.name} is not a valid ${typeLabel}`);
-      } else {
-        validFiles.push(file);
-      }
-    }
-
-    if (skippedErrors.length > 0 || notice) {
-      combinedMsg = `${notice}${
-        skippedErrors.length > 0
-          ? `${skippedErrors.length} file(s) skipped: ${skippedErrors.slice(0, 2).join(", ")}${
-              skippedErrors.length > 2 ? ` (+${skippedErrors.length - 2} more)` : ""
-            }.`
-          : ""
-      }`.trim();
-      setError(combinedMsg);
-      onError?.(combinedMsg);
+    if (notice) {
+      setError(notice);
+      onError?.(notice);
     } else {
       setError("");
     }
-
-    if (validFiles.length > 0) {
-      onUpload(validFiles, skippedErrors.length > 0 || notice ? combinedMsg : "");
-    }
+    if (result.accepted.length) onUpload(result.accepted, notice);
   };
 
   const displayTitle = titleText

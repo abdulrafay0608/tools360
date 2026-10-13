@@ -4,6 +4,7 @@ import {
   createPdfThumbnailLifecycle,
   createThumbnailGenerationGuard,
 } from "./pdfThumbnailLifecycle.js";
+import { PDF_PROCESSING_LIMITS, assertPdfPageCount, assertPdfViewport } from "@/utils/fileProcessingLimits";
 
 const usePDFThumbnails = (files, pdfjs, mode = "file") => {
   const [thumbnails, setThumbnails] = useState([]);
@@ -54,12 +55,14 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
               loadingTask = pdfjs.getDocument({ data });
               lifecycle.addLoadingTask(loadingTask);
               pdf = await loadingTask.promise;
+              assertPdfPageCount(pdf.numPages);
               lifecycle.removeLoadingTask(loadingTask);
               lifecycle.addDocument(pdf);
               if (!isCurrent()) break;
               const page = await pdf.getPage(1);
               if (!isCurrent()) break;
               const viewport = page.getViewport({ scale: 0.5 });
+              assertPdfViewport(viewport, PDF_PROCESSING_LIMITS.maxThumbnailPixels);
               const canvas = document.createElement("canvas");
               canvas.width = Math.ceil(viewport.width);
               canvas.height = Math.ceil(viewport.height);
@@ -87,6 +90,7 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
           const loadingTask = pdfjs.getDocument({ data });
           lifecycle.addLoadingTask(loadingTask);
           const pdf = await loadingTask.promise;
+          assertPdfPageCount(pdf.numPages);
           lifecycle.removeLoadingTask(loadingTask);
           lifecycle.addDocument(pdf);
           if (!isCurrent()) return;
@@ -100,6 +104,7 @@ const usePDFThumbnails = (files, pdfjs, mode = "file") => {
               const page = await pdf.getPage(i);
               if (!isCurrent()) break;
               const viewport = page.getViewport({ scale: 0.5 });
+              assertPdfViewport(viewport, PDF_PROCESSING_LIMITS.maxThumbnailPixels);
 
               const canvas = document.createElement("canvas");
               canvas.width = viewport.width;

@@ -3,6 +3,7 @@ import {
   resolveTargetMimeType,
   IMAGE_OUTPUT_MAX_DIMENSION,
 } from "../utils/imageToolUtils.js";
+import { assertCanvasDimensions, assertImageDimensions } from "../../../utils/fileProcessingLimits.js";
 
 export const DEFAULT_QUALITY = 80;
 
@@ -198,6 +199,7 @@ export async function resizeSingleImage(file, options = {}) {
     if (typeof bitmap.close === "function") bitmap.close();
     throw new Error("Unable to read image dimensions (file may be corrupted).");
   }
+  assertImageDimensions(origWidth, origHeight);
 
   const {
     width: targetWidth,
@@ -209,6 +211,7 @@ export async function resizeSingleImage(file, options = {}) {
     origHeight,
     options
   );
+  assertCanvasDimensions(targetWidth, targetHeight);
 
   const targetMime = resolveTargetMimeType(file.type, outputFormat);
 

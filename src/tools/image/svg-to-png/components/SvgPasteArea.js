@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { sanitizeAndParseSvg, formatFileSize } from "../svgToPngUtils";
+import { SVG_PROCESSING_LIMITS, assertSvgMarkup } from "@/utils/fileProcessingLimits";
 import { FaCode, FaCheck, FaShieldAlt, FaExclamationCircle } from "react-icons/fa";
 
 export default function SvgPasteArea({ onAddPastedSvg }) {
@@ -24,6 +25,7 @@ export default function SvgPasteArea({ onAddPastedSvg }) {
     }
 
     try {
+      assertSvgMarkup(svgCode);
       const result = sanitizeAndParseSvg(svgCode);
       if (currentBlobUrlRef.current) {
         URL.revokeObjectURL(currentBlobUrlRef.current);
@@ -108,6 +110,7 @@ export default function SvgPasteArea({ onAddPastedSvg }) {
             rows={8}
             value={svgCode}
             onChange={(e) => setSvgCode(e.target.value)}
+            maxLength={SVG_PROCESSING_LIMITS.maxMarkupBytes}
             placeholder={`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">\n  <circle cx="50" cy="50" r="40" fill="#235c4f" />\n</svg>`}
             className="w-full font-mono text-xs text-[#1a3328] rounded-sm border border-[#c8d6cf] p-3 focus:border-[#235c4f] focus:outline-none"
           />

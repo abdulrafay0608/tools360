@@ -6,6 +6,7 @@ import { saveAs } from "file-saver";
 import FileUploader from "@/components/pdf/file/FileUploader";
 import usePDFJS from "@/hooks/usePDFJS";
 import PDFJSStatus from "@/components/pdf/PDFJSStatus";
+import { assertPdfPageCount } from "@/utils/fileProcessingLimits";
 import PdfToJpgHeader from "./PdfToJpgHeader";
 import PdfToJpgPageGrid from "./PdfToJpgPageGrid";
 import PdfToJpgOptionsBar from "./PdfToJpgOptionsBar";
@@ -89,6 +90,7 @@ export default function PdfToJpgTool() {
         const doc = await loadingTask.promise;
 
         if (isActive) {
+          assertPdfPageCount(doc.numPages);
           setPdfDoc(doc);
           setTotalPages(doc.numPages);
           // By default, select all pages

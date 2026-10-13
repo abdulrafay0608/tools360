@@ -8,6 +8,7 @@ import useThumbnails from "@/hooks/useThumbnails";
 import { mergePDFs } from "@/components/utils/pdfUtils";
 import ActionBar from "./ActionBar";
 import FileUploader from "@/components/pdf/file/FileUploader";
+import { PDF_PROCESSING_LIMITS } from "@/utils/fileProcessingLimits";
 import FilePreviewList from "@/tools/pdf/merge-pdf/components/FilePreviewList";
 import PDFJSStatus from "@/components/pdf/PDFJSStatus";
 
@@ -87,6 +88,10 @@ const MergePDFTool = () => {
         onUpload={handleUpload}
         accept="application/pdf,.pdf"
         multiple
+        maxFiles={PDF_PROCESSING_LIMITS.maxFiles}
+        maxFileSizeBytes={PDF_PROCESSING_LIMITS.maxFileBytes}
+        maxTotalBytes={PDF_PROCESSING_LIMITS.maxTotalBytes}
+        existingFiles={files}
       />
 
       {files.length > 0 && (

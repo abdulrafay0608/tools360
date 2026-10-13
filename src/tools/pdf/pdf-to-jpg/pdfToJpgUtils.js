@@ -4,6 +4,7 @@
  */
 
 import { downloadZip } from "client-zip";
+import { PDF_PROCESSING_LIMITS, assertPdfViewport } from "../../../utils/fileProcessingLimits.js";
 
 /**
  * Scale factors for resolution settings.
@@ -32,6 +33,7 @@ export const QUALITY_PRESETS = {
  */
 export async function renderPageToJpg(page, scale = 1.0, quality = 0.8) {
   const viewport = page.getViewport({ scale });
+  assertPdfViewport(viewport, PDF_PROCESSING_LIMITS.maxRenderPixels);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 
@@ -85,6 +87,7 @@ export async function generatePageThumbnail(page, maxDimension = 200) {
   );
 
   const viewport = page.getViewport({ scale });
+  assertPdfViewport(viewport, PDF_PROCESSING_LIMITS.maxThumbnailPixels);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 

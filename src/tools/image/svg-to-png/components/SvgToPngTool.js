@@ -10,6 +10,7 @@ import {
 } from "@/hooks/imageBatchQueueUtils.js";
 import { saveAs } from "file-saver";
 import FileUploader from "@/components/pdf/file/FileUploader";
+import { SVG_PROCESSING_LIMITS } from "@/utils/fileProcessingLimits";
 import SvgOptionsBar from "./SvgOptionsBar";
 import SvgSummaryBar from "./SvgSummaryBar";
 import SvgGrid from "./SvgGrid";
@@ -131,13 +132,16 @@ export default function SvgToPngTool() {
         validFiles,
         unsupported,
         oversized,
+        overTotal,
         skippedByLimit,
       } = selectFiles(
         newFiles,
         currentList.length,
         MAX_FILES,
         MAX_FILE_SIZE_BYTES,
-        isSvgFile
+        isSvgFile,
+        currentList.reduce((total, item) => total + (item.fileSize || 0), 0),
+        SVG_PROCESSING_LIMITS.maxTotalBytes
       );
 
       const noticeParts = [
@@ -147,6 +151,9 @@ export default function SvgToPngTool() {
           : "",
         oversized.length
           ? `${oversized.map((f) => f.name).join(", ")} exceeds the 5 MB file limit.`
+          : "",
+        overTotal.length
+          ? `Selected SVG files exceed the ${Math.round(SVG_PROCESSING_LIMITS.maxTotalBytes / (1024 * 1024))} MB total browser-processing limit.`
           : "",
         skippedByLimit
           ? `${skippedByLimit} file(s) skipped; maximum limit is ${MAX_FILES} SVG files.`
@@ -217,6 +224,11 @@ export default function SvgToPngTool() {
       const currentList = itemsRef.current;
       if (currentList.length >= MAX_FILES) {
         setError(`Maximum limit of ${MAX_FILES} items reached.`);
+        return;
+      }
+      const currentBytes = currentList.reduce((total, item) => total + (item.fileSize || 0), 0);
+      if (pastedData.size > SVG_PROCESSING_LIMITS.maxMarkupBytes || currentBytes + pastedData.size > SVG_PROCESSING_LIMITS.maxTotalBytes) {
+        setError(`Pasted SVG exceeds the ${Math.round(SVG_PROCESSING_LIMITS.maxTotalBytes / (1024 * 1024))} MB total browser-processing limit.`);
         return;
       }
 

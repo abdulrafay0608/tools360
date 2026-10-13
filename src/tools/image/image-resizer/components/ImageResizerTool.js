@@ -8,6 +8,7 @@ import { updateBatchItemStatus } from "@/hooks/imageBatchQueueUtils.js";
 import { saveAs } from "file-saver";
 import { FaCheckCircle, FaExclamationCircle, FaLock } from "react-icons/fa";
 import FileUploader from "@/components/pdf/file/FileUploader";
+import { IMAGE_PROCESSING_LIMITS } from "@/utils/fileProcessingLimits";
 import {
   createZipArchive,
   getOutputFilename,
@@ -145,13 +146,16 @@ export default function ImageResizerTool() {
       validFiles,
       unsupported,
       oversized: oversizedFiles,
+      overTotal,
       skippedByLimit,
     } = selectFiles(
       newFiles,
       currentItems.length,
       IMAGE_BATCH_MAX_FILES,
       IMAGE_FILE_MAX_SIZE_BYTES,
-      isAcceptedImage
+      isAcceptedImage,
+      currentItems.reduce((total, item) => total + (item.file?.size || 0), 0),
+      IMAGE_PROCESSING_LIMITS.maxTotalBytes
     );
     const unsupportedCount = unsupported.length;
     const notices = [
@@ -159,6 +163,9 @@ export default function ImageResizerTool() {
       unsupportedCount ? `${unsupportedCount} unsupported image file(s) were skipped.` : "",
       oversizedFiles.length
         ? `${oversizedFiles.map((file) => file.name).join(", ")} exceeds the ${formatFileSizeLimit(IMAGE_FILE_MAX_SIZE_BYTES)} file limit.`
+        : "",
+      overTotal.length
+        ? `Selected images exceed the ${Math.round(IMAGE_PROCESSING_LIMITS.maxTotalBytes / (1024 * 1024))} MB total browser-processing limit.`
         : "",
       skippedByLimit
         ? `${skippedByLimit} image(s) skipped; the limit is ${MAX_FILES} files.`

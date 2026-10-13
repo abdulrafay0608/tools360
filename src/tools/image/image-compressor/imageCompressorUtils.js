@@ -18,6 +18,7 @@ import {
   isAcceptedImage,
   createZipArchive as sharedCreateZipArchive,
 } from "../utils/imageToolUtils.js";
+import { assertCanvasDimensions, assertImageDimensions } from "../../../utils/fileProcessingLimits.js";
 
 export {
   IMAGE_BATCH_MAX_FILES as MAX_FILES,
@@ -137,9 +138,11 @@ export async function compressSingleImage(file, options = {}) {
     if (typeof bitmap.close === "function") bitmap.close();
     throw new Error("Unable to read image dimensions (file may be corrupted).");
   }
+  assertImageDimensions(origWidth, origHeight);
 
   const { width: targetWidth, height: targetHeight, wasDownscaled } =
     calculateTargetDimensions(origWidth, origHeight, maxDimension);
+  assertCanvasDimensions(targetWidth, targetHeight);
 
   const targetMime = resolveTargetMimeType(file.type, outputFormat);
 

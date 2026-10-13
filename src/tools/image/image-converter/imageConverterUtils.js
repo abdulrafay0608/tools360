@@ -9,6 +9,7 @@ import {
   formatFileSizeLimit,
   generateUniqueFilenames as sharedGenerateUniqueFilenames,
 } from "../utils/imageToolUtils.js";
+import { assertCanvasDimensions, assertImageDimensions } from "../../../utils/fileProcessingLimits.js";
 
 export {
   formatFileSize,
@@ -149,9 +150,10 @@ export async function convertSingleImage(file, options = {}) {
       const bitmap = await createImageBitmap(file);
       width = bitmap.width;
       height = bitmap.height;
+      assertImageDimensions(width, height);
       if (typeof bitmap.close === "function") bitmap.close();
-    } catch {
-      // Ignored if decode fails; file remains untouched
+    } catch (error) {
+      throw new Error(error?.message || "Corrupted or unsupported image file.");
     }
 
     return {
@@ -210,6 +212,8 @@ export async function convertSingleImage(file, options = {}) {
     if (typeof bitmap.close === "function") bitmap.close();
     throw new Error("Unable to read image dimensions (file may be corrupted).");
   }
+  assertImageDimensions(width, height);
+  assertCanvasDimensions(width, height);
 
   let canvas;
   let ctx;

@@ -1,16 +1,35 @@
-export function selectEligibleFiles(files, currentCount, maxFiles, maxFileSizeBytes, isAccepted) {
+export function selectEligibleFiles(
+  files,
+  currentCount,
+  maxFiles,
+  maxFileSizeBytes,
+  isAccepted,
+  currentTotalBytes = 0,
+  maxTotalBytes = Infinity
+) {
   const selected = Array.from(files);
   const accepted = selected.filter(isAccepted);
-  const validFiles = accepted.filter((file) => file.size <= maxFileSizeBytes);
+  const perFileValid = accepted.filter((file) => file.size > 0 && file.size <= maxFileSizeBytes);
   const remainingSlots = Math.max(0, maxFiles - currentCount);
-  const acceptedFiles = validFiles.slice(0, remainingSlots);
+  const validFiles = [];
+  const overTotal = [];
+  let totalBytes = currentTotalBytes;
+  for (const file of perFileValid.slice(0, remainingSlots)) {
+    if (totalBytes + file.size > maxTotalBytes) {
+      overTotal.push(file);
+    } else {
+      validFiles.push(file);
+      totalBytes += file.size;
+    }
+  }
 
   return {
     selected,
-    validFiles: acceptedFiles,
+    validFiles,
     unsupported: selected.filter((file) => !isAccepted(file)),
-    oversized: selected.filter((file) => file.size > maxFileSizeBytes),
-    skippedByLimit: Math.max(0, validFiles.length - acceptedFiles.length),
+    oversized: selected.filter((file) => file.size === 0 || file.size > maxFileSizeBytes),
+    overTotal,
+    skippedByLimit: Math.max(0, perFileValid.length - remainingSlots),
   };
 }
 

@@ -10,6 +10,7 @@ import {
 } from "@/hooks/imageBatchQueueUtils.js";
 import { saveAs } from "file-saver";
 import FileUploader from "@/components/pdf/file/FileUploader";
+import { IMAGE_PROCESSING_LIMITS } from "@/utils/fileProcessingLimits";
 import ConverterOptionsBar from "./ConverterOptionsBar";
 import ConverterSummaryBar from "./ConverterSummaryBar";
 import ConverterGrid from "./ConverterGrid";
@@ -119,13 +120,16 @@ export default function ImageConverterTool() {
         validFiles,
         unsupported,
         oversized,
+        overTotal,
         skippedByLimit,
       } = selectFiles(
         newFiles,
         currentList.length,
         MAX_FILES,
         MAX_FILE_SIZE_BYTES,
-        isAcceptedConvertInput
+        isAcceptedConvertInput,
+        currentList.reduce((total, item) => total + (item.file?.size || 0), 0),
+        IMAGE_PROCESSING_LIMITS.maxTotalBytes
       );
 
       const noticeParts = [
@@ -135,6 +139,9 @@ export default function ImageConverterTool() {
           : "",
         oversized.length
           ? `${oversized.map((f) => f.name).join(", ")} exceeds the ${formatFileSizeLimit(MAX_FILE_SIZE_BYTES)} file limit.`
+          : "",
+        overTotal.length
+          ? `Selected images exceed the ${Math.round(IMAGE_PROCESSING_LIMITS.maxTotalBytes / (1024 * 1024))} MB total browser-processing limit.`
           : "",
         skippedByLimit
           ? `${skippedByLimit} image(s) skipped; maximum limit is ${MAX_FILES} images.`

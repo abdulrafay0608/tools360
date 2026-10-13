@@ -5,6 +5,7 @@
 
 import { PDFDocument, PageSizes } from "pdf-lib";
 import { downloadZip } from "client-zip";
+import { assertCanvasDimensions, assertImageDimensions } from "../../../utils/fileProcessingLimits.js";
 
 /**
  * Loads an Image object from a File or Data URL to get width/height.
@@ -63,6 +64,9 @@ export async function processImageToJpegBytes(img, rotation = 0) {
 
   const w = is90or270 ? img.naturalHeight : img.naturalWidth;
   const h = is90or270 ? img.naturalWidth : img.naturalHeight;
+
+  assertImageDimensions(img.naturalWidth, img.naturalHeight);
+  assertCanvasDimensions(w, h);
 
   canvas.width = w;
   canvas.height = h;
