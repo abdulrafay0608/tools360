@@ -6,7 +6,6 @@ import useTrackedObjectUrls from "@/hooks/useTrackedObjectUrls";
 import useImageBatchQueue from "@/hooks/useImageBatchQueue";
 import {
   markBatchItemsCancelled,
-  updateBatchItemStatus,
 } from "@/hooks/imageBatchQueueUtils.js";
 import { saveAs } from "file-saver";
 import FileUploader from "@/components/pdf/file/FileUploader";
@@ -72,11 +71,18 @@ export default function SvgToPngTool() {
     currentOptions,
     {
       shouldProcess: (item) => !(item.status === "error" && !item.svgText),
-      onStart: (item) => commitItems(updateBatchItemStatus(
-        itemsRef.current,
-        item.id,
-        "processing"
-      )),
+      onStart: (item) => commitItems(itemsRef.current.map((current) => {
+        if (current.id !== item.id) return current;
+        if (current.previewUrl) revokeTrackedUrl(current.previewUrl);
+        return {
+          ...current,
+          status: "processing",
+          blob: null,
+          pngSize: null,
+          previewUrl: null,
+          error: "",
+        };
+      })),
       processItem: async (item, batchOptions) => {
         const { width: targetWidth, height: targetHeight, wasCapped } =
           calculateTargetDimensions(item.origWidth, item.origHeight, batchOptions);
@@ -111,12 +117,18 @@ export default function SvgToPngTool() {
           };
         }));
       },
-      onError: (item, cause) => commitItems(updateBatchItemStatus(
-        itemsRef.current,
-        item.id,
-        "error",
-        { error: cause?.message || "Failed to render SVG image." }
-      )),
+      onError: (item, cause) => commitItems(itemsRef.current.map((current) => {
+        if (current.id !== item.id) return current;
+        if (current.previewUrl) revokeTrackedUrl(current.previewUrl);
+        return {
+          ...current,
+          status: "error",
+          blob: null,
+          pngSize: null,
+          previewUrl: null,
+          error: cause?.message || "Failed to render SVG image.",
+        };
+      })),
     }
   ), [commitItems, createTrackedUrl, processBatch, revokeTrackedUrl]);
 
@@ -320,7 +332,7 @@ export default function SvgToPngTool() {
   }, [clearItems, commitItems, invalidateBatch, revokeTrackedUrl]);
 
   const handleDownloadSingle = useCallback((item) => {
-    if (!item.blob || !item.outputFilename) return;
+    if (item.status !== "done" || !item.blob || !item.outputFilename) return;
     saveAs(item.blob, item.outputFilename);
   }, []);
 

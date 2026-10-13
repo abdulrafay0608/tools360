@@ -303,38 +303,26 @@ try {
   });
 
   // ===========================================================================
-  // CHECK 2: 8192px cap
+  // CHECK 2: Canvas pixel budget
   // ===========================================================================
-  await check("8192px cap preserves aspect ratio", async () => {
+  await check("canvas pixel budget rejects stale SVG output", async () => {
     await openSvgTool(page);
     await uploadSvg(page, F.large); // 1600×900
     await waitForItems(page, 1);
 
-    // Request 4x scale: 1600*4=6400 wide, 900*4=3600 tall → both under 8192 so no cap
+    // This is below the per-side cap but exceeds the 16 MP canvas budget.
     await page.locator("button[data-scale-button='4']").click();
-    await waitForItems(page, 1);
-    const scale4Out = path.join(EVIDENCE, "cap-4x.png");
-    await downloadFirst(page, scale4Out);
-    const s4 = await inspectPng(scale4Out, page);
-    // 1600*4=6400, 900*4=3600 — no cap needed
-    assert.equal(s4.width, 6400, `4x width must be 6400, got ${s4.width}`);
-    assert.equal(s4.height, 3600, `4x height must be 3600, got ${s4.height}`);
-
-    // Now use custom width = 20000 to force cap
-    await page.locator("button[data-custom-width-button='true']").click();
-    await page.locator("#custom-width-input").fill("20000");
-    await page.locator("#custom-width-input").dispatchEvent("change");
-    await waitForItems(page, 1);
-    const capOut = path.join(EVIDENCE, "cap-20000.png");
-    await downloadFirst(page, capOut);
-    const capped = await inspectPng(capOut, page);
-    // ratio 1600:900 = 16:9; cap at 8192 wide → height = 8192*(900/1600) = 4608
-    assert.equal(capped.width, 8192, `Capped width must be 8192, got ${capped.width}`);
-    assert.equal(capped.height, 4608, `Capped height must be 4608 (aspect ratio 16:9), got ${capped.height}`);
+    const item = page.locator("article[data-image-item]").first();
+    await item.locator("[data-status='error']").waitFor({ timeout: 30000 });
+    assert.match(
+      await item.locator("[data-status='error']").innerText(),
+      /output canvas is too large/
+    );
+    assert.equal(await item.locator("button[data-download-single='true']").isDisabled(), true);
     await page.screenshot({ path: path.join(EVIDENCE, "02-cap-capped.png") });
 
     await clearAll(page);
-    return { scale4x: [s4.width, s4.height], cappedAt8192: [capped.width, capped.height] };
+    return { rejectedDimensions: [6400, 3600] };
   });
 
   // ===========================================================================
