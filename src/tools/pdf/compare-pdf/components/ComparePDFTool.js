@@ -12,6 +12,7 @@ import {
 import {
   createDifferenceImageData,
   classifyDifference,
+  validateComparePageViewport,
 } from "../compareUtils.js";
 
 import CompareUploadLanding from "./CompareUploadLanding";
@@ -29,6 +30,14 @@ const MAX_RENDER_DIMENSION = 1600;
 const THUMBNAIL_SCALE = 0.18;
 const ZOOM_LEVELS = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
 const DEFAULT_ZOOM_INDEX = 2; // 1.0
+
+async function destroyDocumentSafely(documentProxy) {
+  try {
+    await documentProxy?.destroy?.();
+  } catch {
+    // Preserve the actionable processing error when PDF.js cleanup itself fails.
+  }
+}
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Canvas helpers
@@ -187,8 +196,14 @@ export default function ComparePDFTool() {
             const documentProxy = await task.promise;
             try {
               assertPdfPageCount(documentProxy.numPages);
+              const firstPage = await documentProxy.getPage(1);
+              const baseViewport = firstPage.getViewport({ scale: 1 });
+              validateComparePageViewport(
+                baseViewport,
+                PDF_PROCESSING_LIMITS.maxRenderPixels
+              );
             } catch (limitError) {
-              await documentProxy.destroy();
+              await destroyDocumentSafely(documentProxy);
               throw limitError;
             }
             return documentProxy;
