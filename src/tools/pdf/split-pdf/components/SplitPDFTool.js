@@ -15,6 +15,7 @@ import PagePreviewList from "./PagePreviewList";
 import Button from "@/components/ui/Button";
 import FixedSplitPreview from "./FixedSplitPreview";
 import { formatFileSize } from "@/components/utils/pdfUtils";
+import PDFJSStatus from "@/components/pdf/PDFJSStatus";
 
 const SplitPDFTool = () => {
   const [mode, setMode] = useState("range"); // 'range' or 'fixed'
@@ -25,7 +26,7 @@ const SplitPDFTool = () => {
   const [statusMessage, setStatusMessage] = useState("");
   const [isSplitting, setIsSplitting] = useState(false);
 
-  const { pdfjs, isLoading: isPDFJSLoading } = usePDFJS();
+  const { pdfjs, isLoading: isPDFJSLoading, error: pdfjsError, retry: retryPDFJS } = usePDFJS();
   const { thumbnails, isGenerating, totalPages } = usePDFThumbnails(
     file,
     pdfjs,
@@ -283,6 +284,7 @@ const SplitPDFTool = () => {
 
   return (
     <div className="p-4 sm:p-6">
+      <PDFJSStatus error={pdfjsError} onRetry={retryPDFJS} />
       {!file ? (
         <FileUploader
           onUpload={handleUpload}

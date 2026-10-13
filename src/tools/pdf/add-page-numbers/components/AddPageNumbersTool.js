@@ -5,6 +5,7 @@ import { FaDownload, FaFilePdf } from "react-icons/fa";
 import Button from "@/components/ui/Button";
 import FileUploader from "@/components/pdf/file/FileUploader";
 import usePDFJS from "@/hooks/usePDFJS";
+import PDFJSStatus from "@/components/pdf/PDFJSStatus";
 import { useAdPauseWhile } from "@/hooks/useAdPause";
 import {
   createPageEntries,
@@ -312,7 +313,7 @@ export default function AddPageNumbersTool() {
   const [isExporting, setIsExporting] = useState(false);
   const [renderingPages, setRenderingPages] = useState(() => new Set());
   const activeLoadingTaskRef = useRef(null);
-  const { pdfjs, isLoading: isPDFJSLoading } = usePDFJS();
+  const { pdfjs, isLoading: isPDFJSLoading, error: pdfjsError, retry: retryPDFJS } = usePDFJS();
 
   const hasDocument = Boolean(file && pdfDoc);
   const isBusy = isLoadingDocument || isExporting;
@@ -514,6 +515,7 @@ export default function AddPageNumbersTool() {
 
   return (
     <div className="p-4 sm:p-6">
+      <PDFJSStatus error={pdfjsError} onRetry={retryPDFJS} />
       {error && (
         <div
           className="mb-4 border border-[#f3cfc8] bg-[#fdf4f3] px-4 py-3 text-sm text-[#a13c2f]"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { createObjectUrlTracker } from "./trackedObjectUrlUtils.js";
 
 export default function useTrackedObjectUrls() {
@@ -11,8 +11,8 @@ export default function useTrackedObjectUrls() {
   useEffect(() => () => tracker.revokeAll(), [tracker]);
 
   return {
-    createTrackedUrl: tracker.create,
-    revokeTrackedUrl: tracker.revoke,
-    revokeAllTrackedUrls: tracker.revokeAll,
+    createTrackedUrl: useCallback((blob) => tracker.create(blob), [tracker]),
+    revokeTrackedUrl: useCallback((url) => tracker.revoke(url), [tracker]),
+    revokeAllTrackedUrls: useCallback(() => tracker.revokeAll(), [tracker]),
   };
 }

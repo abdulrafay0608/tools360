@@ -15,20 +15,37 @@ export function loadImageSource(source) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
+    let objectUrl = null;
+    let released = false;
+    const release = () => {
+      if (released) return;
+      released = true;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+        objectUrl = null;
+      }
+      img.onload = null;
+      img.onerror = null;
+      img.src = "";
+    };
     img.onload = () => {
       resolve({
         img,
         width: img.naturalWidth || img.width,
         height: img.naturalHeight || img.height,
+        release,
       });
     };
-    img.onerror = () => reject(new Error("Failed to load image file."));
+    img.onerror = () => {
+      release();
+      reject(new Error("Failed to load image file."));
+    };
 
     if (typeof source === "string") {
       img.src = source;
     } else {
-      const url = URL.createObjectURL(source);
-      img.src = url;
+      objectUrl = URL.createObjectURL(source);
+      img.src = objectUrl;
     }
   });
 }
@@ -83,8 +100,13 @@ async function addImageToPdfPage(pdfDoc, item, options) {
   const { pageSize = "a4", orientation = "auto", margin = "small" } = options;
   const marginPt = margin === "none" ? 0 : margin === "small" ? 20 : 45;
 
-  const { img } = await loadImageSource(item.file);
-  const jpegBytes = await processImageToJpegBytes(img, item.rotation || 0);
+  const { img, release } = await loadImageSource(item.file);
+  let jpegBytes;
+  try {
+    jpegBytes = await processImageToJpegBytes(img, item.rotation || 0);
+  } finally {
+    release?.();
+  }
   const pdfImage = await pdfDoc.embedJpg(jpegBytes);
 
   const imgW = pdfImage.width;

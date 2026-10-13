@@ -5,6 +5,7 @@ import { useAdPauseWhile } from "@/hooks/useAdPause";
 import { saveAs } from "file-saver";
 import FileUploader from "@/components/pdf/file/FileUploader";
 import usePDFJS from "@/hooks/usePDFJS";
+import PDFJSStatus from "@/components/pdf/PDFJSStatus";
 import PdfToJpgHeader from "./PdfToJpgHeader";
 import PdfToJpgPageGrid from "./PdfToJpgPageGrid";
 import PdfToJpgOptionsBar from "./PdfToJpgOptionsBar";
@@ -36,7 +37,7 @@ export default function PdfToJpgTool() {
   useAdPauseWhile("pdf-to-jpg-error", Boolean(error));
   useAdPauseWhile("pdf-to-jpg-empty", !file);
 
-  const { pdfjs } = usePDFJS();
+  const { pdfjs, error: pdfjsError, retry: retryPDFJS } = usePDFJS();
   const activeDocRef = useRef(null);
 
   /* ── Handle File Upload ── */
@@ -238,6 +239,7 @@ export default function PdfToJpgTool() {
 
   return (
     <div className="p-4 sm:p-6">
+      <PDFJSStatus error={pdfjsError} onRetry={retryPDFJS} />
       {error && (
         <div className="rounded-sm border border-[#f3cfc8] bg-[#fdf4f3] px-4 py-3 text-sm text-[#a13c2f]" role="alert">
           {error}

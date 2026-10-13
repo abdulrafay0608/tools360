@@ -16,6 +16,7 @@ export default function JpgToPdfOptionsBar({
   onConvert,
   isConverting,
   imageCount,
+  disabled = false,
 }) {
   return (
     <aside className="flex flex-col gap-5 rounded-sm border border-[#dce5e0] bg-[#f8faf9] p-4 sm:p-5">
@@ -38,10 +39,11 @@ export default function JpgToPdfOptionsBar({
           ].map(({ id, label }) => {
             const active = (options.outputMode || "zip") === id;
             return (
-              <button
+                <button
                 key={id}
                 type="button"
                 onClick={() => onOptionsChange("outputMode", id)}
+                  disabled={disabled}
                 className={`rounded-sm border py-2 text-xs font-semibold transition-colors ${
                   active
                     ? "border-[#235c4f] bg-[#173d34] text-white"
@@ -68,10 +70,11 @@ export default function JpgToPdfOptionsBar({
           ].map(({ id, label }) => {
             const active = options.orientation === id;
             return (
-              <button
+                <button
                 key={id}
                 type="button"
                 onClick={() => onOptionsChange("orientation", id)}
+                  disabled={disabled}
                 className={`rounded-sm border py-1.5 text-xs font-semibold transition-colors ${
                   active
                     ? "border-[#235c4f] bg-[#173d34] text-white"
@@ -98,10 +101,11 @@ export default function JpgToPdfOptionsBar({
           ].map(({ id, label }) => {
             const active = options.pageSize === id;
             return (
-              <button
+                <button
                 key={id}
                 type="button"
                 onClick={() => onOptionsChange("pageSize", id)}
+                  disabled={disabled}
                 className={`rounded-sm border py-1.5 text-xs font-semibold transition-colors ${
                   active
                     ? "border-[#235c4f] bg-[#173d34] text-white"
@@ -128,10 +132,11 @@ export default function JpgToPdfOptionsBar({
           ].map(({ id, label }) => {
             const active = options.margin === id;
             return (
-              <button
+                <button
                 key={id}
                 type="button"
                 onClick={() => onOptionsChange("margin", id)}
+                  disabled={disabled}
                 className={`rounded-sm border py-1.5 text-xs font-semibold transition-colors ${
                   active
                     ? "border-[#235c4f] bg-[#173d34] text-white"
@@ -155,6 +160,7 @@ export default function JpgToPdfOptionsBar({
           type="text"
           value={filename}
           onChange={(e) => onFilenameChange(e.target.value)}
+          disabled={disabled}
           placeholder="converted.pdf"
           className="w-full rounded-sm border border-[#dce5e0] bg-white px-3 py-2 text-xs text-[#1a3328] focus:border-[#235c4f] focus:outline-none"
         />
@@ -167,7 +173,7 @@ export default function JpgToPdfOptionsBar({
           variant="primary"
           size="md"
           onClick={onConvert}
-          disabled={isConverting || imageCount === 0}
+          disabled={disabled || isConverting || imageCount === 0}
           icon={<FaFilePdf />}
           iconPosition="left"
           className="w-full justify-center"

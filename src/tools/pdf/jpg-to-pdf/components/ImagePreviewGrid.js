@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   FaUndo,
   FaRedo,
@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import Button from "@/components/ui/Button";
 import { formatFileSize } from "@/components/utils/pdfUtils";
+import useTrackedObjectUrls from "@/hooks/useTrackedObjectUrls";
 
 /**
  * ImagePreviewGrid
@@ -23,7 +24,31 @@ export default function ImagePreviewGrid({
   onRemove,
   onClearAll,
   onAddMore,
+  disabled = false,
 }) {
+  const { createTrackedUrl, revokeTrackedUrl } = useTrackedObjectUrls();
+  const urlEntriesRef = useRef(new Map());
+  const [previewUrls, setPreviewUrls] = useState(new Map());
+
+  useEffect(() => {
+    const nextEntries = new Map();
+    const nextUrls = new Map();
+    for (const item of images) {
+      const key = item.id || item.file;
+      const existing = urlEntriesRef.current.get(key);
+      const entry = existing?.file === item.file
+        ? existing
+        : { file: item.file, url: createTrackedUrl(item.file) };
+      if (existing && existing !== entry) revokeTrackedUrl(existing.url);
+      nextEntries.set(key, entry);
+      nextUrls.set(key, entry.url);
+    }
+    for (const [key, entry] of urlEntriesRef.current) {
+      if (!nextEntries.has(key)) revokeTrackedUrl(entry.url);
+    }
+    urlEntriesRef.current = nextEntries;
+    setPreviewUrls(nextUrls);
+  }, [images, createTrackedUrl, revokeTrackedUrl]);
   return (
     <div className="space-y-4">
       {/* Header bar for image list */}
@@ -43,6 +68,7 @@ export default function ImagePreviewGrid({
             variant="outline"
             size="sm"
             onClick={onAddMore}
+            disabled={disabled}
             icon={<FaPlus />}
             iconPosition="left"
           >
@@ -53,6 +79,7 @@ export default function ImagePreviewGrid({
             variant="secondary"
             size="sm"
             onClick={onClearAll}
+            disabled={disabled}
             icon={<FaTrashAlt />}
             iconPosition="left"
           >
@@ -64,7 +91,7 @@ export default function ImagePreviewGrid({
       {/* Grid of Image Cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {images.map((item, index) => {
-          const previewUrl = URL.createObjectURL(item.file);
+          const previewUrl = previewUrls.get(item.id || item.file);
 
           return (
             <div
@@ -108,7 +135,7 @@ export default function ImagePreviewGrid({
                   <button
                     type="button"
                     onClick={() => onMove(index, index - 1)}
-                    disabled={index === 0}
+                    disabled={disabled || index === 0}
                     title="Move left"
                     aria-label="Move image left"
                     className="flex h-7 w-7 items-center justify-center rounded text-[#52675e] transition-colors hover:bg-[#eef2ef] disabled:opacity-30"
@@ -118,7 +145,7 @@ export default function ImagePreviewGrid({
                   <button
                     type="button"
                     onClick={() => onMove(index, index + 1)}
-                    disabled={index === images.length - 1}
+                    disabled={disabled || index === images.length - 1}
                     title="Move right"
                     aria-label="Move image right"
                     className="flex h-7 w-7 items-center justify-center rounded text-[#52675e] transition-colors hover:bg-[#eef2ef] disabled:opacity-30"
@@ -131,6 +158,7 @@ export default function ImagePreviewGrid({
                   <button
                     type="button"
                     onClick={() => onRotate(index)}
+                    disabled={disabled}
                     title="Rotate 90 degrees"
                     aria-label="Rotate image"
                     className="flex h-7 w-7 items-center justify-center rounded text-[#235c4f] transition-colors hover:bg-[#eef2ef]"
@@ -141,6 +169,7 @@ export default function ImagePreviewGrid({
                   <button
                     type="button"
                     onClick={() => onRemove(index)}
+                    disabled={disabled}
                     title="Remove image"
                     aria-label="Remove image"
                     className="flex h-7 w-7 items-center justify-center rounded text-[#a13c2f] transition-colors hover:bg-[#fdf4f3]"
