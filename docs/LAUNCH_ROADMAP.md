@@ -103,7 +103,7 @@ A realistic focused launch-hardening pass is approximately 10–15 working days 
 
 Release acceptance gate:
 
-- All P0 tasks accepted; no known supported-format export blocker or misleading metadata promise.
+- Completed Tasks 1–3 are accepted; Task 4's processing bounds and the remaining launch checks below are complete before broad launch.
 - Normal tests, lint and production build pass in the release environment.
 - Each of 14 file tools has at least one representative successful workflow with reopened outputs where applicable and a corrupt/unsupported-input case. ZIP members are checked, not just download events.
 - Privacy tests cover processing/download/reset with an explicit network allowlist and checks beyond POST; no file-bearing requests or content telemetry.
