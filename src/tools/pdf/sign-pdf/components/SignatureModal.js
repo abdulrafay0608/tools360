@@ -14,6 +14,8 @@ import {
   FONT_STYLES,
   COLOR_OPTIONS,
   generateTypedSignature,
+  getCanvasPoint,
+  normalizeSignatureImage,
 } from "../signPdfUtils";
 
 export default function SignatureModal({
@@ -26,24 +28,20 @@ export default function SignatureModal({
   const [typedText, setTypedText] = useState("");
   const [selectedFont, setSelectedFont] = useState("style1");
   const [uploadedDataUrl, setUploadedDataUrl] = useState("");
+  const [uploadError, setUploadError] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
 
   const canvasRef = useRef(null);
   const lastPointRef = useRef({ x: 0, y: 0 });
+  const uploadRequestRef = useRef(0);
 
   /* ── Canvas Drawing Logic ── */
   const startDrawing = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-    lastPointRef.current = {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
-    };
+    lastPointRef.current = getCanvasPoint(e, canvas);
     setIsDrawing(true);
   };
 
@@ -54,12 +52,7 @@ export default function SignatureModal({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-    const currentX = clientX - rect.left;
-    const currentY = clientY - rect.top;
+    const { x: currentX, y: currentY } = getCanvasPoint(e, canvas);
 
     ctx.strokeStyle = selectedColor;
     ctx.lineWidth = 3;
@@ -89,16 +82,35 @@ export default function SignatureModal({
   }, []);
 
   /* ── Handle Image Upload ── */
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      setUploadedDataUrl(reader.result);
-    };
-    reader.readAsDataURL(file);
+    const requestId = ++uploadRequestRef.current;
+    setUploadError("");
+    setIsUploading(true);
+    setUploadedDataUrl("");
     e.target.value = "";
+    try {
+      const normalized = await normalizeSignatureImage(file);
+      if (requestId !== uploadRequestRef.current) return;
+      setUploadedDataUrl(normalized.dataUrl);
+    } catch (error) {
+      if (requestId === uploadRequestRef.current) {
+        setUploadError(error?.message || "This signature image could not be used.");
+      }
+    } finally {
+      if (requestId === uploadRequestRef.current) setIsUploading(false);
+    }
+  };
+
+  useEffect(() => () => {
+    uploadRequestRef.current += 1;
+  }, []);
+
+  const handleClose = () => {
+    uploadRequestRef.current += 1;
+    setIsUploading(false);
+    onClose();
   };
 
   /* ── Final Save Signature ── */
@@ -131,7 +143,7 @@ export default function SignatureModal({
           </h3>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close dialog"
             className="rounded p-1 text-[#708079] transition-colors hover:bg-[#eef2ef] hover:text-[#1a3328]"
           >
@@ -286,6 +298,9 @@ export default function SignatureModal({
           {/* TAB 3: Upload Image */}
           {activeTab === "upload" && (
             <div className="space-y-4">
+              <p className="text-[11px] text-[#708079]">
+                This adds a visible signature stamp to the PDF; it is not a certificate-backed digital signature.
+              </p>
               {uploadedDataUrl ? (
                 <div className="flex flex-col items-center justify-center rounded border border-[#dce5e0] bg-[#fcfdfd] p-4">
                   <div className="relative flex h-32 w-full items-center justify-center overflow-hidden">
@@ -298,7 +313,11 @@ export default function SignatureModal({
                   </div>
                   <button
                     type="button"
-                    onClick={() => setUploadedDataUrl("")}
+                    onClick={() => {
+                      uploadRequestRef.current += 1;
+                      setUploadedDataUrl("");
+                      setUploadError("");
+                    }}
                     className="mt-2 text-xs text-[#a13c2f] hover:underline"
                   >
                     Remove and choose another image
@@ -321,13 +340,19 @@ export default function SignatureModal({
                   />
                 </label>
               )}
+              {isUploading && (
+                <p className="text-xs text-[#52675e]" role="status">Preparing image locally…</p>
+              )}
+              {uploadError && (
+                <p className="text-xs text-red-700" role="alert">{uploadError}</p>
+              )}
             </div>
           )}
         </div>
 
         {/* Modal Footer */}
         <div className="flex items-center justify-end gap-2 border-t border-[#eef2ef] bg-[#f8faf9] px-5 py-3">
-          <Button type="button" variant="secondary" size="sm" onClick={onClose}>
+          <Button type="button" variant="secondary" size="sm" onClick={handleClose}>
             Cancel
           </Button>
           <Button
@@ -338,7 +363,7 @@ export default function SignatureModal({
             disabled={
               (activeTab === "draw" && !hasDrawn) ||
               (activeTab === "type" && !typedText.trim()) ||
-              (activeTab === "upload" && !uploadedDataUrl)
+              (activeTab === "upload" && (!uploadedDataUrl || isUploading))
             }
             icon={<FaCheck />}
             iconPosition="left"
