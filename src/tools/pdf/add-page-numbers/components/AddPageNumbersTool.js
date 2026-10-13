@@ -4,6 +4,11 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FaDownload, FaFilePdf } from "react-icons/fa";
 import Button from "@/components/ui/Button";
 import FileUploader from "@/components/pdf/file/FileUploader";
+import {
+  PDF_PROCESSING_LIMITS,
+  assertPdfPageCount,
+  assertPdfViewport,
+} from "@/utils/fileProcessingLimits";
 import usePDFJS from "@/hooks/usePDFJS";
 import PDFJSStatus from "@/components/pdf/PDFJSStatus";
 import { useAdPauseWhile } from "@/hooks/useAdPause";
@@ -16,7 +21,6 @@ import {
   getPageNumberRange,
   getPdfLoadErrorMessage,
   getVisualPageDimensions,
-  MAX_PDF_FILE_SIZE_BYTES,
   PAGE_NUMBER_FORMATS,
   PAGE_NUMBER_POSITIONS,
 } from "@/components/utils/pdfPageUtils";
@@ -112,6 +116,7 @@ function PagePreview({
           scale: 1,
           rotation: pageData.rotation,
         });
+        assertPdfViewport(viewport, PDF_PROCESSING_LIMITS.maxRenderPixels);
         const maxWidth = Math.max(1, frame.clientWidth - 16);
         const maxHeight = Math.max(1, frame.clientHeight - 16);
         const displayScale = Math.min(
@@ -359,6 +364,12 @@ export default function AddPageNumbersTool() {
         const loadingTask = pdfjs.getDocument({ data: bytes.slice() });
         activeLoadingTaskRef.current = loadingTask;
         const documentProxy = await loadingTask.promise;
+        try {
+          assertPdfPageCount(documentProxy.numPages);
+        } catch (limitError) {
+          await documentProxy.destroy();
+          throw limitError;
+        }
         if (!isActive) {
           await documentProxy.destroy();
           return;
@@ -396,7 +407,7 @@ export default function AddPageNumbersTool() {
         }));
       } catch (loadError) {
         if (isActive) {
-          setError(getPdfLoadErrorMessage(loadError));
+          setError(loadError.message || getPdfLoadErrorMessage(loadError));
           setPdfDoc(null);
           setSourceBytes(null);
           setPages([]);
@@ -532,7 +543,8 @@ export default function AddPageNumbersTool() {
           multiple={false}
           fileTypeLabel="PDF file"
           titleText="Drop PDF file here"
-          maxFileSizeBytes={MAX_PDF_FILE_SIZE_BYTES}
+          maxFileSizeBytes={PDF_PROCESSING_LIMITS.maxFileBytes}
+          maxTotalBytes={PDF_PROCESSING_LIMITS.maxTotalBytes}
         />
       ) : (
         <div className="space-y-4">

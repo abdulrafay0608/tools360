@@ -6,6 +6,12 @@ import { saveAs } from "file-saver";
 import { FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import FileUploader from "@/components/pdf/file/FileUploader";
 import PDFJSStatus from "@/components/pdf/PDFJSStatus";
+import {
+  PDF_PROCESSING_LIMITS,
+  assertPdfPageCount,
+  assertPdfViewport,
+  validateFileSelection,
+} from "@/utils/fileProcessingLimits";
 
 import usePDFJS from "@/hooks/usePDFJS";
 import SignHeaderBar from "./SignHeaderBar";
@@ -45,20 +51,25 @@ export default function SignPDFTool() {
   /* ── File Selection & Validation ── */
   const handleUpload = useCallback((uploadedFiles) => {
     const list = Array.from(uploadedFiles || []);
-    const pdfFile = list.find(
-      (f) => f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf")
-    );
+    const validation = validateFileSelection({
+      files: list,
+      limits: { ...PDF_PROCESSING_LIMITS, maxFiles: 1 },
+      isAccepted: (candidate) =>
+        candidate.type === "application/pdf" || candidate.name.toLowerCase().endsWith(".pdf"),
+      label: "PDF file",
+    });
+    if (validation.rejected.length || validation.accepted.length !== 1) {
+      setError(validation.rejected[0] || "Please select one valid PDF file.");
+      return;
+    }
+    const [pdfFile] = validation.accepted;
 
     if (!pdfFile) {
       setError("Please select a valid PDF file.");
       return;
     }
 
-    if (pdfFile.size > 50 * 1024 * 1024) {
-      setFileWarning("This PDF is larger than 50MB. Processing may take longer in your browser.");
-    } else {
-      setFileWarning("");
-    }
+    setFileWarning("");
 
     setFile(pdfFile);
     setPdfDoc(null);
@@ -98,6 +109,12 @@ export default function SignPDFTool() {
         const loadingTask = pdfjs.getDocument({ data: buffer });
         activeDocRef.current = loadingTask;
         const doc = await loadingTask.promise;
+        try {
+          assertPdfPageCount(doc.numPages);
+        } catch (limitError) {
+          await doc.destroy();
+          throw limitError;
+        }
 
         if (isActive) {
           setPdfDoc(doc);
@@ -112,6 +129,7 @@ export default function SignPDFTool() {
               try {
                 const page = await doc.getPage(p);
                 const vp = page.getViewport({ scale: 0.25 });
+                assertPdfViewport(vp, PDF_PROCESSING_LIMITS.maxThumbnailPixels);
                 const canvas = document.createElement("canvas");
                 canvas.width = Math.ceil(vp.width);
                 canvas.height = Math.ceil(vp.height);
@@ -142,6 +160,8 @@ export default function SignPDFTool() {
             setError(
               "This PDF is password-protected and encrypted. Please unlock it and try again."
             );
+          } else if (err?.message) {
+            setError(err.message);
           } else {
             setError(
               "This PDF file could not be opened or is corrupted. Please try another file."
@@ -266,6 +286,8 @@ export default function SignPDFTool() {
           multiple={false}
           onUpload={handleUpload}
           titleText="Choose a PDF file to sign"
+          maxFileSizeBytes={PDF_PROCESSING_LIMITS.maxFileBytes}
+          maxTotalBytes={PDF_PROCESSING_LIMITS.maxTotalBytes}
         />
       ) : (
         /* Sign Workspace */

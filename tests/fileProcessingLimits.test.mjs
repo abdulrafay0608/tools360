@@ -5,6 +5,7 @@ import {
   assertCanvasDimensions,
   assertImageDimensions,
   assertPdfPageCount,
+  assertPdfViewport,
   assertSvgMarkup,
   validateFileSelection,
 } from "../src/utils/fileProcessingLimits.js";
@@ -39,6 +40,7 @@ test("image, canvas, PDF and SVG bounds reject unsafe work", () => {
   assert.throws(() => assertImageDimensions(9000, 10), /8192/);
   assert.throws(() => assertCanvasDimensions(5000, 5000), /too large/);
   assert.throws(() => assertPdfPageCount(201), /200 pages/);
+  assert.throws(() => assertPdfViewport({ width: 5000, height: 4000 }), /too large/);
   assert.throws(() => assertSvgMarkup("<svg>" + "<path/>".repeat(5001) + "</svg>"), /too many elements/);
 });
 

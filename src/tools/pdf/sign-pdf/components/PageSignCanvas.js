@@ -8,6 +8,7 @@ import {
   FaSearchPlus,
 } from "react-icons/fa";
 import PlacedSignatureItem from "./PlacedSignatureItem";
+import { PDF_PROCESSING_LIMITS, assertPdfViewport } from "@/utils/fileProcessingLimits";
 
 /**
  * PageSignCanvas
@@ -60,6 +61,7 @@ export default function PageSignCanvas({
         const baseScale = Math.min(1.4, 800 / unscaledViewport.width);
         const scale = baseScale * zoom;
         const viewport = page.getViewport({ scale });
+        assertPdfViewport(viewport, PDF_PROCESSING_LIMITS.maxRenderPixels);
 
         const canvas = canvasRef.current;
         if (!canvas) return;
