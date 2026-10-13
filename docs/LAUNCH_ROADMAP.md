@@ -23,7 +23,7 @@ Estimate: 0.5–1.5 days of engineering, excluding access delays. This is the si
 
 ### 2. ✅ Complete — Repair signature image ingestion and output
 
-Dependency: existing Canvas and pdf-lib; no new package required. Normalize JPEG/WebP/PNG to a validated local PNG with file-byte and decoded-pixel limits, or deliberately support embedding by format. Add read/decode errors and a bounded signature canvas. Audit: A02, A04, A10.
+Dependency: existing Canvas and pdf-lib; no new package required. Normalize JPEG/WebP/PNG to a validated local PNG with file-byte and decoded-pixel limits, or deliberately support embedding by format. Add read/decode errors and a bounded signature canvas. Audit: A02, A10. The remaining cross-tool picker bounds are covered by Task 4 (A04, A06).
 
 Acceptance: all advertised formats produce a readable stamped PDF; corrupt/disallowed/oversized images fail clearly before placement; no file content leaves the browser. Verify positions on rotated and offset-crop PDFs, desktop and phone layouts. Typed/drawn PNG behavior remains intact. State clearly that this is a visual signature stamp.
 

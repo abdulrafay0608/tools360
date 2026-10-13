@@ -225,7 +225,7 @@ The following audit findings are resolved in production and should not be treate
 | Finding | Status and evidence |
 |---|---|
 | A01/A13 hostname and deployment identity | Resolved by PR #3 and production merge `4828b1b`; live representative pages, robots and sitemap use `https://techtools360.vercel.app`. |
-| A02/A04/A10 Sign PDF image ingestion | Resolved by PR #4 and production merge `98216ed`; validated PNG/JPEG/WebP handling and existing drawn/typed flows are covered by the release tests. |
+| A02/A10 Sign PDF image ingestion | Resolved by PR #4 and production merge `98216ed`; validated PNG/JPEG/WebP handling and existing drawn/typed flows are covered by the release tests. A04 remains open for the secondary image-picker validation gap. |
 | A03 JPG-to-PDF object URLs | Resolved by PR #5; preview and decoding URL ownership is deterministic and measured cleanup reaches 10/10 after delayed download cleanup. |
 | A05 PDF.js thumbnail lifecycle | Resolved by PR #5; loading-task, render-task and document cleanup are implemented and covered by controlled lifecycle tests. |
 | A11 stale asynchronous output | Resolved by PR #5; conversion snapshots and generation guards reject stale completions after replacement/reset. |
