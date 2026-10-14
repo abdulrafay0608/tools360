@@ -433,34 +433,21 @@ try {
   });
 
   // -------------------------------------------------------------
-  // Check 8: Huge 8000x6000 image keeps UI responsive
+  // Check 8: Oversized 8000x6000 input is rejected by the 24MP source policy
   // -------------------------------------------------------------
-  await check("large 8000x6000 image leaves UI responsive", async () => {
+  await check("48MP source image is rejected before canvas allocation", async () => {
     await openTool(page);
-    await page.evaluate(() => {
-      window.__converterHeartbeat = 0;
-      window.__converterHeartbeatTimer = setInterval(() => {
-        window.__converterHeartbeat += 1;
-      }, 50);
-    });
     await upload(page, path.join(FIXTURES, "huge-8000x6000.jpg"));
-    await page.locator("button[data-format-button='webp']").click();
+    await waitForItems(page, 1, 30000);
 
-    const responsive = await page.evaluate(() => ({
-      heartbeat: window.__converterHeartbeat,
-      viewportWidth: document.documentElement.clientWidth,
-    }));
-    await waitForItems(page, 1, 45000);
-    assert.ok(responsive.heartbeat > 0, "UI heartbeat should run while image is being converted");
+    const item = page.locator("article[data-image-item]").first();
+    assert.equal(await item.getAttribute("data-status"), "error");
+    const itemText = (await item.textContent()) || "";
+    assert.match(itemText, /source image is too large to process safely/i);
 
-    const hugeOutput = path.join(EVIDENCE, "huge-converted.webp");
-    await downloadSingle(page, hugeOutput);
-    verifyMagicBytes(hugeOutput, "webp");
-    const details = await inspectImageDetails(hugeOutput);
-    assert.deepEqual([details.width, details.height], [8000, 6000]);
-
-    await page.evaluate(() => clearInterval(window.__converterHeartbeatTimer));
-    return { ...responsive, outputDimensions: [details.width, details.height] };
+    const downloadButton = item.locator("button[data-download-single]");
+    assert.equal(await downloadButton.isDisabled(), true);
+    return { status: "error", message: itemText.trim() };
   });
 
   // -------------------------------------------------------------
