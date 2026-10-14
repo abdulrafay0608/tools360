@@ -80,6 +80,14 @@ export default function ImageCompressorItem({
                 </span>
               </>
             )}
+
+            {(isDone || isAlreadyOptimized) && item.metadataBehavior && (
+              <span className="text-[11px] font-medium text-[#708079]">
+                {item.metadataBehavior === "retained-original"
+                  ? "Original kept; metadata retained"
+                  : "Re-encoded; source metadata not copied"}
+              </span>
+            )}
           </div>
         </div>
       </div>

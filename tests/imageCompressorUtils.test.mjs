@@ -15,6 +15,7 @@ import {
   SUPPORTED_MIME_TYPES,
   DOWNSCALE_PRESETS,
   FORMAT_PRESETS,
+  METADATA_BEHAVIOR,
 } from "../src/tools/image/image-compressor/imageCompressorUtils.js";
 
 test("formatFileSize formats zero, bytes, KB, and MB accurately", () => {
@@ -137,6 +138,11 @@ test("constants and presets match specification constraints", () => {
   assert.ok(SUPPORTED_MIME_TYPES.includes("image/webp"));
   assert.ok(DOWNSCALE_PRESETS.some((p) => p.value === "1920"));
   assert.ok(FORMAT_PRESETS.some((f) => f.value === "webp"));
+});
+
+test("metadata behavior names the pass-through and re-encode outcomes", () => {
+  assert.equal(METADATA_BEHAVIOR.RETAINED_ORIGINAL, "retained-original");
+  assert.equal(METADATA_BEHAVIOR.STRIPPED_BY_REENCODE, "stripped-by-reencode");
 });
 
 test("image fixtures exist in tests/fixtures outside /public", () => {

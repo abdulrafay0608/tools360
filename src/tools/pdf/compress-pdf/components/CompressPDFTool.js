@@ -14,9 +14,12 @@ import { formatFileSize } from "@/components/utils/pdfUtils";
 import usePDFJS from "@/hooks/usePDFJS";
 import usePDFThumbnails from "@/hooks/useThumbnails";
 import PDFJSStatus from "@/components/pdf/PDFJSStatus";
+import { describeCompressionResult } from "../compressPdfUtils";
 
 /**
- * Compress a PDF file by removing metadata and enabling compression.
+ * Rewrite a PDF locally, clearing basic metadata where supported.
+ * pdf-lib does not recompress embedded scanned images; the output may be
+ * unchanged or larger than the input.
  * @param {File} file
  * @returns {Promise<Blob>}
  */
@@ -38,7 +41,6 @@ async function compressPdf(file) {
   // Save compressed
   const compressedBytes = await pdfDoc.save({
     useObjectStreams: true,
-    compress: true,
   });
 
   return new Blob([compressedBytes], { type: "application/pdf" });
@@ -112,6 +114,11 @@ const CompressPDFTool = () => {
       {error}
     </p>
   )}
+  <p className="mb-4 text-xs leading-relaxed text-[#708079]" role="note">
+    This browser-only rewrite clears basic PDF metadata and optimizes the PDF
+    structure where possible. It does not recompress embedded scanned images,
+    so the downloaded file may be the same size or larger.
+  </p>
   {/* Preview only if not yet compressed */}
   {!compressedBlob && (
     <FilePreviewList
@@ -158,9 +165,7 @@ const CompressPDFTool = () => {
         </div>
       </div>
       <p className="mt-3 text-sm text-[#527268]" role="status">
-        {compressedBlob.size < files[0].size
-          ? `File size reduced by ${(((files[0].size - compressedBlob.size) / files[0].size) * 100).toFixed(1)}%.`
-          : "This file did not get smaller. It may already be optimized or contain content that cannot be reduced by this tool."}
+        {describeCompressionResult(files[0].size, compressedBlob.size)}
       </p>
       <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
         <Button

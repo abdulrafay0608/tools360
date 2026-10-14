@@ -89,7 +89,13 @@ export default function ConverterItem({
 
             {isSkipped && (
               <span className="text-xs font-medium text-[#708079]">
-                (Same format, kept original)
+                (Same format; original bytes and metadata retained)
+              </span>
+            )}
+
+            {isDone && item.note && (
+              <span className="text-xs font-medium text-[#708079]">
+                {item.note}
               </span>
             )}
           </div>

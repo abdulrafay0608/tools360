@@ -93,6 +93,7 @@ export default function ImageConverterTool() {
             width: result.width || image.width,
             height: result.height || image.height,
             note: result.note,
+            metadataBehavior: result.metadataBehavior,
             thumbnailUrl: targetUrl,
             error: "",
           };

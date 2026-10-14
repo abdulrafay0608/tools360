@@ -127,13 +127,19 @@ Add conservative total input bytes, file/page counts, source/output pixel-area b
 
 API reference: [pdf-lib SaveOptions](https://pdf-lib.js.org/docs/api/interfaces/saveoptions). The installed `node_modules/pdf-lib/es/api/PDFDocument.js:1246` also confirms the actual options consumed.
 
+Task 5 local change: removed the unsupported `compress` save option, described the operation as a local PDF rewrite, and added separate user-visible messages for smaller, unchanged and larger outputs. The implementation still does not recompress embedded scanned images. Production verification is pending.
+
 ### A08 — P1: inaccurate PDF-to-JPG DPI labels [source]
 
 `src/tools/pdf/pdf-to-jpg/components/PdfToJpgOptionsBar.js:70` labels 1x/1.5x/2x as roughly 96/150/300 DPI. `pdfToJpgUtils.js:33` simply multiplies PDF.js viewport dimensions. For a standard 612-point page width, those scales produce 612/918/1224 pixels, corresponding to 72/108/144 pixels per physical inch. Canvas JPEG density metadata is a separate concern. `src/content/tools/pdf-to-jpg.js:28` and :49 repeat the labels; Markdown bold markers in tips are rendered as ordinary text. Use accurate pixel scales or implement and verify an explicit DPI conversion.
 
+Task 5 local change: labels now describe the 72/108/144 pixel-per-inch equivalents and explain that JPEG output stores pixel dimensions without a guaranteed print-DPI metadata value. Production verification is pending.
+
 ### A09 — P0: metadata-removal assurance is false for pass-through images [source]
 
 `imageConverterUtils.js:130` returns the original file when its format matches the target, including metadata and, after a decode failure, potentially invalid content. `src/tools/image/image-converter/components/ConverterOptionsBar.js:33` says “Metadata stripped.” `imageCompressorUtils.js:202` may preserve the original when larger re-encoding is avoided; `ImageCompressorOptionsBar.js:32` says metadata/EXIF is stripped. This can mislead a user preparing sensitive photos for sharing. Correct conditional copy or provide an explicit always-reencode sanitization mode with metadata assertions. No external transmission was observed.
+
+Task 5 local change: same-format and already-optimized paths now disclose retained original bytes and metadata, while re-encoded outputs disclose that source metadata is not copied. Corrupt same-format inputs continue to fail during decode validation. Production verification is pending.
 
 ### A10 — P1: signing UX and accessibility defects [source]
 

@@ -6,7 +6,7 @@ import Button from "@/components/ui/Button";
 
 /**
  * PdfToJpgOptionsBar
- * Options panel for setting JPG image quality, DPI scale resolution, and initiating conversion.
+ * Options panel for setting JPG image quality, PDF-point scale and initiating conversion.
  */
 export default function PdfToJpgOptionsBar({
   quality,
@@ -63,13 +63,13 @@ export default function PdfToJpgOptionsBar({
       {/* Image Resolution / Scale setting */}
       <div className="space-y-2">
         <label className="block text-xs font-semibold text-[#263e36]">
-          Image Resolution (DPI)
+          Image Scale (DPI equivalent)
         </label>
         <div className="grid grid-cols-3 gap-1.5">
           {[
-            { id: "1x", label: "1x (~96 DPI)" },
-            { id: "1.5x", label: "1.5x (~150 DPI)" },
-            { id: "2x", label: "2x (~300 DPI)" },
+            { id: "1x", label: "1x (72 px/in equiv.)" },
+            { id: "1.5x", label: "1.5x (108 px/in equiv.)" },
+            { id: "2x", label: "2x (144 px/in equiv.)" },
           ].map(({ id, label }) => {
             const active = scalePreset === id;
             return (
