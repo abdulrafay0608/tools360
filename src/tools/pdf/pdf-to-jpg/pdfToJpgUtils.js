@@ -10,9 +10,9 @@ import { PDF_PROCESSING_LIMITS, assertPdfViewport } from "../../../utils/filePro
  * Scale factors for resolution settings.
  */
 export const SCALE_PRESETS = {
-  "1x": 1.0,   // ~72-96 DPI
-  "1.5x": 1.5, // ~150 DPI
-  "2x": 2.0,   // ~300 DPI
+  "1x": 1.0,   // 72 pixel-per-inch equivalent for a 72-point PDF
+  "1.5x": 1.5, // 108 pixel-per-inch equivalent
+  "2x": 2.0,   // 144 pixel-per-inch equivalent
 };
 
 /**

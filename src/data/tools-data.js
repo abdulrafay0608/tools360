@@ -28,7 +28,7 @@ const rawToolsData = [
         icon: "compress",
         available: true,
         description:
-          "Reduce file size while optimizing for maximal PDF quality.",
+          "Rewrite a PDF locally to clear basic metadata; size may stay the same or grow, and scanned images are not recompressed.",
       },
       {
         name: "PDF to Word",
@@ -79,7 +79,7 @@ const rawToolsData = [
         slug: "pdf-to-jpg",
         icon: "image",
         available: true,
-        description: "Convert PDF pages into high-quality JPG images or download all as a ZIP archive.",
+        description: "Convert PDF pages into JPG images at selectable 1x, 1.5x, or 2x pixel scales, or download them as a ZIP archive.",
       },
       {
         name: "JPG to PDF",
@@ -932,7 +932,7 @@ const rawToolsData = [
         slug: "image-compressor",
         icon: "image",
         available: true,
-        description: "Reduce image file size with adjustable quality.",
+        description: "Re-encode images locally with adjustable quality and dimensions; an output may keep the original bytes when re-encoding is not smaller.",
       },
       {
         name: "Image Resizer",
@@ -946,7 +946,7 @@ const rawToolsData = [
         slug: "image-converter",
         icon: "image",
         available: true,
-        description: "Convert images between JPG, PNG and WebP.",
+        description: "Convert images between JPG, PNG and WebP locally; same-format files may be kept unchanged with their original metadata.",
       },
       {
         name: "SVG to PNG Converter",

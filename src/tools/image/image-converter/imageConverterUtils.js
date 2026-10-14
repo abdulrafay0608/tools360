@@ -1,6 +1,6 @@
 /**
  * imageConverterUtils.js
- * Client-side image format conversion, EXIF handling, and ZIP archiving utilities.
+ * Client-side image format conversion, metadata behavior, and ZIP archiving utilities.
  */
 
 import {
@@ -19,6 +19,11 @@ export {
 } from "../utils/imageToolUtils.js";
 
 export const DEFAULT_QUALITY = 85;
+
+export const METADATA_BEHAVIOR = Object.freeze({
+  RETAINED_ORIGINAL: "retained-original",
+  STRIPPED_BY_REENCODE: "stripped-by-reencode",
+});
 
 export const TARGET_FORMATS = [
   { value: "jpg", label: "JPG", ext: ".jpg", mime: "image/jpeg" },
@@ -121,8 +126,9 @@ export function createZipArchive(items) {
 
 /**
  * Converts a single image in the browser using HTML5 Canvas or OffscreenCanvas.
- * Preserves dimensions, strips metadata, respects EXIF orientation.
- * Skips files already in the target format.
+ * Preserves dimensions and respects EXIF orientation when re-encoding.
+ * Files already in the target format are validated and returned unchanged,
+ * which retains their original metadata.
  */
 export async function convertSingleImage(file, options = {}) {
   const {
@@ -166,7 +172,8 @@ export async function convertSingleImage(file, options = {}) {
       width,
       height,
       isSkipped: true,
-      note: `Already in ${targetNormalized} format (kept original)`,
+      note: `Already in ${targetNormalized} format; original bytes and metadata retained.`,
+      metadataBehavior: METADATA_BEHAVIOR.RETAINED_ORIGINAL,
       targetMime,
     };
   }
@@ -277,7 +284,8 @@ export async function convertSingleImage(file, options = {}) {
     width,
     height,
     isSkipped: false,
-    note: "",
+    note: "Re-encoded locally; source metadata is not copied.",
+    metadataBehavior: METADATA_BEHAVIOR.STRIPPED_BY_REENCODE,
     targetMime,
   };
 }

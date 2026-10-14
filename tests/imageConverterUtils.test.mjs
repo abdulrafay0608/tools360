@@ -10,6 +10,7 @@ import {
   TARGET_FORMATS,
   MAX_FILES,
   MAX_FILE_SIZE_BYTES,
+  METADATA_BEHAVIOR,
 } from "../src/tools/image/image-converter/imageConverterUtils.js";
 
 test("detectImageFormat accurately identifies supported image formats", () => {
@@ -84,4 +85,9 @@ test("constants enforce 30 files limit and 25 MB max size", () => {
   assert.equal(MAX_FILES, 30);
   assert.equal(MAX_FILE_SIZE_BYTES, 25 * 1024 * 1024);
   assert.equal(TARGET_FORMATS.length, 3);
+});
+
+test("metadata behavior distinguishes retained originals from re-encoded output", () => {
+  assert.equal(METADATA_BEHAVIOR.RETAINED_ORIGINAL, "retained-original");
+  assert.equal(METADATA_BEHAVIOR.STRIPPED_BY_REENCODE, "stripped-by-reencode");
 });

@@ -45,13 +45,15 @@ Acceptance: limits apply cumulatively across repeated adds and every input path;
 
 Estimate: 1.5–3 days. Do not promise an exact memory ceiling before measurements.
 
-### 5. Make output/privacy claims match actual results
+### 5. 🚧 In progress locally — Make output/privacy claims match actual results
 
 Dependency: no external service. Correct pass-through metadata statements; fail same-format corrupt-image decoding rather than marking success; explain PDF rewrite savings and correct PDF-to-JPG pixel/DPI labels. Specify unsupported animated/HEIC outputs and financial/signature limitations. Audit: A07–A09.
 
 Acceptance: a retained original is explicitly identified as retaining metadata; a promised metadata-removal path is tested against metadata-bearing fixtures. Compression reports no savings/larger output honestly. Displayed resolution matches exported dimensions for a known physical PDF page. Shared UI, catalog descriptions and editorial content agree. No guaranteed traffic, earnings, compression ratio or legal validity claims.
 
 Estimate: 0.5–1.5 days for copy/behavior alignment; additional sanitization features can be scoped separately.
+
+Task 5 local status: the PDF rewrite path no longer passes an unsupported pdf-lib option; its UI distinguishes smaller, unchanged and larger rewrites and explains that scanned images are not recompressed. Image converter/compressor disclosures now distinguish re-encoded outputs from retained originals and their metadata behavior. PDF-to-JPG labels use 72/108/144 pixel-per-inch equivalents for the 1x/1.5x/2x point scales, and privacy copy distinguishes local file processing from ordinary site-asset requests. Production verification is pending; this local branch is not a completed release.
 
 ## P1 — prelaunch quality improvements
 

@@ -30,7 +30,7 @@ export default function ConverterOptionsBar({
 
         <div className="inline-flex items-center gap-1.5 self-start rounded-full bg-[#eaf3ed] px-3 py-1 text-xs font-medium text-[#235c4f] sm:self-auto">
           <FaShieldAlt className="h-3 w-3" />
-          <span>Metadata stripped • Dimensions preserved</span>
+          <span>Re-encoded outputs omit source metadata • same-format files retain original metadata</span>
         </div>
       </div>
 

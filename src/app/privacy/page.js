@@ -38,6 +38,13 @@ export default function PrivacyPage() {
           contents of those files. If you download a result, that file is
           created locally on your device.
         </p>
+        <p className="mt-3 leading-7 text-[#5d706a]">
+          Using the site still involves ordinary requests for the page,
+          scripts, styles, fonts, and browser worker assets. Those requests
+          are separate from the selected file bytes; advertising and analytics
+          are currently disabled, and the tools do not send files to a
+          processing API.
+        </p>
 
         <h2 className="mt-8 text-lg font-semibold text-[#173d34]">
           Advertising and cookies

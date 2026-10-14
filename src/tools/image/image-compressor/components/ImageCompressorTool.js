@@ -78,6 +78,7 @@ export default function ImageCompressorTool() {
               targetWidth: result.targetWidth,
               targetHeight: result.targetHeight,
               wasDownscaled: result.wasDownscaled,
+              metadataBehavior: result.metadataBehavior,
               thumbnailUrl: newThumbnail,
               error: false,
               errorMessage: "",

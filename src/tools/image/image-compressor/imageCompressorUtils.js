@@ -1,6 +1,6 @@
 /**
  * imageCompressorUtils.js
- * Client-side image compression, format conversion, and ZIP archiving utilities.
+ * Client-side image compression, metadata behavior, and ZIP archiving utilities.
  */
 
 import {
@@ -34,6 +34,11 @@ export {
 };
 
 export const DEFAULT_QUALITY = 75;
+
+export const METADATA_BEHAVIOR = Object.freeze({
+  RETAINED_ORIGINAL: "retained-original",
+  STRIPPED_BY_REENCODE: "stripped-by-reencode",
+});
 
 export const DOWNSCALE_PRESETS = [
   { value: "none", label: "Original dimensions" },
@@ -91,7 +96,9 @@ export function calculateTargetDimensions(originalWidth, originalHeight, maxDime
 
 /**
  * Compresses a single image in the browser using HTML5 Canvas or OffscreenCanvas.
- * Strips EXIF/GPS metadata, respects EXIF orientation, supports downscaling and background fill.
+ * Re-encodes images locally, respecting EXIF orientation, downscaling and
+ * background fill. If re-encoding would not improve an unchanged-dimension
+ * output, the original bytes are retained and metadata remains intact.
  */
 export async function compressSingleImage(file, options = {}) {
   const {
@@ -225,5 +232,8 @@ export async function compressSingleImage(file, options = {}) {
     targetHeight,
     wasDownscaled,
     targetMime,
+    metadataBehavior: keepOriginal
+      ? METADATA_BEHAVIOR.RETAINED_ORIGINAL
+      : METADATA_BEHAVIOR.STRIPPED_BY_REENCODE,
   };
 }

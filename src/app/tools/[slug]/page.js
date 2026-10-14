@@ -52,13 +52,13 @@ function getToolContent(tool) {
   if (tool.slug === "pdf-to-jpg") {
     return {
       tips: [
-        "Choose **1.5x (150 DPI)** or **2x (300 DPI)** if you plan to print the exported JPG images or present them on high-resolution Retina displays.",
+        "Choose 1.5x (108 px/in equivalent) or 2x (144 px/in equivalent) when you need a larger raster image. These presets scale PDF point dimensions; JPEG output stores pixels rather than guaranteed print-DPI metadata.",
         "Use **Low Quality (60%)** when you need compact file sizes for emailing or fast web sharing.",
         "Click the quick **JPG** button directly on any page thumbnail to instantly export just that single page without processing the entire document.",
         "Select specific page checkboxes to convert only the relevant pages and automatically download them packaged in a clean ZIP archive.",
       ],
       privacyText:
-        "Your privacy and document security are our highest priorities. All PDF parsing and canvas rendering occur 100% locally within your device's web browser using client-side WebAssembly and HTML5 Canvas. Your confidential files are never uploaded, transmitted, or stored on any external server.",
+        "Your PDF bytes are processed locally in your browser and are not sent to a file-processing server. Loading this site still makes ordinary requests for HTML, scripts, styles, fonts, and worker assets; those requests are separate from your selected file contents. Advertising and analytics are currently disabled.",
       faqs: [
         {
           question: "How do I convert a multi-page PDF into separate JPG images?",
@@ -73,7 +73,7 @@ function getToolContent(tool) {
         {
           question: "What resolution and DPI settings are supported?",
           answer:
-            "We offer 3 resolution presets: 1x (~96 DPI for standard screen viewing), 1.5x (~150 DPI for medium-resolution displays), and 2x (~300 DPI for high-resolution printing and detailed graphics).",
+            "The presets scale PDF point dimensions: 1x is 72 px/in equivalent, 1.5x is 108 px/in equivalent, and 2x is 144 px/in equivalent for a 72-point PDF. JPEG files contain pixel dimensions; this tool does not embed a guaranteed print-DPI value.",
         },
         {
           question: "Are password-protected or encrypted PDF files supported?",
@@ -83,7 +83,7 @@ function getToolContent(tool) {
         {
           question: "Is there any file size limit for PDF to JPG conversion?",
           answer:
-            "Because all processing runs in your browser, there are no hard server upload limits. Files up to 100MB+ convert smoothly depending on your computer or mobile device's available memory.",
+            "The browser applies file-size, page-count, and rendered-pixel safety limits before processing. The practical workload also depends on your device's available memory, so large files may still take longer or be rejected.",
         },
         {
           question: "Is this PDF to JPG tool completely free to use?",
@@ -102,16 +102,16 @@ function getToolContent(tool) {
       "You can reorder, rotate, or customize settings before downloading.",
     ],
     privacyText:
-      "All document processing happens entirely inside your web browser. No files or private data are ever sent to or stored on our servers.",
+      "Your selected files are processed locally in your browser and are not sent to a file-processing server. The site still makes normal requests for page assets such as scripts, styles, fonts, and worker files; advertising and analytics are currently disabled.",
     faqs: [
       {
         question: `How does the online ${tool.name} work?`,
-        answer: `Our ${tool.name} runs 100% in your web browser. Your files are processed locally on your device using advanced client-side technology, ensuring maximum speed, privacy, and zero data uploads to external servers.`,
+        answer: `Our ${tool.name} processes selected files locally in your browser without sending them to a file-processing server. The page still requests ordinary site assets such as HTML, scripts, styles, fonts, and worker files; advertising and analytics are currently disabled.`,
       },
       {
         question: "Are my uploaded files safe and private?",
         answer:
-          "Yes, completely safe. Unlike traditional online tools, your files never leave your computer or phone. All conversions and modifications happen directly within your browser session.",
+          "The selected file bytes stay in your browser during processing and are not uploaded to a file-processing server. As with any website, your browser still requests the site's normal assets, and the hosting provider may observe those ordinary requests.",
       },
       {
         question: `Is ${tool.name} free to use?`,
@@ -157,7 +157,7 @@ function ToolSEOContent({ tool, content }) {
             </span>
             <p className="font-semibold text-[#263e36]">Customize options & pages</p>
             <p className="mt-1 text-xs text-[#708079]">
-              Select the pages you need, choose image quality, and set your desired DPI resolution.
+              Select the pages you need, choose image quality, and set the output scale.
             </p>
           </li>
           <li className="rounded-sm border border-[#dce5e0] bg-white p-4">
