@@ -138,7 +138,7 @@ AdSense preparation is a separate postlaunch project governed by MONETIZATION_RE
 
 ## Phase 2 Task 6 local status — 15 October 2026
 
-The focused UI polish branch removes disabled ad inventory from production layout, adds reduced-motion handling, and improves the Sign PDF modal's dialog semantics, focus trapping/restoration, Escape handling, tab state, color control labels and typed-input association. These changes are local and pending production review; Task 6 is not marked complete.
+The focused UI polish branch removes disabled ad inventory from production layout, adds reduced-motion handling, and improves the Sign PDF modal's dialog semantics, focus trapping/restoration, Escape handling, method selection, color control labels and typed-input association. These changes are local and pending production review; Task 6 is not marked complete.
 
 ## Phase 2 completion update — 14 October 2026
 

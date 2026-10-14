@@ -36,6 +36,7 @@ export default function SignatureModal({
   const canvasRef = useRef(null);
   const dialogRef = useRef(null);
   const previousFocusRef = useRef(null);
+  const onCloseRef = useRef(onClose);
   const lastPointRef = useRef({ x: 0, y: 0 });
   const uploadRequestRef = useRef(0);
 
@@ -109,17 +110,21 @@ export default function SignatureModal({
     uploadRequestRef.current += 1;
   }, []);
 
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   const handleClose = useCallback(() => {
     uploadRequestRef.current += 1;
     setIsUploading(false);
-    onClose();
-  }, [onClose]);
+    onCloseRef.current();
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return undefined;
     previousFocusRef.current = document.activeElement;
     const dialog = dialogRef.current;
-    const getFocusable = () => [...(dialog?.querySelectorAll("button, input, textarea, [tabindex]:not([tabindex='-1'])") || [])].filter((element) => !element.disabled);
+    const getFocusable = () => [...(dialog?.querySelectorAll("button, input, textarea, [tabindex]:not([tabindex='-1'])") || [])].filter((element) => !element.disabled && element.getClientRects().length > 0);
     getFocusable()[0]?.focus();
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
@@ -186,7 +191,7 @@ export default function SignatureModal({
         </div>
 
         {/* Tab switcher */}
-        <div className="grid grid-cols-3 border-b border-[#eef2ef] bg-[#f8faf9]">
+        <div role="group" aria-label="Signature method" className="grid grid-cols-3 border-b border-[#eef2ef] bg-[#f8faf9]">
           {[
             { id: "draw", label: "Draw", icon: FaPen },
             { id: "type", label: "Type", icon: FaFont },
@@ -196,8 +201,7 @@ export default function SignatureModal({
               key={id}
               type="button"
               onClick={() => setActiveTab(id)}
-              role="tab"
-              aria-selected={activeTab === id}
+              aria-pressed={activeTab === id}
               className={`flex items-center justify-center gap-2 py-3 text-xs font-semibold transition-colors border-b-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-[#235c4f] ${
                 activeTab === id
                   ? "border-[#235c4f] bg-white text-[#173d34]"
@@ -222,11 +226,11 @@ export default function SignatureModal({
                     key={col.id}
                     type="button"
                     onClick={() => setSelectedColor(col.value)}
-                      aria-label={`Ink color: ${col.label}`}
-                      aria-pressed={selectedColor === col.value}
+                    aria-label={`Ink color: ${col.label}`}
+                    aria-pressed={selectedColor === col.value}
                     style={{ backgroundColor: col.value }}
                     title={col.label}
-                      className={`h-6 w-6 rounded-full transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f] ${
+                    className={`h-6 w-6 rounded-full transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f] ${
                       selectedColor === col.value
                         ? "ring-2 ring-offset-2 ring-[#235c4f] scale-110"
                         : "hover:scale-105 opacity-80"
