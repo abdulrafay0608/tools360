@@ -38,6 +38,7 @@ export default function AdSlot({
   const [isNearViewport, setIsNearViewport] = useState(false);
   const containerRef = useRef(null);
   const { paused } = useAdPause();
+  const adScaffoldEnabled = ADS_ENABLED || SHOW_DEV_PLACEHOLDERS;
   const visuallyHidden = paused || hideWhenProcessing;
 
   const config = placement ? AD_SLOTS[placement] : null;
@@ -53,7 +54,7 @@ export default function AdSlot({
   }, []);
 
   useEffect(() => {
-    if (!isClient || !containerRef.current) return undefined;
+    if (!adScaffoldEnabled || !isClient || !containerRef.current) return undefined;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -67,7 +68,11 @@ export default function AdSlot({
 
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, [isClient]);
+  }, [adScaffoldEnabled, isClient]);
+
+  // Keep disabled inventory out of the production DOM and layout. The config
+  // remains available for a future reviewed activation.
+  if (!adScaffoldEnabled) return null;
 
   const mobileMinH =
     config?.minHeight?.mobile ??
