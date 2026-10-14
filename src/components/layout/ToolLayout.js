@@ -6,6 +6,7 @@ import AdSlot from "@/components/ads/AdSlot";
 import ToolAdFrame from "@/components/ads/ToolAdFrame";
 import ToolIcon from "@/components/icons/ToolIcon";
 import RelatedTools from "@/components/layout/RelatedTools";
+import { ADS_ENABLED, SHOW_DEV_PLACEHOLDERS } from "@/config/ads";
 
 /**
  * ToolLayout — Responsive layout for tool pages.
@@ -27,6 +28,7 @@ const ToolLayout = ({
   currentToolSlug,
   trustText = "Files are not uploaded",
 }) => {
+  const showAdScaffold = ADS_ENABLED || SHOW_DEV_PLACEHOLDERS;
   return (
     <main className="min-h-[70vh] bg-[#f4f7f5] text-[#172c27]">
       <div className="border-b border-[#dce5e0] bg-white">
@@ -118,28 +120,34 @@ const ToolLayout = ({
               <div className="border border-[#dce5e0] bg-white">{children}</div>
               <RelatedTools category={category} currentToolSlug={currentToolSlug} />
 
-              <div className="mt-6 lg:mt-8">
-                <AdSlot placement="tool-below" />
-              </div>
+              {showAdScaffold && (
+                <div className="mt-6 lg:mt-8">
+                  <AdSlot placement="tool-below" />
+                </div>
+              )}
 
               {seoContent ? (
                 <div className="mt-8">
                   {seoContent}
-                  <div className="mt-8">
-                    <AdSlot placement="content-mid" />
-                  </div>
+                  {showAdScaffold && (
+                    <div className="mt-8">
+                      <AdSlot placement="content-mid" />
+                    </div>
+                  )}
                 </div>
               ) : null}
             </div>
 
-            <aside className="hidden w-[300px] shrink-0 lg:block">
-              <div
-                className="sticky top-8"
-                style={{ maxHeight: "calc(100vh - 4rem)" }}
-              >
-                <AdSlot placement="tool-sidebar" />
-              </div>
-            </aside>
+            {showAdScaffold && (
+              <aside className="hidden w-[300px] shrink-0 lg:block" aria-label="Advertisement">
+                <div
+                  className="sticky top-8"
+                  style={{ maxHeight: "calc(100vh - 4rem)" }}
+                >
+                  <AdSlot placement="tool-sidebar" />
+                </div>
+              </aside>
+            )}
           </div>
         </ToolAdFrame>
       </div>

@@ -136,6 +136,10 @@ Review error categories and indexing weekly initially, using scrubbed aggregate 
 
 AdSense preparation is a separate postlaunch project governed by MONETIZATION_READINESS.md: useful publisher content, correct identity, account/site review, certified consent where applicable, approved ad code/IDs, privacy separation and real-creative performance/usability checks. None is activated by this roadmap.
 
+## Phase 2 Task 6 local status — 15 October 2026
+
+The focused UI polish branch removes disabled ad inventory from production layout, adds reduced-motion handling, and improves the Sign PDF modal's dialog semantics, focus trapping/restoration, Escape handling, tab state, color control labels and typed-input association. These changes are local and pending production review; Task 6 is not marked complete.
+
 ## Phase 2 completion update — 14 October 2026
 
 The first three Phase 2 tasks are complete in production:
