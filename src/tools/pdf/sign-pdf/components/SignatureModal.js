@@ -35,6 +35,7 @@ export default function SignatureModal({
 
   const canvasRef = useRef(null);
   const dialogRef = useRef(null);
+  const uploadInputRef = useRef(null);
   const previousFocusRef = useRef(null);
   const onCloseRef = useRef(onClose);
   const lastPointRef = useRef({ x: 0, y: 0 });
@@ -367,21 +368,29 @@ export default function SignatureModal({
                   </button>
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center rounded-sm border-2 border-dashed border-[#b8c9c0] bg-[#f8faf9] p-8 text-center cursor-pointer transition-colors hover:border-[#235c4f] hover:bg-white">
-                  <FaUpload className="h-6 w-6 text-[#235c4f] mb-2" />
-                  <span className="text-xs font-semibold text-[#1a3328]">
-                    Click to upload signature image
-                  </span>
-                  <span className="mt-1 text-[11px] text-[#708079]">
-                    PNG, JPG or WEBP (transparent background recommended)
-                  </span>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => uploadInputRef.current?.click()}
+                    aria-label="Upload signature image"
+                    className="flex w-full flex-col items-center justify-center rounded-sm border-2 border-dashed border-[#b8c9c0] bg-[#f8faf9] p-8 text-center cursor-pointer transition-colors hover:border-[#235c4f] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
+                  >
+                    <FaUpload className="h-6 w-6 text-[#235c4f] mb-2" />
+                    <span className="text-xs font-semibold text-[#1a3328]">
+                      Click to upload signature image
+                    </span>
+                    <span className="mt-1 text-[11px] text-[#708079]">
+                      PNG, JPG or WEBP (transparent background recommended)
+                    </span>
+                  </button>
                   <input
+                    ref={uploadInputRef}
                     type="file"
                     accept="image/png,image/jpeg,image/webp"
                     className="hidden"
                     onChange={handleImageUpload}
                   />
-                </label>
+                </div>
               )}
               {isUploading && (
                 <p className="text-xs text-[#52675e]" role="status">Preparing image locally…</p>
