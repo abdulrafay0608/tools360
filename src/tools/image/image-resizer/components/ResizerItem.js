@@ -82,7 +82,7 @@ export default function ResizerItem({ item, onRemove, onDownload }) {
           {isResizing && (
             <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#e5ece8]">
               <div
-                className="h-full rounded-full bg-[#235c4f] transition-all duration-300"
+                className="h-full rounded-full bg-[#2563eb] transition-all duration-300"
                 style={{ width: `${Math.max(5, progress)}%` }}
               />
             </div>
@@ -102,7 +102,7 @@ export default function ResizerItem({ item, onRemove, onDownload }) {
         <div className="text-right">
           {isResizing && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eaf3ed] px-2.5 py-1 text-xs font-medium text-[#235c4f]">
-              <span className="h-2 w-2 animate-ping rounded-full bg-[#235c4f]" />
+              <span className="h-2 w-2 animate-ping rounded-full bg-[#2563eb]" />
               Resizing…
             </span>
           )}

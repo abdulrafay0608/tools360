@@ -46,7 +46,7 @@ export default function JpgToPdfOptionsBar({
                   disabled={disabled}
                 className={`rounded-sm border py-2 text-xs font-semibold transition-colors ${
                   active
-                    ? "border-[#235c4f] bg-[#173d34] text-white"
+                    ? "border-[#2563eb] bg-[#2563eb] text-white"
                     : "border-[#dce5e0] bg-white text-[#52675e] hover:border-[#7e9b8c] hover:bg-[#f4f7f5]"
                 }`}
               >
@@ -77,7 +77,7 @@ export default function JpgToPdfOptionsBar({
                   disabled={disabled}
                 className={`rounded-sm border py-1.5 text-xs font-semibold transition-colors ${
                   active
-                    ? "border-[#235c4f] bg-[#173d34] text-white"
+                    ? "border-[#2563eb] bg-[#2563eb] text-white"
                     : "border-[#dce5e0] bg-white text-[#52675e] hover:border-[#7e9b8c] hover:bg-[#f4f7f5]"
                 }`}
               >
@@ -108,7 +108,7 @@ export default function JpgToPdfOptionsBar({
                   disabled={disabled}
                 className={`rounded-sm border py-1.5 text-xs font-semibold transition-colors ${
                   active
-                    ? "border-[#235c4f] bg-[#173d34] text-white"
+                    ? "border-[#2563eb] bg-[#2563eb] text-white"
                     : "border-[#dce5e0] bg-white text-[#52675e] hover:border-[#7e9b8c] hover:bg-[#f4f7f5]"
                 }`}
               >
@@ -139,7 +139,7 @@ export default function JpgToPdfOptionsBar({
                   disabled={disabled}
                 className={`rounded-sm border py-1.5 text-xs font-semibold transition-colors ${
                   active
-                    ? "border-[#235c4f] bg-[#173d34] text-white"
+                    ? "border-[#2563eb] bg-[#2563eb] text-white"
                     : "border-[#dce5e0] bg-white text-[#52675e] hover:border-[#7e9b8c] hover:bg-[#f4f7f5]"
                 }`}
               >
@@ -162,7 +162,7 @@ export default function JpgToPdfOptionsBar({
           onChange={(e) => onFilenameChange(e.target.value)}
           disabled={disabled}
           placeholder="converted.pdf"
-          className="w-full rounded-sm border border-[#dce5e0] bg-white px-3 py-2 text-xs text-[#1a3328] focus:border-[#235c4f] focus:outline-none"
+          className="w-full rounded-sm border border-[#dce5e0] bg-white px-3 py-2 text-xs text-[#1a3328] focus:border-[#2563eb] focus:outline-none"
         />
       </div>
 

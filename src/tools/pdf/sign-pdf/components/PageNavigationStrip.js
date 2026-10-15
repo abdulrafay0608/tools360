@@ -44,7 +44,7 @@ export default function PageNavigationStrip({
             aria-current={isActive ? "true" : undefined}
             className={`group relative flex flex-col items-center gap-1 rounded-sm border p-1 text-center transition-all ${
               isActive
-                ? "border-[#235c4f] bg-white shadow-sm ring-1 ring-[#235c4f]"
+                ? "border-[#2563eb] bg-white shadow-sm ring-1 ring-[#2563eb]"
                 : "border-transparent hover:border-[#b8c9c0] hover:bg-white"
             }`}
           >

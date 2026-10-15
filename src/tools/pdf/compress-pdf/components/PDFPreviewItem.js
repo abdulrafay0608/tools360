@@ -21,7 +21,7 @@ const PDFPreviewItem = ({
   const containerClasses = isFileMode
     ? "border-[#dce5e0] hover:border-[#91aa9c] cursor-move"
     : isSelected
-    ? "border-[#235c4f] ring-1 ring-[#235c4f] cursor-pointer"
+    ? "border-[#2563eb] ring-1 ring-[#2563eb] cursor-pointer"
     : "border-[#dce5e0] hover:border-[#91aa9c] cursor-pointer";
 
   return (

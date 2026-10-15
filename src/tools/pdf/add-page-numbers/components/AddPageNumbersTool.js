@@ -282,7 +282,7 @@ function PositionSelector({ value, onChange, disabled }) {
           disabled={disabled}
           className={`flex min-h-11 items-center justify-center border text-xs ${
             value === position
-              ? "border-[#235c4f] bg-[#eaf3ed] text-[#173d34]"
+              ? "border-[#2563eb] bg-[#eaf3ed] text-[#173d34]"
               : "border-[#dce5e0] bg-white text-[#52675e]"
           }`}
         >
@@ -624,7 +624,7 @@ export default function AddPageNumbersTool() {
                         disabled={isBusy}
                         className={`min-h-10 border px-3 text-sm ${
                           options.format === format
-                            ? "border-[#235c4f] bg-[#eaf3ed] text-[#173d34]"
+                            ? "border-[#2563eb] bg-[#eaf3ed] text-[#173d34]"
                             : "border-[#dce5e0] bg-white text-[#52675e]"
                         }`}
                       >

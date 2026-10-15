@@ -86,7 +86,7 @@ export default function CompareControlsToolbar({
               aria-pressed={isActive}
               className={`flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-xs font-semibold transition-colors ${
                 isActive
-                  ? "bg-[#173d34] text-white"
+                  ? "bg-[#2563eb] text-white"
                   : "text-[#52675e] hover:bg-[#f4f7f5] hover:text-[#173d34]"
               }`}
             >
@@ -118,7 +118,7 @@ export default function CompareControlsToolbar({
             onBlur={onPageInputCommit}
             onKeyDown={(e) => e.key === "Enter" && onPageInputCommit()}
             aria-label="Page number"
-            className="w-10 rounded-sm border border-[#dce5e0] bg-white px-1.5 py-1 text-center font-semibold text-[#1a3328] focus:border-[#235c4f] focus:outline-none"
+            className="w-10 rounded-sm border border-[#dce5e0] bg-white px-1.5 py-1 text-center font-semibold text-[#1a3328] focus:border-[#2563eb] focus:outline-none"
           />
           <span>of {maxPages}</span>
         </div>

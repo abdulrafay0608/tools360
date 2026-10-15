@@ -51,7 +51,7 @@ export default function ConverterOptionsBar({
                 disabled={disabled}
                 className={`flex flex-col items-center justify-center rounded-sm border py-3 px-2 text-center transition-all ${
                   isSelected
-                    ? "border-[#235c4f] bg-[#eaf3ed] text-[#173d34] shadow-xs font-bold ring-1 ring-[#235c4f]"
+                    ? "border-[#2563eb] bg-[#eaf3ed] text-[#173d34] shadow-xs font-bold ring-1 ring-[#2563eb]"
                     : "border-[#dce5e0] bg-[#f8faf9] text-[#527268] hover:border-[#a0b2aa] hover:bg-white"
                 } disabled:cursor-not-allowed disabled:opacity-50`}
               >

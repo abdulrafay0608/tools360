@@ -152,8 +152,8 @@ export default function PlacedSignatureItem({
       }}
       className={`group absolute select-none border-2 border-dashed transition-shadow ${
         isDragging || isResizing
-          ? "border-[#235c4f] bg-[#235c4f]/10 shadow-lg cursor-grabbing"
-          : "border-[#235c4f]/60 hover:border-[#235c4f] hover:bg-[#235c4f]/5 cursor-grab"
+          ? "border-[#2563eb] bg-[#2563eb]/10 shadow-lg cursor-grabbing"
+          : "border-[#2563eb]/60 hover:border-[#2563eb] hover:bg-[#2563eb]/5 cursor-grab"
       }`}
     >
       {/* Signature Graphic */}
@@ -185,7 +185,7 @@ export default function PlacedSignatureItem({
       <div
         onMouseDown={handleResizeStart}
         onTouchStart={handleResizeStart}
-        className="resize-handle absolute -bottom-1.5 -right-1.5 z-20 flex h-5 w-5 cursor-se-resize items-center justify-center rounded-full bg-[#235c4f] text-white shadow-xs hover:scale-125"
+        className="resize-handle absolute -bottom-1.5 -right-1.5 z-20 flex h-5 w-5 cursor-se-resize items-center justify-center rounded-full bg-[#2563eb] text-white shadow-xs hover:scale-125"
         title="Resize"
         aria-label="Resize signature"
       >

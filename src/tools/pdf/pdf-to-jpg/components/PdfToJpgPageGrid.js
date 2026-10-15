@@ -57,7 +57,7 @@ export default function PdfToJpgPageGrid({
               onClick={() => onTogglePage(pageNum)}
               className={`group relative flex cursor-pointer flex-col justify-between rounded-sm border p-2 transition-all ${
                 isSelected
-                  ? "border-[#235c4f] bg-white shadow-sm ring-1 ring-[#235c4f]"
+                  ? "border-[#2563eb] bg-white shadow-sm ring-1 ring-[#2563eb]"
                   : "border-[#dce5e0] bg-[#f8faf9] opacity-70 hover:border-[#b8c9c0] hover:opacity-100"
               }`}
             >
@@ -65,7 +65,7 @@ export default function PdfToJpgPageGrid({
               <div
                 className={`absolute left-2 top-2 z-10 flex h-5 w-5 items-center justify-center rounded transition-colors ${
                   isSelected
-                    ? "bg-[#173d34] text-white"
+                    ? "bg-[#2563eb] text-white"
                     : "border border-[#b8c9c0] bg-white"
                 }`}
                 aria-label={`Select page ${pageNum}`}
@@ -74,7 +74,7 @@ export default function PdfToJpgPageGrid({
               </div>
 
               {/* Page Number badge */}
-              <div className="absolute right-2 top-2 z-10 rounded bg-[#173d34]/80 px-1.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-xs">
+              <div className="absolute right-2 top-2 z-10 rounded bg-[#2563eb]/80 px-1.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-xs">
                 {pageNum}
               </div>
 

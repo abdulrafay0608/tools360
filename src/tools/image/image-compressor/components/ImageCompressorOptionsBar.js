@@ -86,7 +86,7 @@ export default function ImageCompressorOptionsBar({
               id="output-format-select"
               value={options.outputFormat}
               onChange={(e) => onOptionsChange("outputFormat", e.target.value)}
-              className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-1.5 text-xs font-medium text-[#1a3328] focus:border-[#235c4f] focus:outline-none focus:ring-1 focus:ring-[#235c4f]"
+              className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-1.5 text-xs font-medium text-[#1a3328] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb]"
             >
               {FORMAT_PRESETS.map((fmt) => (
                 <option key={fmt.value} value={fmt.value}>
@@ -113,7 +113,7 @@ export default function ImageCompressorOptionsBar({
               id="max-dimension-select"
               value={options.maxDimension}
               onChange={(e) => onOptionsChange("maxDimension", e.target.value)}
-              className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-1.5 text-xs font-medium text-[#1a3328] focus:border-[#235c4f] focus:outline-none focus:ring-1 focus:ring-[#235c4f]"
+              className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-1.5 text-xs font-medium text-[#1a3328] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb]"
             >
               {DOWNSCALE_PRESETS.map((dim) => (
                 <option key={dim.value} value={dim.value}>
@@ -147,7 +147,7 @@ export default function ImageCompressorOptionsBar({
 
       {isProcessing && (
         <div className="flex items-center gap-2 text-xs text-[#527268]">
-          <div className="h-3 w-3 animate-spin rounded-full border-2 border-[#235c4f] border-t-transparent" />
+          <div className="h-3 w-3 animate-spin rounded-full border-2 border-[#2563eb] border-t-transparent" />
           <span>Applying compression settings...</span>
         </div>
       )}

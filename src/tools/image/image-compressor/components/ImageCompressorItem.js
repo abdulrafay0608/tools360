@@ -98,7 +98,7 @@ export default function ImageCompressorItem({
         <div className="text-right">
           {isProcessing && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eaf3ed] px-2.5 py-1 text-xs font-medium text-[#235c4f]">
-              <span className="h-2 w-2 animate-ping rounded-full bg-[#235c4f]" />
+              <span className="h-2 w-2 animate-ping rounded-full bg-[#2563eb]" />
               Compressing...
             </span>
           )}

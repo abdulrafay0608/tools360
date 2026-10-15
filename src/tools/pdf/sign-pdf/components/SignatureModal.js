@@ -185,7 +185,7 @@ export default function SignatureModal({
             type="button"
             onClick={handleClose}
             aria-label="Close dialog"
-            className="rounded p-1 text-[#708079] transition-colors hover:bg-[#eef2ef] hover:text-[#1a3328] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
+            className="rounded p-1 text-[#708079] transition-colors hover:bg-[#eef2ef] hover:text-[#1a3328] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb]"
           >
             <FaTimes className="h-4 w-4" />
           </button>
@@ -203,9 +203,9 @@ export default function SignatureModal({
               type="button"
               onClick={() => setActiveTab(id)}
               aria-pressed={activeTab === id}
-              className={`flex items-center justify-center gap-2 py-3 text-xs font-semibold transition-colors border-b-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-[#235c4f] ${
+              className={`flex items-center justify-center gap-2 py-3 text-xs font-semibold transition-colors border-b-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-[#2563eb] ${
                 activeTab === id
-                  ? "border-[#235c4f] bg-white text-[#173d34]"
+                  ? "border-[#2563eb] bg-white text-[#173d34]"
                   : "border-transparent text-[#52675e] hover:bg-white"
               }`}
             >
@@ -231,9 +231,9 @@ export default function SignatureModal({
                     aria-pressed={selectedColor === col.value}
                     style={{ backgroundColor: col.value }}
                     title={col.label}
-                    className={`h-6 w-6 rounded-full transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f] ${
+                    className={`h-6 w-6 rounded-full transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb] ${
                       selectedColor === col.value
-                        ? "ring-2 ring-offset-2 ring-[#235c4f] scale-110"
+                        ? "ring-2 ring-offset-2 ring-[#2563eb] scale-110"
                         : "hover:scale-105 opacity-80"
                     }`}
                   />
@@ -292,7 +292,7 @@ export default function SignatureModal({
                   onChange={(e) => setTypedText(e.target.value)}
                   placeholder="e.g. John Doe"
                   maxLength={40}
-                  className="w-full rounded border border-[#dce5e0] px-3 py-2 text-sm text-[#1a3328] focus:border-[#235c4f] focus:outline-none"
+                  className="w-full rounded border border-[#dce5e0] px-3 py-2 text-sm text-[#1a3328] focus:border-[#2563eb] focus:outline-none"
                 />
               </div>
 
@@ -313,7 +313,7 @@ export default function SignatureModal({
                         onClick={() => setSelectedFont(f.id)}
                         className={`flex items-center justify-between rounded border p-3 text-left transition-all ${
                           isSelected
-                            ? "border-[#235c4f] bg-[#eaf3ed] shadow-xs"
+                            ? "border-[#2563eb] bg-[#eaf3ed] shadow-xs"
                             : "border-[#dce5e0] bg-white hover:border-[#b8c9c0]"
                         }`}
                       >
@@ -373,7 +373,7 @@ export default function SignatureModal({
                     type="button"
                     onClick={() => uploadInputRef.current?.click()}
                     aria-label="Upload signature image"
-                    className="flex w-full flex-col items-center justify-center rounded-sm border-2 border-dashed border-[#b8c9c0] bg-[#f8faf9] p-8 text-center cursor-pointer transition-colors hover:border-[#235c4f] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
+                    className="flex w-full flex-col items-center justify-center rounded-sm border-2 border-dashed border-[#b8c9c0] bg-[#f8faf9] p-8 text-center cursor-pointer transition-colors hover:border-[#2563eb] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb]"
                   >
                     <FaUpload className="h-6 w-6 text-[#235c4f] mb-2" />
                     <span className="text-xs font-semibold text-[#1a3328]">

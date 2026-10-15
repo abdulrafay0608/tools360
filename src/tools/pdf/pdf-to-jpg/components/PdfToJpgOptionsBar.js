@@ -49,7 +49,7 @@ export default function PdfToJpgOptionsBar({
                 onClick={() => onQualityChange(id)}
                 className={`rounded-sm border py-2 text-xs font-semibold transition-colors ${
                   active
-                    ? "border-[#235c4f] bg-[#173d34] text-white"
+                    ? "border-[#2563eb] bg-[#2563eb] text-white"
                     : "border-[#dce5e0] bg-white text-[#52675e] hover:border-[#7e9b8c] hover:bg-[#f4f7f5]"
                 }`}
               >
@@ -79,7 +79,7 @@ export default function PdfToJpgOptionsBar({
                 onClick={() => onScaleChange(id)}
                 className={`rounded-sm border py-2 text-xs font-semibold transition-colors ${
                   active
-                    ? "border-[#235c4f] bg-[#173d34] text-white"
+                    ? "border-[#2563eb] bg-[#2563eb] text-white"
                     : "border-[#dce5e0] bg-white text-[#52675e] hover:border-[#7e9b8c] hover:bg-[#f4f7f5]"
                 }`}
               >
@@ -117,7 +117,7 @@ export default function PdfToJpgOptionsBar({
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-[#dce5e0]">
             <div
-              className="h-full bg-[#235c4f] transition-all duration-200"
+              className="h-full bg-[#2563eb] transition-all duration-200"
               style={{
                 width: `${(progress.current / progress.total) * 100}%`,
               }}

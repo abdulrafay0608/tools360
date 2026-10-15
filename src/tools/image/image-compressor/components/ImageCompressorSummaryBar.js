@@ -105,7 +105,7 @@ export default function ImageCompressorSummaryBar({
           id="download-all-zip-button"
           onClick={onDownloadAllZip}
           disabled={readyToDownload === 0 || isProcessing}
-          className="inline-flex min-h-10 items-center gap-2 rounded-sm bg-[#173d34] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#245b4c] disabled:cursor-not-allowed disabled:bg-[#a0b2aa]"
+          className="inline-flex min-h-10 items-center gap-2 rounded-sm bg-[#2563eb] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#1d4ed8] disabled:cursor-not-allowed disabled:bg-[#a0b2aa]"
         >
           <FaFileArchive className="h-3.5 w-3.5" />
           <span>Download All (ZIP)</span>
