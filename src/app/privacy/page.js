@@ -5,12 +5,12 @@ const pageUrl = getAbsoluteUrl("/privacy");
 export const metadata = {
   title: "Privacy Policy | Tools360",
   description:
-    "How Tools360 handles files, cookies, advertising, and analytics.",
+    "How Tools360 processes selected files locally and handles website requests while advertising and analytics are disabled.",
   alternates: { canonical: pageUrl },
   openGraph: {
     title: "Privacy Policy | Tools360",
     description:
-      "How Tools360 handles files, cookies, advertising, and analytics.",
+      "How Tools360 processes selected files locally and handles website requests while advertising and analytics are disabled.",
     url: pageUrl,
   },
 };
@@ -50,8 +50,8 @@ export default function PrivacyPage() {
           Advertising and cookies
         </h2>
         <p className="mt-3 leading-7 text-[#5d706a]">
-          We reserve space on tool pages for advertisements. Real ad scripts
-          are not enabled yet. When advertising is turned on, third-party ad
+          Advertising slots and scripts are currently disabled. If advertising
+          is turned on later, third-party ad
           and analytics providers may set cookies or similar storage, and may
           collect data such as your IP address, browser type, and pages you
           visit in order to show and measure ads.
@@ -65,8 +65,7 @@ export default function PrivacyPage() {
           >
             Google Ads policies
           </a>
-          . We do not use your uploaded documents as advertising data because
-          those files never leave your browser.
+          . The tools do not use selected documents as advertising data.
         </p>
 
         <h2 className="mt-8 text-lg font-semibold text-[#173d34]">Contact</h2>

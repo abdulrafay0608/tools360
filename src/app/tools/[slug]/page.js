@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getLiveTools, getToolCategory } from "@/data/toolsDataUtils";
+import { toolContent } from "@/data/toolContent";
 import ToolLayout from "@/components/layout/ToolLayout";
 import ToolRenderer from "@/components/layout/ToolRenderer";
 import { getAbsoluteUrl } from "@/config/site";
@@ -13,211 +14,41 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const tool = getLiveTools().find((entry) => entry.slug === slug);
-
-  if (!tool) {
-    return {
-      title: "Tool Not Found | Tools360",
-      description: "The requested tool is not available on Tools360.",
-    };
-  }
+  if (!tool) return { title: "Tool Not Found | Tools360" };
 
   const title = `${tool.name} Online | Tools360`;
-  const description =
-    tool.description ||
-    `Use ${tool.name} in your browser. Files are processed locally and are not uploaded.`;
-  const url = getAbsoluteUrl(`/tools/${tool.slug}`);
-
+  const description = tool.description;
+  const url = getAbsoluteUrl(`/tools/${slug}`);
   return {
     title,
     description,
-    alternates: {
-      canonical: url,
-    },
-    openGraph: {
-      title,
-      description,
-      url,
-      siteName: "Tools360",
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
+    alternates: { canonical: url },
+    openGraph: { title, description, url, siteName: "Tools360", type: "website" },
+    twitter: { card: "summary", title, description },
   };
 }
 
-function getToolContent(tool) {
-  if (tool.slug === "pdf-to-jpg") {
-    return {
-      tips: [
-        "Choose 1.5x (108 px/in equivalent) or 2x (144 px/in equivalent) when you need a larger raster image. These presets scale PDF point dimensions; JPEG output stores pixels rather than guaranteed print-DPI metadata.",
-        "Use **Low Quality (60%)** when you need compact file sizes for emailing or fast web sharing.",
-        "Click the quick **JPG** button directly on any page thumbnail to instantly export just that single page without processing the entire document.",
-        "Select specific page checkboxes to convert only the relevant pages and automatically download them packaged in a clean ZIP archive.",
-      ],
-      privacyText:
-        "Your PDF bytes are processed locally in your browser and are not sent to a file-processing server. Loading this site still makes ordinary requests for HTML, scripts, styles, fonts, and worker assets; those requests are separate from your selected file contents. Advertising and analytics are currently disabled.",
-      faqs: [
-        {
-          question: "How do I convert a multi-page PDF into separate JPG images?",
-          answer:
-            "Simply upload your PDF file into the drop zone. Our tool automatically displays thumbnails for all pages. You can choose your preferred resolution and quality, then click 'Convert Pages to JPG (ZIP)' to download all pages packaged in a single ZIP folder.",
-        },
-        {
-          question: "Can I download just a single page from my PDF as a JPG?",
-          answer:
-            "Yes! You can either select only the specific page checkbox or click the instant 'JPG' download button directly on the thumbnail of the page you want.",
-        },
-        {
-          question: "What resolution and DPI settings are supported?",
-          answer:
-            "The presets scale PDF point dimensions: 1x is 72 px/in equivalent, 1.5x is 108 px/in equivalent, and 2x is 144 px/in equivalent for a 72-point PDF. JPEG files contain pixel dimensions; this tool does not embed a guaranteed print-DPI value.",
-        },
-        {
-          question: "Are password-protected or encrypted PDF files supported?",
-          answer:
-            "For security reasons and client-side processing limitations, password-protected PDFs must have their password removed prior to conversion.",
-        },
-        {
-          question: "Is there any file size limit for PDF to JPG conversion?",
-          answer:
-            "The browser applies file-size, page-count, and rendered-pixel safety limits before processing. The practical workload also depends on your device's available memory, so large files may still take longer or be rejected.",
-        },
-        {
-          question: "Is this PDF to JPG tool completely free to use?",
-          answer:
-            "Yes, 100% free with no registration, no email required, no subscriptions, and no watermarks added to your converted images.",
-        },
-      ],
-    };
-  }
-
-  // Default content for other tools
-  return {
-    tips: [
-      "Review your document pages before processing to ensure all contents are aligned.",
-      "All file operations are performed client-side in your browser for maximal speed.",
-      "You can reorder, rotate, or customize settings before downloading.",
-    ],
-    privacyText:
-      "Your selected files are processed locally in your browser and are not sent to a file-processing server. The site still makes normal requests for page assets such as scripts, styles, fonts, and worker files; advertising and analytics are currently disabled.",
-    faqs: [
-      {
-        question: `How does the online ${tool.name} work?`,
-        answer: `Our ${tool.name} processes selected files locally in your browser without sending them to a file-processing server. The page still requests ordinary site assets such as HTML, scripts, styles, fonts, and worker files; advertising and analytics are currently disabled.`,
-      },
-      {
-        question: "Are my uploaded files safe and private?",
-        answer:
-          "The selected file bytes stay in your browser during processing and are not uploaded to a file-processing server. As with any website, your browser still requests the site's normal assets, and the hosting provider may observe those ordinary requests.",
-      },
-      {
-        question: `Is ${tool.name} free to use?`,
-        answer: `Yes, ${tool.name} is 100% free with no registration, subscription, or software installation required.`,
-      },
-      {
-        question: "Does this tool work on mobile devices?",
-        answer: `Yes! ${tool.name} is fully responsive and optimized to work seamlessly across iPhone, Android, tablets, Windows, Mac, and Linux devices.`,
-      },
-      {
-        question: "Will the quality of my document be affected?",
-        answer:
-          "Our algorithms are optimized to preserve maximal quality and clarity while keeping file sizes lightweight and optimized.",
-      },
-    ],
-  };
-}
-
-/**
- * SEO Content section — server-rendered, passed to ToolLayout as `seoContent`.
- */
-function ToolSEOContent({ tool, content }) {
+function ToolGuidance({ tool, content }) {
   return (
-    <section className="border border-[#dce5e0] bg-[#f8faf9] p-6 sm:p-8 space-y-8">
-      {/* How to use */}
+    <section className="space-y-6 border border-[#dce5e0] bg-[#f8faf9] p-5 sm:p-8">
       <div>
         <h2 className="text-lg font-semibold text-[#1a3328] sm:text-xl">
-          How to use {tool.name} online
+          How to use {tool.name}
         </h2>
-        <ol className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm text-[#52675e]">
-          <li className="rounded-sm border border-[#dce5e0] bg-white p-4">
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#e6f0eb] font-bold text-xs text-[#173d34] mb-2">
-              1
-            </span>
-            <p className="font-semibold text-[#263e36]">Select or drop your PDF</p>
-            <p className="mt-1 text-xs text-[#708079]">
-              Choose your PDF file or drag and drop it into the upload dropzone.
-            </p>
-          </li>
-          <li className="rounded-sm border border-[#dce5e0] bg-white p-4">
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#e6f0eb] font-bold text-xs text-[#173d34] mb-2">
-              2
-            </span>
-            <p className="font-semibold text-[#263e36]">Customize options & pages</p>
-            <p className="mt-1 text-xs text-[#708079]">
-              Select the pages you need, choose image quality, and set the output scale.
-            </p>
-          </li>
-          <li className="rounded-sm border border-[#dce5e0] bg-white p-4">
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#e6f0eb] font-bold text-xs text-[#173d34] mb-2">
-              3
-            </span>
-            <p className="font-semibold text-[#263e36]">Download your file</p>
-            <p className="mt-1 text-xs text-[#708079]">
-              Process the file in your browser, then download the result to your device.
-            </p>
-          </li>
+        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-[#52675e]">
+          {content.steps.map((step) => <li key={step}>{step}</li>)}
         </ol>
       </div>
-
-      {/* Pro Tips & Privacy Section */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="rounded-sm border border-[#dce5e0] bg-white p-5 space-y-3">
-          <h3 className="text-sm font-semibold text-[#1a3328] uppercase tracking-wider">
-            💡 Pro Tips for Best Results
-          </h3>
-          <ul className="space-y-2 text-xs leading-relaxed text-[#52675e]">
-            {content.tips.map((tip, i) => (
-              <li key={i} className="flex items-start gap-2">
-                <span className="text-[#235c4f] font-bold">•</span>
-                <span>{tip}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="rounded-sm border border-[#dce5e0] bg-white p-5 space-y-3">
-          <h3 className="text-sm font-semibold text-[#1a3328] uppercase tracking-wider">
-            🔒 Privacy & Local Processing
-          </h3>
-          <p className="text-xs leading-relaxed text-[#52675e]">
-            {content.privacyText}
-          </p>
-        </div>
-      </div>
-
-      {/* FAQs */}
       <div>
         <h2 className="text-lg font-semibold text-[#1a3328] sm:text-xl">
-          Frequently Asked Questions (FAQs)
+          Before you start
         </h2>
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {content.faqs.map((faq, index) => (
-            <div
-              key={index}
-              className="rounded-sm border border-[#dce5e0] bg-white p-4"
-            >
-              <h3 className="text-sm font-semibold text-[#263e36]">
-                {faq.question}
-              </h3>
-              <p className="mt-2 text-xs leading-relaxed text-[#52675e]">
-                {faq.answer}
-              </p>
-            </div>
-          ))}
-        </div>
+        <p className="mt-3 text-sm leading-6 text-[#52675e]">{content.limitations}</p>
+        <p className="mt-3 text-sm leading-6 text-[#52675e]">
+          File and text processing happens in your browser. Selected content is not
+          sent to a processing server; loading the website still requests normal
+          page assets from the host. Advertising and analytics are currently disabled.
+        </p>
       </div>
     </section>
   );
@@ -226,106 +57,42 @@ function ToolSEOContent({ tool, content }) {
 export default async function ToolPage({ params }) {
   const { slug } = await params;
   const tool = getLiveTools().find((entry) => entry.slug === slug);
-
   if (!tool) notFound();
 
-  const category = getToolCategory(tool.slug);
-  const content = getToolContent(tool);
-  const toolUrl = getAbsoluteUrl(`/tools/${tool.slug}`);
-
-  // JSON-LD Schemas: WebApplication + FAQPage
+  const content = toolContent[slug];
+  if (!content) throw new Error(`Missing guidance for live tool: ${slug}`);
+  const toolUrl = getAbsoluteUrl(`/tools/${slug}`);
   const jsonLd = {
     "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebApplication",
-        name: tool.name,
-        url: toolUrl,
-        applicationCategory: "UtilitiesApplication",
-        operatingSystem: "All",
-        browserRequirements: "Requires JavaScript. Requires HTML5.",
-        description: tool.description,
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-        },
-      },
-      ...(tool.slug === "organize-pdf" ||
-      tool.slug === "rotate-pdf" ||
-      tool.slug === "add-page-numbers" ||
-      tool.slug === "image-compressor" ||
-      tool.slug === "image-resizer" ||
-      tool.slug === "percentage-calculator" ||
-      tool.slug === "loan-emi-calculator" ||
-      tool.slug === "age-calculator" ||
-      tool.slug === "word-counter"
-        ? []
-        : [
-            {
-              "@type": "FAQPage",
-              mainEntity: content.faqs.map((faq) => ({
-                "@type": "Question",
-                name: faq.question,
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: faq.answer,
-                },
-              })),
-            },
-          ]),
-    ],
+    "@type": "WebApplication",
+    name: tool.name,
+    url: toolUrl,
+    applicationCategory: "UtilitiesApplication",
+    operatingSystem: "All",
+    browserRequirements: "Requires JavaScript.",
+    description: tool.description,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };
+
+  const isCalculator = [
+    "loan-emi-calculator", "age-calculator", "percentage-calculator", "word-counter",
+  ].includes(slug);
 
   return (
     <>
-      {/* Structured Data Script for SEO */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-
       <ToolLayout
         title={tool.name}
-        category={category}
-        currentToolSlug={tool.slug}
-        description={
-          tool.slug === "rotate-pdf" ||
-          tool.slug === "add-page-numbers" ||
-          tool.slug === "image-compressor" ||
-          tool.slug === "image-resizer" ||
-          tool.slug === "image-converter" ||
-          tool.slug === "svg-to-png" ||
-          tool.slug === "percentage-calculator" ||
-          tool.slug === "loan-emi-calculator" ||
-          tool.slug === "age-calculator" ||
-          tool.slug === "word-counter"
-            ? null
-            : tool.description
-        }
-        seoContent={
-          tool.slug === "organize-pdf" ||
-          tool.slug === "rotate-pdf" ||
-          tool.slug === "add-page-numbers" ||
-          tool.slug === "image-compressor" ||
-          tool.slug === "image-resizer" ||
-          tool.slug === "image-converter" ||
-          tool.slug === "svg-to-png" ||
-          tool.slug === "percentage-calculator" ||
-          tool.slug === "loan-emi-calculator" ||
-          tool.slug === "age-calculator" ||
-          tool.slug === "word-counter" ? null : (
-              <ToolSEOContent tool={tool} content={content} />
-            )
-        }
-        trustText={
-          ["percentage-calculator", "loan-emi-calculator", "age-calculator", "word-counter"].includes(tool.slug)
-            ? "Calculated in your browser. Nothing is stored or sent."
-            : undefined
-        }
+        category={getToolCategory(slug)}
+        currentToolSlug={slug}
+        description={content.intro}
+        seoContent={<ToolGuidance tool={tool} content={content} />}
+        trustText={isCalculator ? "Inputs stay in this browser session" : undefined}
       >
-        {/* Interactive Client Component Tool */}
-        <ToolRenderer slug={tool.slug} />
+        <ToolRenderer slug={slug} />
       </ToolLayout>
     </>
   );

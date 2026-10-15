@@ -20,8 +20,8 @@ export default function Footer() {
             Tools360
           </Link>
           <p className="mt-3 leading-6">
-            Straightforward tools for common PDF tasks. Files are processed in
-            your browser.
+            Straightforward PDF, image, writing, and calculator tools. Selected
+            files and text are processed in your browser.
           </p>
         </div>
 

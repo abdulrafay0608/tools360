@@ -71,6 +71,8 @@ Reuse `src/content/tools`, `toolPageConfig` and the current server route. Start 
 
 Acceptance: every live tool explains its actual behavior and failure cases in crawlable HTML; content and any schema agree; titles/descriptions/canonicals are valid and distinct; internal links resolve only to live pages. Sitemap stays live-only and uses truthful change dates. Add a branded share image; extra schema is optional and must not invent reviews/ratings. Submit the verified production sitemap and inspect representative URLs in Search Console.
 
+Manual Search Console steps after this work is deployed: verify ownership of the `https://techtools360.vercel.app/` URL-prefix property using an owner-controlled method (or verify a Domain property through DNS if appropriate); submit `https://techtools360.vercel.app/sitemap.xml`; inspect the live home, one category, and representative PDF/image/calculator tool URLs; compare Google's selected canonical with the site's canonical; then monitor indexing, crawl errors, and actual query data. Repository checks do not establish property ownership, sitemap acceptance, indexing, or rankings. Do not add a verification token to the repository until the property owner supplies it.
+
 Estimate: 1.5–3 days of engineering/editorial work, overlapping release verification where practical.
 
 ### 8. Harden packaging, documentation and regression execution

@@ -3,9 +3,9 @@ import ToolCard from "@/components/ui/ToolCard";
 import { getCategoriesWithLiveTools } from "@/data/toolsDataUtils";
 import { SITE_URL } from "@/config/site";
 
-const title = "Tools360 | Simple PDF Tools";
+const title = "Tools360 | Browser-Based PDF, Image & Calculator Tools";
 const description =
-  "Merge, split, and process PDF files with focused tools that run in your browser.";
+  "Free browser-based PDF, image, writing, and calculator tools. Selected files and text are processed locally in your browser.";
 
 export const metadata = {
   title,
@@ -32,8 +32,8 @@ export default function Home() {
               Tools for everyday tasks.
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-[#5d706a] sm:text-base">
-              Find focused tools for documents, images, code, writing, finance,
-              and more.
+              Find focused PDF, image, writing, and calculator tools. Work with
+              files and text locally in your browser, without an account.
             </p>
           </div>
         </div>
