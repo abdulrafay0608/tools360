@@ -4,11 +4,11 @@ const pageUrl = getAbsoluteUrl("/contact");
 
 export const metadata = {
   title: "Contact | Tools360",
-  description: "How to reach Tools360 about the browser-based PDF tools.",
+  description: "Contact Tools360 with product feedback, a tool issue, or a privacy question; please do not email confidential files.",
   alternates: { canonical: pageUrl },
   openGraph: {
     title: "Contact | Tools360",
-    description: "How to reach Tools360 about the browser-based PDF tools.",
+    description: "Contact Tools360 with product feedback, a tool issue, or a privacy question; please do not email confidential files.",
     url: pageUrl,
   },
 };
@@ -22,7 +22,7 @@ export default function ContactPage() {
         </p>
         <h1 className="mt-3 text-3xl font-semibold">Get in touch</h1>
         <p className="mt-5 leading-7 text-[#5d706a]">
-          Tools360 is a small set of browser-based PDF utilities. For product
+          Tools360 offers browser-based utilities. For product
           questions, privacy questions, or to report a problem with a tool,
           email{" "}
           <a

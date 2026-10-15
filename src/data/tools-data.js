@@ -2,7 +2,7 @@ const rawToolsData = [
   {
     category: "PDF Tools",
     id: "pdf-tools",
-    description: "Edit, organize, convert, and manage PDF documents.",
+    description: "Merge, split, rotate, compare, sign, and convert PDF files locally with focused browser tools.",
     icon: "pdf",
     sortOrder: 1,
     tools: [
@@ -12,7 +12,7 @@ const rawToolsData = [
         icon: "merge",
         available: true,
         description:
-          "Combine PDFs in the order you want with the easiest PDF merger available.",
+          "Combine multiple PDF files in your chosen order and download one merged document in your browser.",
       },
       {
         name: "Split PDF",
@@ -20,7 +20,7 @@ const rawToolsData = [
         icon: "split",
         available: true,
         description:
-          "Separate one page or a whole set for easy conversion into independent PDF files.",
+          "Split a PDF by non-overlapping page ranges or fixed page counts and download the results as a ZIP.",
       },
       {
         name: "Compress PDF",
@@ -86,14 +86,14 @@ const rawToolsData = [
         slug: "jpg-to-pdf",
         icon: "image",
         available: true,
-        description: "Convert JPG images to PDF in seconds.",
+        description: "Turn JPG, PNG, or WebP images into one PDF or separate PDFs in a ZIP, with page settings and image order controls.",
       },
       {
         name: "Sign PDF",
         slug: "sign-pdf",
         icon: "signature",
         available: true,
-        description: "Sign PDF documents directly in your browser with drawn, typed, or uploaded signatures.",
+        description: "Add a visible drawn, typed, or uploaded signature stamp to a PDF in your browser; no digital certificate is applied.",
       },
       {
         name: "Watermark PDF",
@@ -106,7 +106,7 @@ const rawToolsData = [
         slug: "rotate-pdf",
         icon: "rotate",
         available: true,
-        description: "Rotate PDFs as you like — even multiple at once!",
+        description: "Rotate selected PDF pages left or right and download a new document with the updated page orientation.",
       },
       {
         name: "HTML to PDF",
@@ -150,7 +150,7 @@ const rawToolsData = [
         slug: "add-page-numbers",
         icon: "numbers",
         available: true,
-        description: "Add page numbers to PDF easily with positioning.",
+        description: "Stamp page numbers onto a selected PDF page range, choose their position, and download the numbered document.",
       },
       {
         name: "Scan to PDF",
@@ -169,7 +169,7 @@ const rawToolsData = [
         slug: "compare-pdf",
         icon: "compare",
         available: true,
-        description: "Review corresponding PDF pages side by side.",
+        description: "Compare two PDFs visually with side-by-side, overlay, and pixel-difference views; export a comparison image if needed.",
       },
       {
         name: "Redact PDF",
@@ -481,7 +481,7 @@ const rawToolsData = [
   {
     category: "Writer & Blogging Tools",
     id: "writer-blogging-tools",
-    description: "Tools for drafting, checking, and improving written content.",
+    description: "Count words, characters, and paragraphs in text you type or paste into your browser.",
     icon: "text",
     sortOrder: 7,
     tools: [
@@ -502,7 +502,7 @@ const rawToolsData = [
         slug: "word-counter",
         icon: "text",
         available: true,
-        description: "Count words, characters, and paragraphs.",
+        description: "Count words, characters, and paragraphs as you type or paste text in your browser.",
       },
       {
         name: "Paraphraser",
@@ -567,7 +567,7 @@ const rawToolsData = [
   {
     category: "Finance & Calculators",
     id: "finance-calculators",
-    description: "Calculate costs, percentages, dates, and financial estimates.",
+    description: "Calculate percentages, age, and estimated loan payments with free browser-based tools.",
     icon: "finance",
     sortOrder: 3,
     tools: [
@@ -576,7 +576,7 @@ const rawToolsData = [
         slug: "loan-emi-calculator",
         icon: "finance",
         available: true,
-        description: "Calculate monthly EMI for loans.",
+        description: "Estimate a fixed monthly loan payment, total interest, and amortization schedule from your entered amount, rate, and term.",
       },
       {
         name: "GST Calculator",
@@ -607,7 +607,7 @@ const rawToolsData = [
         slug: "age-calculator",
         icon: "finance",
         available: true,
-        description: "Calculate age from date of birth.",
+        description: "Calculate age in years, months, and days from a birth date to today or another selected date.",
       },
       {
         name: "Unit Converter",
@@ -632,7 +632,7 @@ const rawToolsData = [
         slug: "percentage-calculator",
         icon: "finance",
         available: true,
-        description: "Calculate percentages quickly.",
+        description: "Calculate percentages, percentage change, and values after adding or subtracting a percentage.",
       },
       {
         name: "Mortgage Calculator",
@@ -923,7 +923,7 @@ const rawToolsData = [
   {
     category: "Image Tools",
     id: "image-tools",
-    description: "Resize, convert, compress, and prepare image files.",
+    description: "Resize, convert, compress, and rasterize supported images locally in your browser.",
     icon: "image",
     sortOrder: 2,
     tools: [
@@ -939,7 +939,7 @@ const rawToolsData = [
         slug: "image-resizer",
         icon: "image",
         available: true,
-        description: "Resize images to specific dimensions.",
+        description: "Resize JPG, PNG, or WebP images by dimensions, percentage, or preset and download the results locally.",
       },
       {
         name: "Image Converter",
@@ -953,7 +953,7 @@ const rawToolsData = [
         slug: "svg-to-png",
         icon: "image",
         available: true,
-        description: "Convert SVG images to PNG format.",
+        description: "Rasterize an SVG file or pasted SVG markup to PNG at your chosen size and scale in the browser.",
       },
       {
         name: "Background Remover",

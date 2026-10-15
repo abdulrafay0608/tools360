@@ -157,6 +157,8 @@ Task 5 local change: same-format and already-optimized paths now disclose retain
 
 Only PDF-to-JPG has a tool editorial module and `hasSeoContent=true` (`src/content/tools/index.js`, `src/config/toolPageConfig.js:17`). The other 17 do not have equivalent server-rendered how-to, limitations, output semantics and FAQ content. Some client tools contain instructions, so they are not all content-free. Useful task-specific guidance remains thin and dependent on JS. Home and about/privacy/contact lack explicit canonicals (`src/app/page.js`, `src/app/layout.js:17`, and their page metadata); absence was confirmed in local HTML. Add concise distinct guidance, accurate limitations, and self-canonicals. No ranking penalty or traffic impact is asserted.
 
+Task 7 local update (not yet released): the current route already has self-canonicals for home, information, category, and tool pages. The remaining content issue was generic FAQ/instructions on some tools and absent server-rendered guidance on others. The Task 7 branch replaces that filler with per-tool steps and limitations for all 18 live tools, adjusts misleading output/privacy copy, and removes unsupported FAQ markup. Production verification and Search Console setup remain pending.
+
 ### A14 — P1: empty advertising reservations waste workspace [source]
 
 `src/components/layout/ToolLayout.js:136` always dedicates a 300px desktop sidebar even with `ADS_ENABLED=false`. `AdSlot.js:117` renders labeled empty placeholders in production. This reduces working width and leaves ad space without revenue; it is not an activated ad. Preserve the scaffold but gate inactive inventory before launch. Ad readiness gaps are enumerated in MONETIZATION_READINESS.md.

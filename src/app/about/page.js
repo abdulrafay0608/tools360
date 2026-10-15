@@ -4,11 +4,11 @@ const pageUrl = getAbsoluteUrl("/about");
 
 export const metadata = {
   title: "About Tools360",
-  description: "Learn about Tools360's browser-based PDF tools.",
+  description: "Learn how Tools360's free PDF, image, writing, and calculator tools work locally in your browser.",
   alternates: { canonical: pageUrl },
   openGraph: {
     title: "About Tools360",
-    description: "Learn about Tools360's browser-based PDF tools.",
+    description: "Learn how Tools360's free PDF, image, writing, and calculator tools work locally in your browser.",
     url: pageUrl,
   },
 };
@@ -22,16 +22,17 @@ export default function AboutPage() {
         </p>
         <h1 className="mt-3 text-3xl font-semibold">Useful tools, kept simple.</h1>
         <p className="mt-5 leading-7 text-[#5d706a]">
-          Tools360 is building a focused set of browser-based utilities for
-          everyday PDF work. The available tools process files in your browser;
-          your documents are not uploaded to our servers.
+          Tools360 offers free browser-based PDF and image tools, a word
+          counter, and calculators. Selected files and text are processed
+          locally in your browser rather than sent to a processing server.
         </p>
         <p className="mt-4 leading-7 text-[#5d706a]">
-          We add tools as their workflows are ready and tested. The catalog
-          currently includes PDF merge, split, comparison, compression,
-          conversion, and signing utilities. Tool pages may show reserved
-          advertisement space; files you process are still handled only in
-          your browser.
+          The live catalog includes PDF merge, split, comparison, page organization,
+          conversion, and visible-signature tools. Image tools resize, convert,
+          compress, or rasterize supported formats. Each tool page describes
+          its inputs and limits so you can check whether it fits your task.
+          Advertising is currently disabled; ordinary website asset requests
+          still occur when you visit a page.
         </p>
       </article>
     </main>

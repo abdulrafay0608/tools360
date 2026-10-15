@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "Tools360 | Simple PDF Tools",
+  title: "Tools360 | Browser-Based PDF, Image & Calculator Tools",
   description:
-    "Merge, split, and process PDF files with focused tools that run in your browser.",
+    "Free browser-based PDF, image, writing, and calculator tools. Selected files and text are processed locally in your browser.",
 };
 
 export default function RootLayout({ children }) {
