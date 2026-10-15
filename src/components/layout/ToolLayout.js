@@ -1,24 +1,11 @@
-// components/layout/ToolLayout.js
-import React from "react";
-import { FaFilePdf, FaLaptop } from "react-icons/fa";
 import Link from "next/link";
+import { FaFilePdf, FaLaptop } from "react-icons/fa";
 import AdSlot from "@/components/ads/AdSlot";
 import ToolAdFrame from "@/components/ads/ToolAdFrame";
 import ToolIcon from "@/components/icons/ToolIcon";
 import RelatedTools from "@/components/layout/RelatedTools";
-import { ADS_ENABLED, SHOW_DEV_PLACEHOLDERS } from "@/config/ads";
+import { ADS_ENABLED } from "@/config/ads";
 
-/**
- * ToolLayout — Responsive layout for tool pages.
- *
- * Desktop (lg+): 2-column layout (tool content + sticky ad sidebar).
- * Mobile: 1-column layout, no sidebar.
- *
- * Ad placements (all from config):
- * - Desktop sidebar: sticky "tool-sidebar" (right column)
- * - Below tool: "tool-below" (horizontal, both breakpoints)
- * - Content section: "content-mid" (inside SEO content area)
- */
 const ToolLayout = ({
   title,
   description,
@@ -27,132 +14,64 @@ const ToolLayout = ({
   category,
   currentToolSlug,
   trustText = "Files are not uploaded",
-}) => {
-  const showAdScaffold = ADS_ENABLED || SHOW_DEV_PLACEHOLDERS;
-  return (
-    <main className="min-h-[70vh] bg-[#f4f7f5] text-[#172c27]">
-      <div className="border-b border-[#dce5e0] bg-white">
-        <div className="mx-auto max-w-7xl px-5 py-5 sm:px-8 sm:py-8 lg:px-12">
-          <div className="max-w-4xl">
-            {category && (
-              <nav aria-label="Breadcrumb" className="mb-4 text-sm text-[#62746d]">
-                <ol className="flex flex-wrap items-center gap-2">
-                  <li><Link href="/" className="hover:text-[#173d34]">Home</Link></li>
-                  <li aria-hidden="true">/</li>
-                  <li>
-                    <Link
-                      href={`/tools/category/${category.id}`}
-                      className="inline-flex items-center gap-1.5 hover:text-[#173d34]"
-                    >
-                      <ToolIcon icon={category.icon} className="h-3.5 w-3.5" />
-                      {category.category}
-                    </Link>
-                  </li>
-                  <li aria-hidden="true">/</li>
-                  <li aria-current="page" className="font-medium text-[#173d34]">{title}</li>
-                </ol>
-              </nav>
-            )}
-            <div className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#527268] sm:mb-4">
-              {category ? (
-                <ToolIcon icon={category.icon} className="h-4 w-4" />
-              ) : (
-                <FaFilePdf aria-hidden="true" />
-              )}
-              {category?.category || "Tools workspace"}
-            </div>
-            <h1 className="text-2xl font-semibold leading-tight sm:text-4xl">
-              {title}
-            </h1>
-            {description && (
-              <p className="mt-2 min-h-12 max-w-2xl text-sm leading-6 text-[#5d706a] sm:mt-3 sm:min-h-14 sm:text-base sm:leading-7">
-                {description}
-              </p>
-            )}
-
-            <div className="mt-3 flex flex-wrap justify-start gap-x-5 gap-y-2 sm:mt-5">
-              <div className="flex items-center gap-2 text-sm text-[#527268]">
-                <FaLaptop className="mr-1" aria-hidden="true" /> Processed in your browser
-              </div>
-              <div className="flex items-center gap-2 text-sm text-[#527268]">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 mr-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
-                {trustText}
-              </div>
-              <div className="flex items-center gap-2 text-sm text-[#527268]">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 mr-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                  />
-                </svg>
-                No account required
-              </div>
-            </div>
-          </div>
+}) => (
+  <main className="min-h-[70vh] bg-slate-50 text-slate-900">
+    <div className="border-b border-slate-200 bg-white">
+      <div className="mx-auto max-w-7xl px-4 py-7 sm:px-8 sm:py-10 lg:px-12">
+        {category && (
+          <nav aria-label="Breadcrumb" className="mb-6 text-sm text-slate-600">
+            <ol className="flex flex-wrap items-center gap-2">
+              <li><Link href="/" className="rounded hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">Home</Link></li>
+              <li aria-hidden="true" className="text-slate-400">/</li>
+              <li>
+                <Link href={`/tools/category/${category.id}`} className="inline-flex items-center gap-1.5 rounded hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">
+                  <ToolIcon icon={category.icon} className="size-3.5" />{category.category}
+                </Link>
+              </li>
+              <li aria-hidden="true" className="text-slate-400">/</li>
+              <li aria-current="page" className="font-medium text-slate-900">{title}</li>
+            </ol>
+          </nav>
+        )}
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-blue-700">
+          {category ? <ToolIcon icon={category.icon} className="size-3.5" /> : <FaFilePdf aria-hidden="true" />}
+          {category?.category || "Tools workspace"}
+        </div>
+        <h1 className="max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-4xl">{title}</h1>
+        {description && <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">{description}</p>}
+        <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium text-slate-600 sm:text-sm">
+          <span className="inline-flex items-center gap-2"><FaLaptop aria-hidden="true" className="text-blue-600" />Processed in your browser</span>
+          <span className="inline-flex items-center gap-2">
+            <svg aria-hidden="true" className="size-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            {trustText}
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <svg aria-hidden="true" className="size-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            No account required
+          </span>
         </div>
       </div>
+    </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-8 sm:py-8 lg:px-12">
-        <ToolAdFrame>
-          <div className="flex flex-col lg:flex-row lg:gap-8">
-            <div className="min-w-0 flex-1">
-              <div className="border border-[#dce5e0] bg-white">{children}</div>
-              <RelatedTools category={category} currentToolSlug={currentToolSlug} />
-
-              {showAdScaffold && (
-                <div className="mt-6 lg:mt-8">
-                  <AdSlot placement="tool-below" />
-                </div>
-              )}
-
-              {seoContent ? (
-                <div className="mt-8">
-                  {seoContent}
-                  {showAdScaffold && (
-                    <div className="mt-8">
-                      <AdSlot placement="content-mid" />
-                    </div>
-                  )}
-                </div>
-              ) : null}
-            </div>
-
-            {showAdScaffold && (
-              <aside className="hidden w-[300px] shrink-0 lg:block" aria-label="Advertisement">
-                <div
-                  className="sticky top-8"
-                  style={{ maxHeight: "calc(100vh - 4rem)" }}
-                >
-                  <AdSlot placement="tool-sidebar" />
-                </div>
-              </aside>
-            )}
-          </div>
-        </ToolAdFrame>
-      </div>
-    </main>
-  );
-};
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-8 lg:px-12">
+      <ToolAdFrame>
+        <section aria-label={`${title} workspace`} className="tool-workspace min-w-0 rounded-2xl border border-slate-200 bg-white shadow-sm">
+          {children}
+        </section>
+        {seoContent && <div className="mt-8">{seoContent}</div>}
+        <RelatedTools category={category} currentToolSlug={currentToolSlug} />
+        {ADS_ENABLED && (
+          <aside aria-label="Advertisement" className="mt-10 border-t border-slate-200 pt-8">
+            <AdSlot placement="tool-after-content" />
+          </aside>
+        )}
+      </ToolAdFrame>
+    </div>
+  </main>
+);
 
 export default ToolLayout;

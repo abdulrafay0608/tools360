@@ -30,21 +30,21 @@ export async function generateMetadata({ params }) {
 
 function ToolGuidance({ tool, content }) {
   return (
-    <section className="space-y-6 border border-[#dce5e0] bg-[#f8faf9] p-5 sm:p-8">
+    <section className="space-y-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
       <div>
-        <h2 className="text-lg font-semibold text-[#1a3328] sm:text-xl">
+        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
           How to use {tool.name}
         </h2>
-        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-[#52675e]">
+        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-600">
           {content.steps.map((step) => <li key={step}>{step}</li>)}
         </ol>
       </div>
       <div>
-        <h2 className="text-lg font-semibold text-[#1a3328] sm:text-xl">
+        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
           Before you start
         </h2>
-        <p className="mt-3 text-sm leading-6 text-[#52675e]">{content.limitations}</p>
-        <p className="mt-3 text-sm leading-6 text-[#52675e]">
+        <p className="mt-3 text-sm leading-6 text-slate-600">{content.limitations}</p>
+        <p className="mt-3 text-sm leading-6 text-slate-600">
           File and text processing happens in your browser. Selected content is not
           sent to a processing server; loading the website still requests normal
           page assets from the host. Advertising and analytics are currently disabled.

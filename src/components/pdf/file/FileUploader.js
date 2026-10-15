@@ -132,15 +132,15 @@ const FileUploader = ({
           event.dataTransfer.dropEffect = "copy";
         }
       }}
-      className={`border border-dashed p-4 text-center transition-colors sm:p-10 ${
+      className={`rounded-xl border-2 border-dashed p-5 text-center transition-colors sm:p-10 ${
         dragActive
-          ? "border-[#235c4f] bg-[#eaf3ed]"
-          : "border-[#b8c9c0] bg-white hover:border-[#7e9b8c]"
+          ? "border-blue-600 bg-blue-50"
+          : "border-slate-300 bg-slate-50 hover:border-blue-300"
       }`}
       aria-label={`${typeLabel} drop area`}
     >
       <div className="flex flex-col items-center justify-center">
-        <div className="mb-3 flex size-12 items-center justify-center bg-[#eaf3ed] text-[#235c4f]">
+        <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-6 w-6"
@@ -156,10 +156,10 @@ const FileUploader = ({
             />
           </svg>
         </div>
-        <p className="mb-1 text-[#263e36]" aria-live="polite">
+        <p className="mb-1 text-slate-900" aria-live="polite">
           <span className="font-semibold">{displayTitle}</span>
         </p>
-        <p className="mb-4 text-sm text-[#708079]">or choose from your device</p>
+        <p className="mb-4 text-sm text-slate-600">or choose from your device</p>
         <div>
           <input
             id={inputId}
@@ -173,12 +173,12 @@ const FileUploader = ({
           />
           <label
             htmlFor={inputId}
-            className="inline-flex min-h-11 cursor-pointer items-center justify-center bg-[#173d34] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#245b4c] peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-[#235c4f]"
+            className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-blue-600"
           >
             Browse files
           </label>
         </div>
-        <p id={`${inputId}-help`} className="mt-4 text-xs text-[#708079]">
+        <p id={`${inputId}-help`} className="mt-4 text-xs text-slate-600">
           {multiple
             ? `${typeLabel}s up to ${Math.floor(maxFileSizeBytes / (1024 * 1024))} MB each`
             : `One ${typeLabel} up to ${Math.floor(maxFileSizeBytes / (1024 * 1024))} MB`}
