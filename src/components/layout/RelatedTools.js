@@ -12,15 +12,15 @@ export default function RelatedTools({ category, currentToolSlug }) {
   return (
     <section
       aria-labelledby="related-tools-heading"
-      className="mt-8 border border-[#dce5e0] bg-white p-5 sm:p-6"
+      className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
     >
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <h2 id="related-tools-heading" className="text-xl font-semibold text-[#173d34]">
+        <h2 id="related-tools-heading" className="text-xl font-semibold text-slate-900">
           More {category.category}
         </h2>
         <Link
           href={`/tools/category/${category.id}`}
-          className="text-sm font-medium text-[#235c4f] hover:underline"
+          className="rounded text-sm font-semibold text-blue-700 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
         >
           View category →
         </Link>
@@ -33,6 +33,7 @@ export default function RelatedTools({ category, currentToolSlug }) {
             slug={tool.slug}
             description={tool.description}
             icon={tool.icon}
+            categoryId={category.id}
           />
         ))}
       </div>

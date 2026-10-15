@@ -57,7 +57,7 @@ export default function SvgOptionsBar({
                   disabled={disabled}
                   className={`rounded-sm border px-3 py-1.5 text-xs font-semibold transition-all ${
                     isSelected
-                      ? "border-[#235c4f] bg-[#eaf3ed] text-[#173d34] ring-1 ring-[#235c4f]"
+                      ? "border-[#2563eb] bg-[#eaf3ed] text-[#173d34] ring-1 ring-[#2563eb]"
                       : "border-[#dce5e0] bg-white text-[#527268] hover:border-[#a0b2aa]"
                   } disabled:opacity-50`}
                 >
@@ -78,7 +78,7 @@ export default function SvgOptionsBar({
               disabled={disabled}
               className={`rounded-sm border px-3 py-1.5 text-xs font-semibold transition-all ${
                 isCustomWidth
-                  ? "border-[#235c4f] bg-[#eaf3ed] text-[#173d34] ring-1 ring-[#235c4f]"
+                  ? "border-[#2563eb] bg-[#eaf3ed] text-[#173d34] ring-1 ring-[#2563eb]"
                   : "border-[#dce5e0] bg-white text-[#527268] hover:border-[#a0b2aa]"
               } disabled:opacity-50`}
             >
@@ -106,7 +106,7 @@ export default function SvgOptionsBar({
                   })
                 }
                 disabled={disabled}
-                className="w-24 rounded-sm border border-[#c8d6cf] bg-white px-2 py-1 text-xs font-semibold text-[#1a3328] focus:border-[#235c4f] focus:outline-none"
+                className="w-24 rounded-sm border border-[#c8d6cf] bg-white px-2 py-1 text-xs font-semibold text-[#1a3328] focus:border-[#2563eb] focus:outline-none"
               />
               <span className="text-[11px] text-[#708079]">(Height auto-locked)</span>
             </div>
@@ -132,7 +132,7 @@ export default function SvgOptionsBar({
               disabled={disabled}
               className={`rounded-sm border px-3 py-1.5 text-xs font-semibold transition-all ${
                 options.backgroundColor === "transparent"
-                  ? "border-[#235c4f] bg-[#eaf3ed] text-[#173d34] ring-1 ring-[#235c4f]"
+                  ? "border-[#2563eb] bg-[#eaf3ed] text-[#173d34] ring-1 ring-[#2563eb]"
                   : "border-[#dce5e0] bg-white text-[#527268] hover:border-[#a0b2aa]"
               } disabled:opacity-50`}
             >
@@ -148,7 +148,7 @@ export default function SvgOptionsBar({
               disabled={disabled}
               className={`rounded-sm border px-3 py-1.5 text-xs font-semibold transition-all ${
                 options.backgroundColor === "#FFFFFF"
-                  ? "border-[#235c4f] bg-[#eaf3ed] text-[#173d34] ring-1 ring-[#235c4f]"
+                  ? "border-[#2563eb] bg-[#eaf3ed] text-[#173d34] ring-1 ring-[#2563eb]"
                   : "border-[#dce5e0] bg-white text-[#527268] hover:border-[#a0b2aa]"
               } disabled:opacity-50`}
             >

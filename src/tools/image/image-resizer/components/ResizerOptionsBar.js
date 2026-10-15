@@ -61,7 +61,7 @@ export default function ResizerOptionsBar({
             value={options.resizeMode}
             onChange={(e) => handleChange("resizeMode", e.target.value)}
             disabled={disabled}
-            className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-2 text-xs font-medium text-[#1a3328] focus:border-[#235c4f] focus:outline-none focus:ring-1 focus:ring-[#235c4f] disabled:opacity-50"
+            className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-2 text-xs font-medium text-[#1a3328] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] disabled:opacity-50"
           >
             {RESIZE_MODES.map((mode) => (
               <option key={mode.value} value={mode.value}>
@@ -113,7 +113,7 @@ export default function ResizerOptionsBar({
                     });
                   }}
                   disabled={disabled}
-                  className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-2 text-xs text-[#1a3328] focus:border-[#235c4f] focus:outline-none focus:ring-1 focus:ring-[#235c4f] disabled:opacity-50"
+                  className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-2 text-xs text-[#1a3328] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] disabled:opacity-50"
                 />
                 <button
                   onClick={() => handleChange("aspectLocked", !options.aspectLocked)}
@@ -151,7 +151,7 @@ export default function ResizerOptionsBar({
                     });
                   }}
                   disabled={disabled}
-                  className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-2 text-xs text-[#1a3328] focus:border-[#235c4f] focus:outline-none focus:ring-1 focus:ring-[#235c4f] disabled:opacity-50"
+                  className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-2 text-xs text-[#1a3328] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] disabled:opacity-50"
                 />
               </div>
             </div>
@@ -169,7 +169,7 @@ export default function ResizerOptionsBar({
                 onChange={handlePresetChange}
                 disabled={disabled}
                 value={options.selectedPreset ?? "0"}
-                className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-2 text-xs font-medium text-[#1a3328] focus:border-[#235c4f] focus:outline-none focus:ring-1 focus:ring-[#235c4f] disabled:opacity-50"
+                className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-2 text-xs font-medium text-[#1a3328] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] disabled:opacity-50"
               >
                 {RESIZE_PRESETS.map((p, idx) => (
                   <option key={idx} value={idx}>{p.label}</option>
@@ -185,7 +185,7 @@ export default function ResizerOptionsBar({
                 value={options.fitMode}
                 onChange={(e) => handleChange("fitMode", e.target.value)}
                 disabled={disabled}
-                className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-2 text-xs font-medium text-[#1a3328] focus:border-[#235c4f] focus:outline-none focus:ring-1 focus:ring-[#235c4f] disabled:opacity-50"
+                className="w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-2 text-xs font-medium text-[#1a3328] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] disabled:opacity-50"
               >
                 {FIT_MODES.map((mode) => (
                   <option key={mode.value} value={mode.value}>
@@ -206,7 +206,7 @@ export default function ResizerOptionsBar({
             value={options.outputFormat}
             onChange={(e) => handleChange("outputFormat", e.target.value)}
             disabled={disabled}
-            className="mb-3 w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-2 text-xs font-medium text-[#1a3328] focus:border-[#235c4f] focus:outline-none focus:ring-1 focus:ring-[#235c4f] disabled:opacity-50"
+            className="mb-3 w-full rounded-sm border border-[#c8d6cf] bg-white px-2.5 py-2 text-xs font-medium text-[#1a3328] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] disabled:opacity-50"
           >
             {FORMAT_PRESETS.map((fmt) => (
               <option key={fmt.value} value={fmt.value}>

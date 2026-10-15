@@ -39,7 +39,7 @@ function DonutChart({ principal, interest, currency, customSymbol }) {
           cy="60"
           r="45"
           fill="none"
-          stroke="#235c4f"
+          stroke="#2563eb"
           strokeWidth="18"
           strokeDasharray={`${((100 - interestPercent) * 282.743) / 100} 282.743`}
           transform="rotate(-90 60 60)"
@@ -49,7 +49,7 @@ function DonutChart({ principal, interest, currency, customSymbol }) {
         </text>
       </svg>
       <div className="min-w-0 space-y-2 text-xs text-[#52675e]">
-        <p><span className="mr-2 inline-block size-2 bg-[#235c4f]" />Principal: {formatCurrency(principal, currency, customSymbol)}</p>
+        <p><span className="mr-2 inline-block size-2 bg-[#2563eb]" />Principal: {formatCurrency(principal, currency, customSymbol)}</p>
         <p><span className="mr-2 inline-block size-2 bg-[#dce5e0]" />Interest: {formatCurrency(interest, currency, customSymbol)}</p>
       </div>
     </div>

@@ -47,9 +47,9 @@ export default function PageThumbnailStrip({
             onClick={() => onPageSelect(pageNum)}
             aria-label={`Go to page ${pageNum}${hasDiff ? " (has differences)" : ""}`}
             aria-current={isActive ? "true" : undefined}
-            className={`group relative mx-2 flex flex-col items-center gap-1 border p-1 text-center transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#235c4f] ${
+            className={`group relative mx-2 flex flex-col items-center gap-1 border p-1 text-center transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#2563eb] ${
               isActive
-                ? "border-[#235c4f] bg-white shadow-sm"
+                ? "border-[#2563eb] bg-white shadow-sm"
                 : "border-transparent hover:border-[#b8c9c0] hover:bg-white"
             }`}
           >

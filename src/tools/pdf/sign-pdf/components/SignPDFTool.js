@@ -353,7 +353,7 @@ export default function SignPDFTool() {
                         onClick={() => setCurrentPage(sig.pageNum)}
                         className={`flex cursor-pointer items-center justify-between rounded-sm border p-2 text-xs transition-colors ${
                           currentPage === sig.pageNum
-                            ? "border-[#235c4f] bg-white font-medium text-[#173d34]"
+                            ? "border-[#2563eb] bg-white font-medium text-[#173d34]"
                             : "border-[#dce5e0] bg-[#f4f7f5] text-[#52675e] hover:bg-white"
                         }`}
                       >

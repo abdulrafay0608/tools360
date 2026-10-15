@@ -375,9 +375,9 @@ const SplitPDFTool = () => {
                 <button
                   type="button"
                   aria-pressed={mode === "range"}
-                  className={`min-h-10 px-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#235c4f] ${
+                  className={`min-h-10 px-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#2563eb] ${
                     mode === "range"
-                      ? "bg-[#173d34] text-white"
+                      ? "bg-[#2563eb] text-white"
                       : "text-[#52675e] hover:bg-white"
                   }`}
                   onClick={() => handleModeChange("range")}
@@ -387,9 +387,9 @@ const SplitPDFTool = () => {
                 <button
                   type="button"
                   aria-pressed={mode === "fixed"}
-                  className={`min-h-10 px-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#235c4f] ${
+                  className={`min-h-10 px-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#2563eb] ${
                     mode === "fixed"
-                      ? "bg-[#173d34] text-white"
+                      ? "bg-[#2563eb] text-white"
                       : "text-[#52675e] hover:bg-white"
                   }`}
                   onClick={() => handleModeChange("fixed")}

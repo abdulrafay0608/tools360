@@ -18,9 +18,10 @@ import { useAdPause } from "@/hooks/useAdPause";
  * - Client-only rendering (no SSR mismatch).
  * - Subtle "Advertisement" label for policy compliance.
  * - Hides visually during processing/drag without collapsing reserved space.
+ * - Renders nothing until advertising is enabled with a real slot ID.
  *
  * Props:
- *   placement        — Key from AD_SLOTS config (e.g. "tool-sidebar", "tool-below")
+ *   placement        — Key from AD_SLOTS config (e.g. "home-after-tools")
  *   className        — Additional CSS classes
  *   hideWhenProcessing — Legacy alias; prefer useAdPause from tools
  *
@@ -44,7 +45,7 @@ export default function AdSlot({
   const config = placement ? AD_SLOTS[placement] : null;
 
   const resolvedFormat = config?.format || format || "horizontal";
-  const resolvedSlotId = config?.slotId || slotId || placement || "default-slot";
+  const resolvedSlotId = config?.slotId || slotId || "";
   const resolvedDescription = config?.description || placement || "Ad";
   const isDesktopOnly = config?.desktopOnly || false;
   const isMobileOnly = config?.mobileOnly || false;
@@ -72,7 +73,7 @@ export default function AdSlot({
 
   // Keep disabled inventory out of the production DOM and layout. The config
   // remains available for a future reviewed activation.
-  if (!adScaffoldEnabled) return null;
+  if (!adScaffoldEnabled || (ADS_ENABLED && !resolvedSlotId)) return null;
 
   const mobileMinH =
     config?.minHeight?.mobile ??

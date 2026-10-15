@@ -64,7 +64,7 @@ export default function WordCounterTool() {
           setMessage("");
         }}
         placeholder="Start writing or paste text here..."
-        className="min-h-40 w-full resize-y border border-[#b8c9c0] p-3 text-sm leading-6 text-[#263e36] outline-none focus:border-[#235c4f] focus:ring-1 focus:ring-[#235c4f] sm:min-h-48"
+        className="min-h-40 w-full resize-y border border-[#b8c9c0] p-3 text-sm leading-6 text-[#263e36] outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] sm:min-h-48"
       />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs text-[#71827c]" role="status" aria-live="polite">

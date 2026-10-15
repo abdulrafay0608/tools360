@@ -397,7 +397,7 @@ export default function SvgToPngTool() {
           onClick={() => setActiveTab("upload")}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-sm transition-all ${
             activeTab === "upload"
-              ? "bg-[#235c4f] text-white shadow-xs"
+              ? "bg-[#2563eb] text-white shadow-xs"
               : "bg-white text-[#527268] hover:bg-[#f0f4f2]"
           }`}
         >
@@ -411,7 +411,7 @@ export default function SvgToPngTool() {
           onClick={() => setActiveTab("paste")}
           className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-sm transition-all ${
             activeTab === "paste"
-              ? "bg-[#235c4f] text-white shadow-xs"
+              ? "bg-[#2563eb] text-white shadow-xs"
               : "bg-white text-[#527268] hover:bg-[#f0f4f2]"
           }`}
         >

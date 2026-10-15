@@ -1,6 +1,6 @@
 // components/Footer.tsx
 import Link from "next/link";
-import { FaFilePdf } from "react-icons/fa";
+import { FaTools } from "react-icons/fa";
 import { getCategoriesWithLiveTools } from "@/data/toolsDataUtils";
 
 export default function Footer() {
@@ -9,14 +9,14 @@ export default function Footer() {
   const categories = getCategoriesWithLiveTools();
 
   return (
-    <footer className="border-t border-[#dce5e0] bg-white text-sm text-[#5d706a]">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-9 px-5 py-9 sm:grid-cols-2 sm:px-8 lg:grid-cols-[1.4fr_1fr_1fr] lg:px-12">
+    <footer className="border-t border-slate-200 bg-white text-sm text-slate-600">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-9 px-4 py-10 sm:grid-cols-2 sm:px-8 lg:grid-cols-[1.4fr_1fr_1fr] lg:px-12">
         <div className="max-w-xs">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-base font-semibold text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#235c4f]"
+            className="inline-flex items-center gap-2 rounded text-base font-semibold text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600"
           >
-            <FaFilePdf aria-hidden="true" className="text-[#527268]" />
+            <FaTools aria-hidden="true" className="text-blue-600" />
             Tools360
           </Link>
           <p className="mt-3 leading-6">
@@ -26,7 +26,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#405950]">
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-800">
             Categories
           </h3>
           <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
@@ -34,7 +34,7 @@ export default function Footer() {
               <li key={category.id}>
                 <Link
                   href={`/tools/category/${category.id}`}
-                  className="transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
+                  className="rounded transition-colors hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                 >
                   {category.category}
                 </Link>
@@ -44,14 +44,14 @@ export default function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#405950]">
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-800">
             Information
           </h3>
           <ul className="space-y-2">
             <li>
               <Link
                 href="/"
-                className="transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
+                className="rounded transition-colors hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
               >
                 All tools
               </Link>
@@ -59,7 +59,7 @@ export default function Footer() {
             <li>
               <Link
                 href="/about"
-                className="transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
+                className="rounded transition-colors hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
               >
                 About Tools360
               </Link>
@@ -67,7 +67,7 @@ export default function Footer() {
             <li>
               <Link
                 href="/privacy"
-                className="transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
+                className="rounded transition-colors hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
               >
                 Privacy
               </Link>
@@ -75,7 +75,7 @@ export default function Footer() {
             <li>
               <Link
                 href="/contact"
-                className="transition-colors hover:text-[#173d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#235c4f]"
+                className="rounded transition-colors hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
               >
                 Contact
               </Link>
@@ -84,8 +84,8 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-[#e8eeea]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-4 text-xs text-[#71827c] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+      <div className="border-t border-slate-200">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
           <span>© {currentYear} Tools360</span>
           <span>PDFs stay on your device while you work.</span>
         </div>

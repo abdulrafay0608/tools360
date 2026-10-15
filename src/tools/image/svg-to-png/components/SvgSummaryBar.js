@@ -89,7 +89,7 @@ export default function SvgSummaryBar({
           data-download-all="true"
           onClick={onDownloadAll}
           disabled={readyToDownload === 0 || isProcessing}
-          className="inline-flex min-h-10 items-center gap-2 rounded-sm bg-[#235c4f] px-5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#1a473d] disabled:cursor-not-allowed disabled:bg-[#a0b2aa]"
+          className="inline-flex min-h-10 items-center gap-2 rounded-sm bg-[#2563eb] px-5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#1d4ed8] disabled:cursor-not-allowed disabled:bg-[#a0b2aa]"
         >
           <FaDownload className="h-3.5 w-3.5" />
           <span>

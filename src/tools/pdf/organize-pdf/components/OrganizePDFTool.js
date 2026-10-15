@@ -181,7 +181,7 @@ function SortablePageCard({
         transition,
       }}
       className={`relative min-w-0 border bg-white p-2 transition-shadow sm:p-3 ${
-        selected ? "border-[#235c4f] ring-1 ring-[#235c4f]" : "border-[#dce5e0]"
+        selected ? "border-[#2563eb] ring-1 ring-[#2563eb]" : "border-[#dce5e0]"
       } ${page.deleted ? "opacity-50" : ""} ${
         isDragging ? "z-10 shadow-lg" : ""
       }`}
@@ -200,7 +200,7 @@ function SortablePageCard({
           aria-label={`Select page ${index + 1}`}
           aria-pressed={selected}
           onClick={(event) => onSelect(page.id, index, event.shiftKey)}
-          className="inline-flex min-h-9 min-w-9 items-center gap-1 text-xs font-semibold text-[#263e36] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#235c4f]"
+          className="inline-flex min-h-9 min-w-9 items-center gap-1 text-xs font-semibold text-[#263e36] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#2563eb]"
         >
           {selected ? (
             <FaCheckSquare aria-hidden="true" className="text-[#235c4f]" />
@@ -215,7 +215,7 @@ function SortablePageCard({
           {...listeners}
           aria-label={`Drag page ${index + 1}`}
           title="Drag to reorder"
-          className="inline-flex min-h-9 min-w-9 touch-none items-center justify-center text-[#708079] hover:bg-[#f4f7f5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#235c4f]"
+          className="inline-flex min-h-9 min-w-9 touch-none items-center justify-center text-[#708079] hover:bg-[#f4f7f5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#2563eb]"
         >
           <FaGripVertical aria-hidden="true" />
         </button>

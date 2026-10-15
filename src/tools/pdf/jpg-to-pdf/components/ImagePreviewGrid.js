@@ -99,7 +99,7 @@ export default function ImagePreviewGrid({
               className="group relative flex flex-col justify-between rounded-sm border border-[#dce5e0] bg-white p-2.5 shadow-sm transition-all hover:border-[#7e9b8c] hover:shadow"
             >
               {/* Index badge */}
-              <div className="absolute left-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[#173d34] text-xs font-bold text-white shadow-sm">
+              <div className="absolute left-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[#2563eb] text-xs font-bold text-white shadow-sm">
                 {index + 1}
               </div>
 

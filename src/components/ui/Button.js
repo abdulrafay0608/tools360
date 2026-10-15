@@ -17,15 +17,15 @@ const Button = ({
   // Variant styles
   const variants = {
     primary:
-      "bg-[#173d34] text-white hover:bg-[#245b4c] focus-visible:outline-[#235c4f]",
+      "bg-blue-600 text-white hover:bg-blue-700 focus-visible:outline-blue-600",
     secondary:
-      "bg-[#edf3ef] text-[#29493e] hover:bg-[#e1ebe5] focus-visible:outline-[#235c4f]",
+      "bg-blue-50 text-blue-800 hover:bg-blue-100 focus-visible:outline-blue-600",
     danger:
       "bg-[#a13c2f] text-white hover:bg-[#842f25] focus-visible:outline-[#a13c2f]",
     outline:
-      "border border-[#b8c9c0] bg-white text-[#29493e] hover:bg-[#f2f7f4] focus-visible:outline-[#235c4f]",
+      "border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 focus-visible:outline-blue-600",
     ghost:
-      "bg-transparent text-[#405950] hover:bg-[#edf3ef] focus-visible:outline-[#235c4f]",
+      "bg-transparent text-slate-700 hover:bg-slate-100 focus-visible:outline-blue-600",
   };
 
   // Size styles
@@ -44,7 +44,7 @@ const Button = ({
 
   // Base styles
   const baseStyles =
-    "inline-flex min-h-10 items-center justify-center rounded-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex min-h-11 items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
   // Disabled state
   const disabledStyles =

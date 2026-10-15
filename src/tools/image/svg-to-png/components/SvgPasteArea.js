@@ -112,7 +112,7 @@ export default function SvgPasteArea({ onAddPastedSvg }) {
             onChange={(e) => setSvgCode(e.target.value)}
             maxLength={SVG_PROCESSING_LIMITS.maxMarkupBytes}
             placeholder={`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">\n  <circle cx="50" cy="50" r="40" fill="#235c4f" />\n</svg>`}
-            className="w-full font-mono text-xs text-[#1a3328] rounded-sm border border-[#c8d6cf] p-3 focus:border-[#235c4f] focus:outline-none"
+            className="w-full font-mono text-xs text-[#1a3328] rounded-sm border border-[#c8d6cf] p-3 focus:border-[#2563eb] focus:outline-none"
           />
 
           {parseError && (
@@ -170,7 +170,7 @@ export default function SvgPasteArea({ onAddPastedSvg }) {
               data-add-pasted-button="true"
               onClick={handleAdd}
               disabled={!parsed}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-sm bg-[#235c4f] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#1a473d] disabled:cursor-not-allowed disabled:bg-[#a0b2aa]"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-sm bg-[#2563eb] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#1d4ed8] disabled:cursor-not-allowed disabled:bg-[#a0b2aa]"
             >
               <FaCheck className="h-3 w-3" />
               <span>Add to Conversion Queue</span>

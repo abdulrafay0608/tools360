@@ -147,7 +147,7 @@ function PageCard({
       data-page-source={page.sourceIndex + 1}
       data-page-rotation={visibleRotation}
       className={`relative min-w-0 border bg-white p-2 sm:p-3 ${
-        selected ? "border-[#235c4f] ring-1 ring-[#235c4f]" : "border-[#dce5e0]"
+        selected ? "border-[#2563eb] ring-1 ring-[#2563eb]" : "border-[#dce5e0]"
       }`}
     >
       <div className="mb-2 flex items-center justify-between gap-1">
@@ -156,7 +156,7 @@ function PageCard({
           aria-label={`Select page ${index + 1}`}
           aria-pressed={selected}
           onClick={(event) => onSelect(page.id, index, event.shiftKey)}
-          className="inline-flex min-h-9 min-w-9 items-center gap-1 text-xs font-semibold text-[#263e36] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#235c4f]"
+          className="inline-flex min-h-9 min-w-9 items-center gap-1 text-xs font-semibold text-[#263e36] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#2563eb]"
         >
           <span aria-hidden="true">{selected ? "☑" : "□"}</span>
           Page {index + 1}
